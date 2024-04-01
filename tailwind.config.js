@@ -16,6 +16,9 @@ module.exports = {
         'color-navbar-login':"#F2F2F2",
         'color-background-main':"#F8F9FA"
       },
+      height: {
+        'profile': '7rem',
+      }
     },
   },
   plugins: [],

@@ -10,8 +10,8 @@ function Login(){
             <Navbar></Navbar>
             <div className="flex flex-col w-full h-full">
                 <div className="grow">
-                    <div className="flex flex-row">
-                        <div className="flex flex-col grow items-center justify-center">
+                    <div className="flex flex-row ">
+                        <div className="flex flex-col w-1/2 grow items-center justify-center">
                             <div className="w-96">
                                 <h1 className="text-4xl text-blue-title font-bold pb-6">Sign in</h1>
                                 <span className="text-xl text-color-basic">Enter your email and password to sign in</span>
@@ -38,8 +38,8 @@ function Login(){
                                 </span>
                             </form>
                         </div>
-                        <div className="" >
-                            <img width="876px"  alt="" src={bg_image.bgLoginImage}></img> 
+                        <div className="w-1/2" >
+                            <img min-width="876px"  alt="" src={bg_image.bgLoginImage}></img> 
                         </div>
                     </div>
                 </div>

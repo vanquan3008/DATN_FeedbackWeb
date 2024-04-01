@@ -21,7 +21,7 @@ function Navbar(
                 <span className={`text-sm leading-8 ${tSubjectColor}`}>FeedBack Sentiment </span>
             </div>
             <div className="grow flex items-center justify-center leading-8">
-                <a href="/" className={`pl-1 pr-4 flex flex-row ${tItemsColor}`}>
+                <a href="/home" className={`pl-1 pr-4 flex flex-row ${tItemsColor}`}>
                     {/* <FontAwesomeIcon className='pr-1 text-sm ' icon={faHouse}/> */}
                     <img 
                         alt=''
