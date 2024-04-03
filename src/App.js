@@ -4,6 +4,7 @@ import Login from './Pages/Login';
 import Register from './Pages/Register';
 import Home from './Pages/Home';
 import Profile from './Pages/Profile';
+import FeedBack from './Pages/FeedBack';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
             <Route path="/" element={<Login/>}/>
             <Route path="/Home" element={<Home/>}/>
             <Route path="/Profile" element={<Profile/>}/>
+            <Route path="/FeedBack" element={<FeedBack/>}/>
           </Routes>
       </div>
    </BrowserRouter>

@@ -34,7 +34,7 @@ function Login(){
                                     SIGN IN
                                 </button>
                                 <span className="text-sm pt-6 text-color-basic">
-                                    Don't have an account? <a href="/" className="text-blue-title font-bold">Sign up</a>
+                                    Don't have an account? <a href="/Register" className="text-blue-title font-bold">Sign up</a>
                                 </span>
                             </form>
                         </div>

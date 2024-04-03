@@ -17,13 +17,13 @@ function DefaultLayout({children , type}) {
             </div>
            
             <div className="w-full relative flex flex-col"> 
-                <div className={`${type==="Profile" ? "" :"hidden"} absolute z-0 rounded-xl`}>
+                <div className={`${type==="Profile" ? "" :"hidden"}  absolute z-0 rounded-xl`}>
                     <img id="bg-profile" alt="" src={bg_image.bgProfileImage}></img>
                 </div>
-                <div  className={`${type==="Profile" ? "relative bg-transparent " :"bg-color-background-main"} flex-grow-0`}>
+                <div  className={`${type==="Profile" ? "relative bg-transparent " :"bg-color-background-main"} h-24` }>
                     <NavbarDefaultLayout tTitleColor={type === "Profile"?"text-white":"text-black"} type={type}></NavbarDefaultLayout>
                 </div>
-                <div className={`rounded-md w-full h-full grow ${type==="Profile" ? "relative -top-14 " :""} `} style={{paddingTop: `${type === "Profile" ? height + 'px' : ''}`}}>
+                <div className={`rounded-md w-full grow overflow-hidden  ${type==="Profile" ? "relative -top-14 " :""} `} style={{paddingTop: `${type === "Profile" ? height + 'px' : ''}`}}>
                     {children}
                 </div>
 
