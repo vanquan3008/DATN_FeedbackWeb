@@ -2,7 +2,7 @@ import { icons } from "../../Assets/icons";
 import { useSelector } from 'react-redux'
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-// import { logOut } from "../../Redux/apiRequest";
+import { logOut } from "../../Redux/apiRequest";
 function Sidebar({type}) {
     const userLogin = useSelector((state)=>
         state.auth.login.currentUser
@@ -10,10 +10,10 @@ function Sidebar({type}) {
     const dispatch= useDispatch();
     const navigate = useNavigate();
 
-    // const handleLogout = (e)=>{
-    //     logOut(dispatch,navigate)
-    // }
-    // console.log(userLogin)
+    const handleLogout = (e)=>{
+        logOut(dispatch,navigate)
+    }
+    console.log(userLogin)
     return ( 
         <div className="flex flex-col h-full">
             <div className="flex flex-row p-8 m-2  text-black font-bold text-lg ">
@@ -63,12 +63,12 @@ function Sidebar({type}) {
                                 <span className="text-sm mt-1.5 mb-1.5">Profile</span>
                             </a>
                             {/* Logout */}
-                            <a href="/register" className={`flex flex-row p-1.5 w-auto  text-center hover:bg-sky-200  items-center rounded-2xl
+                            <div className={`flex flex-row p-1.5 w-auto  text-center hover:bg-sky-200  items-center rounded-2xl
                                     ${userLogin?'':'hidden'}
-                            `}>
+                            `}  onClick={handleLogout}>
                                 <img alt="" className="mt-2 mr-2" src={icons.iconSignUpPage}></img>
                                 <span className="text-sm mt-1.5 mb-1.5">Logout</span>
-                            </a>
+                            </div>
                             {/* Login and Register */}
                             <a href="/" className={`flex flex-row p-1.5 w-auto  text-center hover:bg-sky-200 items-center rounded-2xl
                                         ${userLogin ? 'hidden':''}

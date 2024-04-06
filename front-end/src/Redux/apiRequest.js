@@ -17,14 +17,14 @@ export const loginUser = async (user , dispatch ,navigator) =>{
 
 
 
-// export const logOut = async ( dispatch ,navigate )=>{
-//     dispatch(logoutStart())
-//     try{
-//         await axios.get('http://localhost:8000/logout');
-//         dispatch(logoutSuccess())
-//         navigate('/')
-//     }
-//     catch(error){
-//         dispatch(logoutError())
-//     }
-// }
+export const logOut = async ( dispatch ,navigate )=>{
+    dispatch(logoutStart())
+    try{
+        await axios.get('http://localhost:8000/logout');
+        dispatch(logoutSuccess())
+        navigate('/')
+    }
+    catch(error){
+        dispatch(logoutError())
+    }
+}

@@ -5,16 +5,20 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import GlobalStyle from './Components/GlobalStyles';
 import 'antd/dist/antd.js'
-import { store } from './Redux/store.js';
-
+import { store ,persistor } from './Redux/store.js';
 import { Provider } from 'react-redux'
+import { PersistGate } from 'redux-persist/integration/react';
+
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <Provider store={store}>
+    <PersistGate loading={null} persistor={persistor}>
       <GlobalStyle>
         <App/>
       </GlobalStyle>
+    </PersistGate>
     </Provider>
   </React.StrictMode>
 );
