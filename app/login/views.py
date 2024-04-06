@@ -54,12 +54,14 @@ def signin(request):
                 ).isoformat(),
                 "timestart": (datetime.datetime.utcnow()).isoformat(),
             }
-            
+    
             token = jwt.encode(loadjwt, "secret", algorithm="HS256")
             response = JsonResponse({"status": data, "jwt": token })
-            response.set_cookie(key="jwt", value=token, httponly=True)
+            
+            response.set_cookie(key="jwt",value= token, httponly=True ,secure=True )
+            
         else:
-            response = JsonResponse({"error" : "Login fail"},status=400)
+            response = JsonResponse({"error" : "Login fail"},status=404)
 
         return response
     else:
@@ -70,27 +72,11 @@ def signin(request):
 
 @csrf_exempt
 def logout(request):
+    print(request.COOKIES.get('jwt'))
     response = JsonResponse({"message": "Logged out successfully"})
     response.delete_cookie("jwt")
     return response
 
 
-# def verifyToken(request):
-#     token = request.COOKIES.get('jwt')
-#     if not token:
-#         return JsonResponse({"status": "UnAuthenticated"}, status=401)
-
-#     try:
-#         payload = jwt.decode(token, "secret", algorithms=["HS256"])
-#         request = payload
-#         return request
-
-#     except jwt.exceptions.DecodeError as e:
-#         print(f"Error decoding token: {e}")  
-#         return JsonResponse({"status": "Invalid token"}, status=401)
-
-#     except Exception as e:  # Catch other unexpected errors
-#         print(f"Unexpected error: {e}")
-#         return JsonResponse({"status": "Internal server error"}, status=500)
     
     
