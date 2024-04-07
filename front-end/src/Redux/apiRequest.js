@@ -1,12 +1,14 @@
 import axios from "axios";
-import { loginError, loginStart, loginSuccess, logoutError, logoutStart, logoutSuccess } from "./authSlice";
+import { loginError, loginStart, loginSuccess, logoutError, logoutStart, logoutSuccess} from "./authSlice";
 
 
 //Login
 export const loginUser = async (user , dispatch ,navigator) =>{
     dispatch(loginStart());
     try{
-        const res = await axios.post("http://localhost:8000/signin", user);
+        const res = await axios.post("http://localhost:8000/signin", user ,{
+            withCredentials : true, 
+        });
         dispatch(loginSuccess(res.data))
         navigator("/home")
     }
@@ -16,11 +18,11 @@ export const loginUser = async (user , dispatch ,navigator) =>{
 }
 
 
-
 export const logOut = async ( dispatch ,navigate )=>{
     dispatch(logoutStart())
     try{
-        await axios.get('http://localhost:8000/logout');
+        await axios.get('http://localhost:8000/logout',{
+         withCredentials : true});
         dispatch(logoutSuccess())
         navigate('/')
     }

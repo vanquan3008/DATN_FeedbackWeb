@@ -1,6 +1,7 @@
 import { faBell, faGear } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { icons } from "../../Assets/icons";
+import { useSelector } from 'react-redux'
 
 function NavbarDefaultLayout(
     {
@@ -8,7 +9,13 @@ function NavbarDefaultLayout(
         type="Dashhboard"
     }
     ) {
+
+
+    const userLogin = useSelector((state)=> state.auth.login.currentUser)
+    const infoUser = userLogin?.userLogin;
     return ( 
+
+        
         <div className="flex flex-row justify-between  w-full items-center pl-4 h-24 ">
             <div className="text-sm">
                 <div className="text-color-basic">
@@ -22,11 +29,21 @@ function NavbarDefaultLayout(
                     <input className="w-56 h-10  outline-none border-solid border-2 rounded-xl pl-9 pr-4" placeholder="Search" type="search"></input>
                     <FontAwesomeIcon className={`absolute  bottom-1/2 transform translate-y-1/2 left-3 text-black`} icon={faSearch}></FontAwesomeIcon>
                 </div> */}
-
+                {
+                userLogin? 
+                <div className="flex flex-row pl-4 pr-4" >
+                    {
+                    infoUser?.url_image ?<img alt="" className={`w-6 h-6 mr-2  `} src={infoUser?.url_image}></img>:
+                        <img alt="" className={`w-6 h-6 mr-2  `} src={tTitleColor ==="text-black" ? icons.iconProfileLogin : icons.iconProfileSignUp}></img>
+                        
+                    }
+                    <span className={`${tTitleColor} text-base font-normal `}>{infoUser?.fullname}</span>
+                </div>:
                 <div className="flex flex-row pl-4 pr-4" >
                     <img alt="" className={`w-6 h-6 mr-2  `} src={tTitleColor ==="text-black" ? icons.iconProfileLogin : icons.iconProfileSignUp}></img>
-                    <span className={`${tTitleColor}`}>Sign in</span>
-                </div>
+                    <span className={`${tTitleColor} text-base font-normal `}>Sign in</span>
+                    
+                </div>}
                 <div className="p-2">
                     <FontAwesomeIcon className={`${tTitleColor}`} icon={faGear}></FontAwesomeIcon>
                 </div>
