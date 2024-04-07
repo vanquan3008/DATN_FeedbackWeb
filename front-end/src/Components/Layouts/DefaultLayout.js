@@ -5,11 +5,12 @@ import { useEffect, useState } from "react";
 import FooterDefaultLayout from "./FooterDefaultLayout";
 function DefaultLayout({children , type}) {
     const [height, setHeight] = useState(0);
+
     useEffect(() => {
         const img = document.getElementById('bg-profile');
         setHeight(img.clientHeight - 96);
     }, []);
-
+    console.log(height)
     return (  
         <div className="flex flex-row w-screen h-screen bg-color-background-main ">
             <div className="w-1/4 h-full ">

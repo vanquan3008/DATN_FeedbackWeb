@@ -16,8 +16,6 @@ function Login(){
     const navigator = useNavigate();
     
     const loginError = useSelector((state) => state.auth.login.isError);
-
-    console.log(loginError);
     const handleLogin = async (e)=>{
         e.preventDefault();
 
@@ -40,7 +38,7 @@ function Login(){
                                 <span className="text-xl text-color-basic">Enter your email and password to sign in</span>
                             </div>
                             {/* form login  */}
-                            <form className="w-96 pt-8 flex flex-col" onClick={handleLogin}>
+                            <form className="w-96 pt-8 flex flex-col" >
                                 <div className="flex flex-col pb-2">
                                     <span className="text-sm pb-4 text-color-basic font-medium">Email</span>
                                     <input ref={emailRef} type="email" className="outline-none border-solid border-2 h-10 rounded-lg text-sm pl-2 pr-2" placeholder="Email"></input>
@@ -60,13 +58,14 @@ function Login(){
                                     <Switch className="w-8 bg-slate-400 mr-2"></Switch>
                                     Remember me
                                 </div>
-                                <button className="w-96 h-8 bg-blue-400 text-white text-sm font-bold mt-10 rounded-md">
+                                <button className="w-96 h-8 bg-blue-400 text-white text-sm font-bold mt-10 rounded-md" onClick={handleLogin}>
                                     SIGN IN
                                 </button>
-                                <span className="text-sm pt-6 text-color-basic">
-                                    Don't have an account? <a href="/Register" className="text-blue-title font-bold">Sign up</a>
-                                </span>
+                                
                             </form>
+                            <span className="text-sm pt-6 text-color-basic w-96 ">
+                                Don't have an account? <a href="/register" className="text-blue-title font-bold z-10">Sign up</a>
+                            </span>
                         </div>
                         <div className="w-1/2" >
                             <img min-width="876px"  alt="" src={bg_image.bgLoginImage}></img> 

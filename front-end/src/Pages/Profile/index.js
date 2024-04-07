@@ -2,8 +2,13 @@
 import { icons } from "../../Assets/icons/index.js";
 import { images } from "../../Assets/images/index.js";
 import {DefaultLayout} from "../../Components/Layouts/DefaultLayout.js";
+import { useSelector } from 'react-redux'
 
 function Profile() {
+
+
+    const userLogin = useSelector((state)=> state.auth.login.currentUser)
+    const infoUser = userLogin?.userLogin;
     return ( 
        <DefaultLayout type={"Profile"}>
             <div className=" h-full flex flex-col justify-center items-center">
@@ -15,8 +20,8 @@ function Profile() {
                                 <img alt="" src={images.imgNoAvtar}></img>
                             </div>
                             <div className="flex flex-col  justify-center pl-2">
-                                <span className="text-2xl font-bold ">Văn Quân</span>
-                                <span className="text-sm text-color-basic">Admin</span>
+                                <span className="text-2xl font-bold ">{infoUser?.fullname}</span>
+                                <span className="text-sm text-color-basic">{infoUser?.email}</span>
                             </div>
 
                         </div>

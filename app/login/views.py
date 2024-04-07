@@ -7,7 +7,8 @@ import json
 from django.contrib.auth.hashers import make_password, check_password
 import datetime
 import jwt
-from django.core import serializers
+from django.core.serializers import serialize
+from django.forms.models import model_to_dict
 
 @csrf_exempt
 def signup(request):
@@ -54,9 +55,12 @@ def signin(request):
                 ).isoformat(),
                 "timestart": (datetime.datetime.utcnow()).isoformat(),
             }
-    
+            user_login = model_to_dict(user_signin[0])
+            user_login.pop("password",None)
+            
+            
             token = jwt.encode(loadjwt, "secret", algorithm="HS256")
-            response = JsonResponse({"status": data, "jwt": token })
+            response = JsonResponse({"status": data, "jwt": token ,"userLogin" : user_login})
             
             response.set_cookie(key="jwt",value= token, httponly=True ,secure=True )
             
@@ -72,7 +76,6 @@ def signin(request):
 
 @csrf_exempt
 def logout(request):
-    print(request.COOKIES.get('jwt'))
     response = JsonResponse({"message": "Logged out successfully"})
     response.delete_cookie("jwt")
     return response

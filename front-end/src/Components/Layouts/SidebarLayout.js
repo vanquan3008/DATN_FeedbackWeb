@@ -13,7 +13,6 @@ function Sidebar({type}) {
     const handleLogout = (e)=>{
         logOut(dispatch,navigate)
     }
-    console.log(userLogin)
     return ( 
         <div className="flex flex-col h-full">
             <div className="flex flex-row p-8 m-2  text-black font-bold text-lg ">
