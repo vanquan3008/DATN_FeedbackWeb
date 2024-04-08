@@ -18,8 +18,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from login import views as login
+from models import views as models
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("login.url")),
+    path("", include("models.url")),
 ]
