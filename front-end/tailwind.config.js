@@ -14,7 +14,8 @@ module.exports = {
         'blue-title':"#21D4FD",
         'color-title-main':"#3A416F",
         'color-navbar-login':"#F2F2F2",
-        'color-background-main':"#F8F9FA"
+        'color-background-main':"#F8F9FA",
+        'color-background' :'rgba(0,0,0,0.5)'
       },
       height: {
         'profile': '7rem',
