@@ -58,7 +58,6 @@ def signin(request):
             user_login = model_to_dict(user_signin[0])
             user_login.pop("password",None)
             
-            
             token = jwt.encode(loadjwt, "secret", algorithm="HS256")
             response = JsonResponse({"status": data, "jwt": token ,"userLogin" : user_login})
             

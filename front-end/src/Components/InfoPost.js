@@ -5,8 +5,8 @@ function InfoPost({
     onClick = false ,
 }) {
     return ( 
-        <div className={`flex flex-col w-full p-2 ${onClick === true ? "border-l-8 border-l-sky-300" :"border-l-2"}  border-x border-y`}>
-            <div className="text-xl font-bold p-2">
+        <div className={`flex flex-col w-full p-2 ${onClick === true ? "border-l-8 border-l-sky-300" :"border-l"}  border-x border-y`}>
+            <div className="text-xl text-start font-bold p-2">
                 Title
             </div>
             <div className="text-base text-color-basic w-11/12 truncate break-words p-2">

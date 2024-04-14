@@ -5,8 +5,11 @@ import Register from './Pages/Register';
 import Home from './Pages/Home';
 import Profile from './Pages/Profile';
 import FeedBack from './Pages/FeedBack';
+import { store } from './Redux/store.js';
 
 function App() {
+  const user = store.getState().auth.login.currentUser;
+  console.log(user)
   return (
     <BrowserRouter>
       <div className="App">
@@ -14,8 +17,9 @@ function App() {
             <Route path="/Register" element={<Register/>}/>
             <Route path="/" element={<Login/>}/>
             <Route path="/Home" element={<Home/>}/>
-            <Route path="/Profile" element={<Profile/>}/>
-            <Route path="/FeedBack" element={<FeedBack/>}/>
+            <Route path="/Profile" element={user?<Profile/>:<Home/>}/>
+            <Route path="/FeedBack" element={user?<FeedBack/>:<Home/>}/>
+            
           </Routes>
       </div>
    </BrowserRouter>

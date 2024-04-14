@@ -39,6 +39,7 @@ function Sidebar({type}) {
                             </a>
                             <a href="/FeedBack" className={`flex flex-row p-1.5 w-auto  hover:bg-sky-200
                              ${type === "FeedBack" ? 'font-medium border-solid border bg-sky-300 text-white shadow-lg shadow-gray-200' :''}
+                             ${userLogin?"" :'hidden'}
                             text-center  items-center rounded-2xl`} >
                                 <img alt="" className="mt-2 mr-2" src={icons.iconTablePage}></img>
                                 <span className="text-sm mt-1.5 mb-1.5">FeedBack</span>
