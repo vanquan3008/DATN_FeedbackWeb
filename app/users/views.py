@@ -8,6 +8,12 @@ import datetime
 import jwt
 import json
 from django.forms.models import model_to_dict
+import re
+import pandas as pd
+import io, csv
+
+from email import message_from_bytes
+from email.policy import default
 
 
 # Create your views here.
@@ -85,24 +91,68 @@ def logout(request):
     return response
 
 
+def extract_json_string(data):
+    match = re.search(r"\[([\s\S]*)\]", data)
+    if match:
+        json_string = match.group(0)  # Lấy cả cặp [ ]
+        return json_string
+    else:
+        return None
+
+
 @csrf_exempt
 def analyze_json_file(request):
     if request.method == "POST":
         data = request.body.decode("utf-8")
-        print(data)
-        return data
+        json_string = extract_json_string(data)
+        json_data = json.loads(json_string)
+
+        key_word = "review"
+        texts = [json_data[i][key_word] for i in range(len(json_data))]
+        # print(texts[0])
+
+        return JsonResponse({"message": texts[0]}, status=200)
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
 
 
+def extract_string_csv(data):
+    start_index = data.find("Content-Type: text/csv") + len("Content-Type: text/csv")
+    end_index = start_index
+
+    # Tìm index của dấu - kết thúc file csv, chọn là 5 dấu -
+    string_end = "-"
+    count = 0
+    while end_index < len(data) and count < 5:
+        if data[end_index] == string_end:
+            count += 1
+        else:
+            count = 0
+        end_index += 1
+    end_index = end_index - 5
+
+    extracted_string = data[start_index:end_index]
+    return extracted_string
+
+
 @csrf_exempt
 def analyze_csv_file(request):
     if request.method == "POST":
-        data = request.body
-        print(data)
-        return data
+        try:
+            data = request.body.decode("utf-8")
+            csv_string = extract_string_csv(data)
+            df = pd.read_csv(io.StringIO(csv_string))
+
+            key_word = "product_description"
+            texts = df[key_word].tolist()
+            print(texts[0])
+            return JsonResponse(
+                {"message": "CSV file processed successfully"}, status=200
+            )
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
