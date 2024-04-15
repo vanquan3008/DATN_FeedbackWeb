@@ -37,6 +37,13 @@ function Sidebar({type}) {
                                 <img alt="" className="mt-2 mr-2" src={icons.iconDashboardPage}></img>
                                 <span className="text-sm mt-1.5 mb-1.5">Dashboard</span>
                             </a>
+                            <a className={`flex flex-row p-1.5 w-auto hover:bg-sky-200
+                                ${type === "History" ? 'font-medium border-solid border bg-sky-300 text-white shadow-lg shadow-gray-200' :''} text-center  items-center rounded-2xl`} 
+                                href="/history"
+                            >
+                                <img alt="" className="mt-2 mr-2" src={icons.iconDashboardPage}></img>
+                                <span className="text-sm mt-1.5 mb-1.5">History</span>
+                            </a>
                             <a href="/FeedBack" className={`flex flex-row p-1.5 w-auto  hover:bg-sky-200
                              ${type === "FeedBack" ? 'font-medium border-solid border bg-sky-300 text-white shadow-lg shadow-gray-200' :''}
                              ${userLogin?"" :'hidden'}

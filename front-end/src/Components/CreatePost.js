@@ -1,4 +1,4 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";import { useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { images } from "../Assets/images";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import InfoPost from "./InfoPost";
@@ -14,7 +14,6 @@ function CreatePost(
 ) {
     const userLogin = useSelector((state)=> state.auth.login.currentUser)
     const infoUser = userLogin?.userLogin;
-    console.log(infoUser)
     const wrapRef = useRef();
     // Close post
     return ( 
@@ -32,7 +31,7 @@ function CreatePost(
                 <div className="w-full h-20 flex items-center pl-4 pr-4 justify-between border border-b ">
                     <div className="flex flex-row p-4 item-center">
                         <div className="border p-2 rounded-full object-contain">
-                            <img src={infoUser.url_image ? infoUser.url_image : images.imgNoAvtar} className="w-10 h-10"></img>
+                            <img alt="" src={infoUser.url_image ? infoUser.url_image : images.imgNoAvtar} className="w-10 h-10"></img>
                         </div>
                         <span className="text-base p-4 font-medium">
                           {infoUser.fullname}
