@@ -37,7 +37,7 @@ function Home() {
                             <div>
                                 <form className="text-xl p-4">
                                     <label className="text-xl text-color-basic font-bold">Choose type data :  </label>
-                                    <select id="Data" name="Data" className="border-2 border-solid rounded-xl bg-white text-color-basic" onChange={handleChange}>
+                                    <select id="Data" name="Data" className="border-2 border-solid rounded-xl bg-white text-color-basic outline-none" onChange={handleChange}>
                                         <option disabled>--- Data type ---</option>
                                         <option value="textarea">Text</option>
                                         <option value="file">File</option>
