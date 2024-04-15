@@ -25,6 +25,13 @@ class Post(models.Model):
     sentiment = models.FloatField(null=True, blank=True)
 
 
+class Detail_post(models.Model):
+    id_post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    comment_id = models.AutoField(primary_key=True)
+    comment_content = models.CharField(max_length=500)
+
+
 class Report(models.Model):
     id_report = models.AutoField(primary_key=True)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -33,13 +40,6 @@ class Report(models.Model):
     number_pos = models.IntegerField()
     number_neu = models.IntegerField()
     number_neg = models.IntegerField()
-
-
-class Detail_post(models.Model):
-    id_post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    comment_id = models.AutoField(primary_key=True)
-    comment_content = models.CharField(max_length=500)
 
 
 class Result_file(models.Model):
