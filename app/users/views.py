@@ -11,9 +11,10 @@ from django.forms.models import model_to_dict
 import re
 import pandas as pd
 import io, csv
-
-from email import message_from_bytes
-from email.policy import default
+import os
+from dotenv import load_dotenv
+import openai
+from openai import OpenAI
 
 
 # Create your views here.
@@ -89,6 +90,45 @@ def logout(request):
     response = JsonResponse({"message": "Logged out successfully"})
     response.delete_cookie("jwt")
     return response
+
+
+API_SECRET_KEY = os.getenv("api_gpt_key")
+openai.api_key = API_SECRET_KEY
+# Initialize the OpenAI client
+client = OpenAI(api_key=openai.api_key)
+
+
+@csrf_exempt
+def analyze_text(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        text = data["text"]
+
+        prompt = f"""You are trained to analyze and detect the sentiment of the given text.
+    If you are unsure of an answer, you can say "not sure" and recommend the user review manually.
+
+    Analyze the following text and determine if the sentiment is: Positive, Negative, or Neutral.
+    {text}"""
+
+        # Call the OpenAI API to generate a response
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",  # Use a powerful model for sentiment analysis
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=1,  # Limit response to a single word
+            temperature=0,  # Keep response consistent
+        )
+
+        # Extract the sentiment from the response
+        sentiment = response.choices[0].message.content.strip().lower()
+
+        return JsonResponse({"message": "a"}, status=200)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
 
 
 def extract_json_string(data):
