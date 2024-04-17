@@ -251,10 +251,26 @@ def analyze_csv_file(request):
 
             key_word = "product_description"
             texts = df[key_word].tolist()
-            print(texts[0])
-            return JsonResponse(
-                {"message": "CSV file processed successfully"}, status=200
-            )
+
+            num_positive = 0
+            num_negative = 0
+            num_neutral = 0
+            for sentence in texts:
+                sentiment = sentiment_each_sentence(sentence)
+                if sentiment == "positive":
+                    num_positive += 1
+                elif sentiment == "negative":
+                    num_negative += 1
+                else:
+                    num_neutral += 1
+
+            data_response = {
+                "positive": num_positive,
+                "negative": num_negative,
+                "neutral": num_neutral,
+            }
+
+            return JsonResponse({"message": data_response}, status=200)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
     else:
