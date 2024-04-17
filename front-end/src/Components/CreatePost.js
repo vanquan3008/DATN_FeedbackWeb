@@ -2,8 +2,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { images } from "../Assets/images";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import InfoPost from "./InfoPost";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useSelector } from 'react-redux'
+import axios from "axios";
+
 
 function CreatePost(
     {
@@ -12,10 +14,32 @@ function CreatePost(
         
     }
 ) {
+    const [createPostSuccess,setCreatePostSuccess] = useState(null);
     const userLogin = useSelector((state)=> state.auth.login.currentUser)
     const infoUser = userLogin?.userLogin;
     const wrapRef = useRef();
-    // Close post
+    const titleRef = useRef();
+    const contentRef = useRef();
+    console.log(createPostSuccess);
+    // Create post
+    const handleCreatePost = async ()=>{
+        const createPost ={
+            "user_id" : infoUser.user_id,
+            "content" :contentRef.current.value,
+            "title": titleRef.current.value,
+        }
+        try{
+            await axios.post(`http://127.0.0.1:8000/create_post`,createPost);
+            setCreatePost(false);
+            setCreatePostSuccess(true);
+            window.location.reload();
+        }
+        catch(e){
+            setCreatePostSuccess(false);
+        } 
+    }
+
+
     return ( 
         <div
             ref={wrapRef} 
@@ -49,7 +73,7 @@ function CreatePost(
                             <div className="text-start py-3 font-medium text-base">
                                 TITLE
                             </div>
-                            <input type="text" placeholder="Short, descriptive title" className="border-solid border-2 rounded-xl outline-none p-4">
+                            <input ref={titleRef} type="text" placeholder="Short, descriptive title" className="border-solid border-2 rounded-xl outline-none p-4">
 
                             </input>
                         </div>
@@ -57,7 +81,7 @@ function CreatePost(
                             <div className="text-start py-3 font-medium text-base">
                                 CONTENT
                             </div>
-                            <textarea placeholder="Any additional details..." className="border-solid border-2 rounded-xl outline-none p-4 h-40">
+                            <textarea ref={contentRef} placeholder="Any additional details..." className="border-solid border-2 rounded-xl outline-none p-4 h-40">
                             </textarea>
                         </div>
                     </div>
@@ -78,7 +102,7 @@ function CreatePost(
                     </div>
                 </div>
                 <div className="flex justify-end items-center w-full h-20 border border-t">
-                    <button className=" rounded-xl bg-sky-400 p-4 mr-10 text-white font-bold hover:opacity-40">CREATE POST</button>
+                    <button className=" rounded-xl bg-sky-400 p-4 mr-10 text-white font-bold hover:opacity-40" onClick={handleCreatePost}>CREATE POST</button>
                 </div>
             </div>
         </div>

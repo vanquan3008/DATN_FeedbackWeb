@@ -82,6 +82,31 @@ def signin(request):
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
 
+@csrf_exempt
+def get_all_user(request):
+    if request.method == "GET":
+        try:
+            user_all = User.objects.all()
+            if not user_all.exists():
+                return JsonResponse({"error": "Do not have user"}, status=404)
+            else:
+                user_data = [
+                    {
+                        "user_id": user.user_id,
+                        "fullname": user.fullname,
+                        "email": user.email,
+                       
+                    }
+                    for user in user_all
+                ]
+                print(user_data)
+                return JsonResponse(
+                    {"message": "Get all post successfully"}, status=200
+                )
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+
 
 @csrf_exempt
 def logout(request):
@@ -198,12 +223,13 @@ def analyze_csv_file(request):
 
 
 @csrf_exempt
-def post_status(request):
+def create_post(request):
     if request.method == "POST":
         data = json.loads(request.body)
         try:
             r_user_id = data.get("user_id")
             r_content_post = data.get("content")
+            r_title_post = data.get("title")
             r_image_content_url = data.get("image_content_url")
 
             time_post = datetime.datetime.now()
@@ -213,6 +239,7 @@ def post_status(request):
                 content_post=r_content_post,
                 image_content_url=r_image_content_url,
                 date_post=time_post,
+                title_post = r_title_post
             )
             return JsonResponse({"message": "Post status successfully"}, status=200)
         except Exception as e:
@@ -240,7 +267,7 @@ def post_comment_to_status(request):
             )
             print(r_user_id, r_post_id, r_comment_content)
             return JsonResponse(
-                {"message": "Comment on status successfully"}, status=200
+                {"message": "Comment on status successfully" }, status=200
             )
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
@@ -252,7 +279,7 @@ def post_comment_to_status(request):
 
 
 @csrf_exempt
-def get_all_post(request):
+def get_all_post_by_userid(request):
     if request.method == "POST":
         data = json.loads(request.body)
         try:
@@ -263,6 +290,7 @@ def get_all_post(request):
             else:
                 posts_data = [
                     {
+                        "title":post.title_post,
                         "id_post": post.id_post,
                         "content": post.content_post,
                         "date_post": post.date_post,
@@ -270,9 +298,9 @@ def get_all_post(request):
                     }
                     for post in user_posts
                 ]
-                print(posts_data)
+                
                 return JsonResponse(
-                    {"message": "Get all post successfully"}, status=200
+                    {"message": "Get all post successfully" ,"list_post": posts_data }, status=200
                 )
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
@@ -282,6 +310,35 @@ def get_all_post(request):
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
 
+@csrf_exempt
+def get_all_post(request):
+    if request.method == "GET":
+        try:
+            all_post = Post.objects.all()
+            if not all_post.exists():
+                return JsonResponse({"error": "Do not have user id"}, status=404)
+            else:
+                posts_data = [
+                    {
+                        "title":post.title_post,
+                        "id_post": post.id_post,
+                        "content": post.content_post,
+                        "date_post": post.date_post,
+                        "image_content_url": post.image_content_url,
+                    }
+                    for post in all_post
+                ]
+                
+                return JsonResponse(
+                    {"message": "Get all post successfully" ,"list_post": posts_data }, status=200
+                )
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
 
 @csrf_exempt
 def get_all_comments_on_post(request):
