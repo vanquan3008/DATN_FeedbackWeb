@@ -30,7 +30,7 @@ function FeedBack() {
         )
     })
     
-
+    console.log(createPost)
     return (
         <div>
         <DefaultLayout type={"FeedBack"}>
@@ -49,7 +49,7 @@ function FeedBack() {
                     </div> */}
                     <div className=" w-full h-full bg-white rounded-3xl border-solid border-8">
                         <div className="w-full h-full">
-                            <DetailPost data = {currentPost}></DetailPost>
+                            <DetailPost data = {currentPost} setCreatePost={setCreatePost}></DetailPost>
                         </div>
                     </div>
                 </div>

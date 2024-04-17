@@ -8,7 +8,7 @@ function Comment() {
             <div className="flex flex-row justify-between p-4  ml-4 items-center">
                 <div className="flex flex-row items-center">
                     <div className="flex justify-center items-center border w-12 h-12 rounded-full">
-                        <img className="w-8 h-8" src={images.imgNoAvtar}></img>
+                        <img alt="" className="w-8 h-8" src={images.imgNoAvtar}></img>
                     </div>
                     <div className="text-base font-medium px-4 text-sky-500">Hello</div>
                 </div>

@@ -9,6 +9,7 @@ urlpatterns = [
     path("json_analysis", views.analyze_json_file),
     path("csv_analysis", views.analyze_csv_file),
     path("text_analysis", views.analyze_text),
+    
     path("txt_analysis", views.analyze_txt_file),
     path("create_post", views.create_post),
     path("post_comment_to_status", views.post_comment_to_status),
