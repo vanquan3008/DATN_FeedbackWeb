@@ -16,6 +16,12 @@ from dotenv import load_dotenv
 import openai
 from openai import OpenAI
 
+load_dotenv()
+API_SECRET_KEY = os.getenv("api_gpt_key")
+openai.api_key = API_SECRET_KEY
+# Initialize the OpenAI client
+client = OpenAI(api_key=openai.api_key)
+
 
 # Create your views here.
 @csrf_exempt
@@ -115,12 +121,6 @@ def logout(request):
     return response
 
 
-API_SECRET_KEY = os.getenv("api_gpt_key")
-openai.api_key = API_SECRET_KEY
-# Initialize the OpenAI client
-client = OpenAI(api_key=openai.api_key)
-
-
 @csrf_exempt
 def analyze_text(request):
     if request.method == "POST":
@@ -148,6 +148,70 @@ def analyze_text(request):
         sentiment = response.choices[0].message.content.strip().lower()
 
         return JsonResponse({"message": "a"}, status=200)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+
+def sentiment_each_sentence(text):
+    prompt = f"""You are trained to analyze and detect the sentiment of the given text.
+    If you are unsure of an answer, you can say "not sure" and recommend the user review manually.
+
+    Analyze the following text and determine if the sentiment is: Positive, Negative, or Neutral.
+    {text}"""
+
+    # Call the OpenAI API to generate a response
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",  # Use a powerful model for sentiment analysis
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt},
+        ],
+        max_tokens=1,  # Limit response to a single word
+        temperature=0,  # Keep response consistent
+    )
+
+    # Extract the sentiment from the response
+    sentiment = response.choices[0].message.content.strip().lower()
+    return sentiment
+
+
+def extract_txt_string(data):
+    start_index = data.find("Content-Type: text/plain\r\n\r\n") + len(
+        "Content-Type: text/plain\r\n\r\n"
+    )
+    end_index = data.find("\r\n\r\n-")
+    extracted_string = data[start_index:end_index]
+    return extracted_string
+
+
+@csrf_exempt
+def analyze_txt_file(request):
+    if request.method == "POST":
+        data = request.body.decode("utf-8")
+        txt_data = extract_txt_string(data).split("\r\n")
+        sentences = [sentence for sentence in txt_data if len(sentence) > 0]
+
+        num_positive = 0
+        num_negative = 0
+        num_neutral = 0
+        for sentence in sentences:
+            sentiment = sentiment_each_sentence(sentence)
+            if sentiment == "positive":
+                num_positive += 1
+            elif sentiment == "negative":
+                num_negative += 1
+            else:
+                num_neutral += 1
+
+        data_response = {
+            "positive": num_positive,
+            "negative": num_negative,
+            "neutral": num_neutral,
+        }
+
+        return JsonResponse({"message": data_response}, status=200)
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
@@ -210,10 +274,26 @@ def analyze_csv_file(request):
 
             key_word = "product_description"
             texts = df[key_word].tolist()
-            print(texts[0])
-            return JsonResponse(
-                {"message": "CSV file processed successfully"}, status=200
-            )
+
+            num_positive = 0
+            num_negative = 0
+            num_neutral = 0
+            for sentence in texts:
+                sentiment = sentiment_each_sentence(sentence)
+                if sentiment == "positive":
+                    num_positive += 1
+                elif sentiment == "negative":
+                    num_negative += 1
+                else:
+                    num_neutral += 1
+
+            data_response = {
+                "positive": num_positive,
+                "negative": num_negative,
+                "neutral": num_neutral,
+            }
+
+            return JsonResponse({"message": data_response}, status=200)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
     else:
