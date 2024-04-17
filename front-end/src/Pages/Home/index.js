@@ -1,7 +1,8 @@
-import {  useState } from "react";
+import { useRef, useState } from "react";
 import {DefaultLayout} from "../../Components/Layouts/DefaultLayout.js";
 // Rechard
 import { ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import axios from "axios";
 
 // Data biểu đồ tròn
 const data =[
@@ -14,7 +15,11 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
 function Home() {
     const [options,setOption] =useState("textarea"); 
     const [textLength , setTextLength] = useState(0);
-
+    const [sentimentSuccess ,setSentimentSuccess] = useState(null);
+    const [sentiment ,setSentiment] = useState("");
+    const [sentimentF ,setSentimentF] = useState({});
+    const textRef = useRef();
+    const [file ,setFile] = useState(null);
 
     const handleChange = (event) => {
         setOption(event.target.value);
@@ -25,6 +30,34 @@ function Home() {
         setTextLength(textInput.length);
     };
 
+    const sentimentText = async ()=>{
+        try{
+            const text ={ "text" : textRef.current.value}
+            const generation_stm = await axios.post('http://127.0.0.1:8000/text_analysis',text);
+            setSentimentSuccess(true);
+            setSentiment(generation_stm);
+        }
+        catch(err){
+            setSentimentSuccess(false);
+        }
+    }
+    console.log(sentimentF)
+    const sentimentFile = async (e)=>{ 
+        const filename = file['0'].name;
+        const extension = filename.split('.').pop();
+        try{
+            if(extension === 'txt'){
+                const generation_stm = await axios.post('http://127.0.0.1:8000/txt_analysis',file['0']);
+                setSentimentSuccess(true);
+                setSentimentF(generation_stm)
+            }
+           
+        }
+        catch(err){
+            setSentimentSuccess(false);
+        }
+    }
+    console.log(sentimentSuccess);
     return ( 
        <DefaultLayout type={"Dashboard"}>
             <div className="flex flex-col w-full h-full">
@@ -47,17 +80,17 @@ function Home() {
                             <div className="grow flex items-center justify-center">
                                 {
                                     options === "textarea"?<div className="w-full h-full flex justify-center items-center flex-col">
-                                        <textarea onChange={handleChangeText} maxLength={300} className="w-11/12 h-5/6 border-solid border-2 rounded-xl outline-none p-4"  placeholder="Input sentence ..." autoComplete="off"></textarea>
+                                        <textarea ref={textRef} onChange={handleChangeText} maxLength={300} className="w-11/12 h-5/6 border-solid border-2 rounded-xl outline-none p-4"  placeholder="Input sentence ..." autoComplete="off"></textarea>
                                         <div className=" text-color-basic">{textLength} / 300</div>
                                     </div>
                                     :
                                     <div className=" flex justify-center items-center w-11/12 h-5/6 border-solid border-2 rounded-xl ">
-                                        <input accept=".json , .xls" className=" outline-none " type={options}></input>
+                                        <input accept=".json , .csv , .txt" label='Upload'  className=" outline-none " onChange={(e)=>{setFile(e.target.files)}} type={options}></input>
                                     </div>
                                 }
                             </div>
                             <div className="flex justify-center ">
-                            <button className="w-11/12 h-10 bg-sky-300 mb-10 rounded-lg text-white font-medium hover:opacity-70">Check</button></div>
+                            <button className="w-11/12 h-10 bg-sky-300 mb-10 rounded-lg text-white font-medium hover:opacity-70" onClick={options==="textarea" ? sentimentText :sentimentFile}>Check</button></div>
                         </div>
                         <div className=" w-10"></div>
                         <div className=" m-10 bg-white h-auto rounded-xl border-solid border-2  text-3xl font-bold flex flex-col  w-full overflow-hidden">
@@ -67,29 +100,46 @@ function Home() {
                                 {/* Phân tích chung */}
                                 <div>
                                     <div className="w-full pt-4 pb-4 pl-12">
-                                       <label className="border-b-2 font-semibold text-sky-300"> Overview</label>
+                                       <label className="border-b-2 font-semibold text-sky-500"> Overview</label>
                                     </div>
-                                    <div className="flex flex-col justify-center text-center">
-                                       <div>Sentiment Review Chart</div>
-                                        <ResponsiveContainer width="100%" height={300}>
-                                            <PieChart>
-                                                <Pie
-                                                    data={data}
-                                                    dataKey="value"
-                                                    nameKey="name"
-                                                    cx="50%"
-                                                    cy="50%"
-                                                    outerRadius={80}
-                                                    fill="#8884d8"
-                                                    label
-                                                >
-                                                    {data.map((entry, index) => (
-                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                                    ))}
-                                                </Pie>
-                                            <Legend />
-                                            </PieChart>
-                                        </ResponsiveContainer>
+                                    <div>{
+                                        options === "textarea" ? <div>
+                                            {textRef.current.value ?
+                                            <div className="flex flex-col p-4 pl-12">
+                                                <div className="text-2xl text-sky-500 font-semibold ">Sentence</div>
+                                                <span className="text-xl p-4 font-normal">{textRef.current.value}</span>
+                                            </div>:<div className="flex justify-center font-bold text-center text-2xl text-sky-500">No Content</div>
+                                            }
+                                            {sentiment ?
+                                            <div className="flex flex-col p-4 pl-12">
+                                                <div className="text-2xl text-sky-500 font-semibold ">Sentiment</div>
+                                                <div className="text-xl p-4 font-normal">{sentiment}</div>
+                                            </div>:<div></div>
+                                            }
+                                        </div> :
+                                        <div className="flex flex-col justify-center text-center">
+                                        <div>Sentiment Review Chart</div>
+                                            <ResponsiveContainer width="100%" height={300}>
+                                                <PieChart>
+                                                    <Pie
+                                                        data={data}
+                                                        dataKey="value"
+                                                        nameKey="name"
+                                                        cx="50%"
+                                                        cy="50%"
+                                                        outerRadius={80}
+                                                        fill="#8884d8"
+                                                        label
+                                                    >
+                                                        {data.map((entry, index) => (
+                                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                        ))}
+                                                    </Pie>
+                                                <Legend />
+                                                </PieChart>
+                                            </ResponsiveContainer>
+                                        </div>
+                                        }
                                     </div>
                                 </div>
                             

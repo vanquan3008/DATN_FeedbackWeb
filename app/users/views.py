@@ -55,6 +55,8 @@ def signin(request):
         r_email = data.get("email")
         r_password = data.get("password")
 
+        print(r_email, r_password)
+
         user_signin = User.objects.filter(email=r_email)
         if (
             len(user_signin) == 1
@@ -112,8 +114,6 @@ def get_all_user(request):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
 
-
-
 @csrf_exempt
 def logout(request):
     response = JsonResponse({"message": "Logged out successfully"})
@@ -147,13 +147,41 @@ def analyze_text(request):
         # Extract the sentiment from the response
         sentiment = response.choices[0].message.content.strip().lower()
 
-        return JsonResponse({"message": "a"}, status=200)
+        return JsonResponse({"message": sentiment}, status=200)
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
 
+@csrf_exempt
+def get_all_post(request):
+    if request.method == "GET":
+        try:
+            all_post = Post.objects.all()
+            if not all_post.exists():
+                return JsonResponse({"error": "Do not have user id"}, status=404)
+            else:
+                posts_data = [
+                    {
+                        "title":post.title_post,
+                        "id_post": post.id_post,
+                        "content": post.content_post,
+                        "date_post": post.date_post,
+                        "image_content_url": post.image_content_url,
+                    }
+                    for post in all_post
+                ]
+                
+                return JsonResponse(
+                    {"message": "Get all post successfully" ,"list_post": posts_data }, status=200
+                )
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
 
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
 def sentiment_each_sentence(text):
     prompt = f"""You are trained to analyze and detect the sentiment of the given text.
     If you are unsure of an answer, you can say "not sure" and recommend the user review manually.
@@ -309,7 +337,6 @@ def create_post(request):
         try:
             r_user_id = data.get("user_id")
             r_content_post = data.get("content")
-            r_title_post = data.get("title")
             r_image_content_url = data.get("image_content_url")
 
             time_post = datetime.datetime.now()
@@ -319,7 +346,6 @@ def create_post(request):
                 content_post=r_content_post,
                 image_content_url=r_image_content_url,
                 date_post=time_post,
-                title_post = r_title_post
             )
             return JsonResponse({"message": "Post status successfully"}, status=200)
         except Exception as e:
@@ -347,7 +373,7 @@ def post_comment_to_status(request):
             )
             print(r_user_id, r_post_id, r_comment_content)
             return JsonResponse(
-                {"message": "Comment on status successfully" }, status=200
+                {"message": "Comment on status successfully"}, status=200
             )
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
@@ -370,7 +396,6 @@ def get_all_post_by_userid(request):
             else:
                 posts_data = [
                     {
-                        "title":post.title_post,
                         "id_post": post.id_post,
                         "content": post.content_post,
                         "date_post": post.date_post,
@@ -378,10 +403,8 @@ def get_all_post_by_userid(request):
                     }
                     for post in user_posts
                 ]
-                
-                return JsonResponse(
-                    {"message": "Get all post successfully" ,"list_post": posts_data }, status=200
-                )
+                print(posts_data)
+                return JsonResponse({"message": posts_data}, status=200)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 
@@ -390,35 +413,6 @@ def get_all_post_by_userid(request):
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
 
-@csrf_exempt
-def get_all_post(request):
-    if request.method == "GET":
-        try:
-            all_post = Post.objects.all()
-            if not all_post.exists():
-                return JsonResponse({"error": "Do not have user id"}, status=404)
-            else:
-                posts_data = [
-                    {
-                        "title":post.title_post,
-                        "id_post": post.id_post,
-                        "content": post.content_post,
-                        "date_post": post.date_post,
-                        "image_content_url": post.image_content_url,
-                    }
-                    for post in all_post
-                ]
-                
-                return JsonResponse(
-                    {"message": "Get all post successfully" ,"list_post": posts_data }, status=200
-                )
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
-
-    else:
-        return JsonResponse(
-            {"error": "Only POST requests are allowed for this endpoint"}, status=500
-        )
 
 @csrf_exempt
 def get_all_comments_on_post(request):
