@@ -13,11 +13,13 @@ class User(models.Model):
     numberphone = models.CharField(max_length=12, null=True, blank=True)
     address = models.CharField(max_length=50, null=True, blank=True)
     url_image = models.URLField(max_length=200, null=True, blank=True)
+    
+    
 
 
 class Post(models.Model):
     id_post = models.AutoField(primary_key=True)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     date_post = models.DateTimeField(default=timezone.now)
     title_post = models.CharField(max_length=300 ,null=True)
     content_post = models.CharField(max_length=300)
@@ -27,15 +29,17 @@ class Post(models.Model):
 
 
 class Detail_post(models.Model):
-    id_post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     comment_id = models.AutoField(primary_key=True)
     comment_content = models.CharField(max_length=500)
+    #date_comment = models.DateTimeField(default=timezone.now)
+    
 
 
 class Report(models.Model):
     id_report = models.AutoField(primary_key=True)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     date_create = models.DateTimeField(default=timezone.now)
     url_report = models.URLField(max_length=200)
     number_pos = models.IntegerField()
@@ -45,7 +49,7 @@ class Report(models.Model):
 
 class Result_file(models.Model):
     id_file = models.AutoField(primary_key=True)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     file_name = models.CharField(max_length=50)
     date_save = models.DateTimeField(default=timezone.now)
     number_pos = models.IntegerField()
@@ -55,7 +59,7 @@ class Result_file(models.Model):
 
 class Result_text(models.Model):
     id_text = models.AutoField(primary_key=True)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     text_content = models.CharField(max_length=10000)
     date_save = models.DateTimeField(default=timezone.now)
     sentiment = models.FloatField(null=True, blank=True)

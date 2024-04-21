@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import {  useRef, useState } from "react";
 import {DefaultLayout} from "../../Components/Layouts/DefaultLayout.js";
 // Rechard
 import { ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
@@ -25,6 +25,7 @@ function Home() {
         setOption(event.target.value);
     };
 
+
     const handleChangeText = (event) => { 
         const textInput = event.target.value;
         setTextLength(textInput.length);
@@ -50,7 +51,6 @@ function Home() {
            
             if(extension === 'txt'){
                 const generation_stm = await axios.post('http://127.0.0.1:8000/txt_analysis',file);
-                
                 setSentimentF(generation_stm.data.message)
             }
             else if(extension === 'json'){
@@ -75,7 +75,7 @@ function Home() {
         { name: 'Negative', value: sentimentF?.negative },
         { name: 'Neutral', value: sentimentF?.neutral },
     ]
-    console.log(sentimentF)
+    console.log(sentimentSuccess)
     return ( 
        <DefaultLayout type={"Dashboard"}>
             <div className="flex flex-col w-full h-full">
@@ -108,7 +108,10 @@ function Home() {
                                 }
                             </div>
                             <div className="flex justify-center ">
-                            <button className="w-11/12 h-10 bg-sky-300 mb-10 rounded-lg text-white font-medium hover:opacity-70" onClick={options==="textarea" ? sentimentText :sentimentFile}>Check</button></div>
+                                <button className={`w-11/12 h-10 mb-10 rounded-lg text-white font-medium ${textLength === 0 && file ===null  ?"bg-sky-200" :"bg-sky-300 hover:opacity-70" }`} 
+                                        onClick={options==="textarea" ? sentimentText :sentimentFile}
+                                        disabled={textLength === 0 && file === null ? true : false}
+                                >Check</button></div>
                         </div>
                         <div className=" w-10"></div>
                         <div className=" m-10 bg-white h-auto rounded-xl border-solid border-2  text-3xl font-bold flex flex-col  w-full overflow-hidden">

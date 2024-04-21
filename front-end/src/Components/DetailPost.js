@@ -2,13 +2,61 @@ import { faEllipsis, faHeart } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { images } from "../Assets/images";
 import Comment from "./Comment";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import axios from "axios";
+// Time
+import Moment from 'react-moment';
 
 function DetailPost(
-        data
+        data,
     ) {
     const [textComment ,setTextComment] = useState("");
+    const [listComment ,setListComment] = useState([]);
+    const [sentimentPost ,setSentimentPost] = useState(null);
+    const userLogin = useSelector((state)=> state.auth.login.currentUser)
+    const infoUser = userLogin?.userLogin;
 
+
+    const createComment = async (e)=>{
+        e.preventDefault();
+        const comment =  {
+            "user_id" : infoUser.user_id ,
+            "id_post": data.data?.id_post,
+            "comment_content" : textComment
+        }
+        await axios.post(`http://127.0.0.1:8000/post_comment_to_status`,comment);
+        window.location.reload();
+    }
+
+
+   useEffect(()=>  {
+        if(data.data !== null) {
+            const getComment = async () => {
+                const  idPost =  {
+                    "id_post" : data.data?.id_post
+                }
+                const comment = await axios.post(`http://127.0.0.1:8000/get_all_comments_on_post`,idPost);
+                setListComment(comment.data.comments)
+
+                const sentiment = await axios.post(`http://127.0.0.1:8000/get_sentiment_comments_on_post`,idPost);
+                setSentimentPost(sentiment.data.comments)
+            }
+            getComment();
+        }
+    },[data] )
+    
+    const _listComment = listComment.map((cur, index) => {
+        return listComment[listComment.length - index - 1];
+    });
+
+    const renderComment  =  _listComment.map((comment , index)=>{
+        return (
+            <Comment  data={comment}></Comment>
+        )
+    })
+
+   
 
     return (
         <>{
@@ -30,9 +78,9 @@ function DetailPost(
                                         <div className=" w-12 h-12 rounded-full border flex items-center justify-center object-contain" >
                                             <img alt="" className="w-8 h-8 " src={images.imgNoAvtar}></img>
                                         </div>
-                                        <div className="px-4 text-base font-medium text-sky-500">Văn Quân</div>
+                                        <div className="px-4 text-base font-medium text-sky-500">{data?.data?.user_post?.fullname}</div>
                                         <div className="p-2">•</div>
-                                        <div className="text-base text-color-basic">6h</div>
+                                        <Moment format="LL" className="text-base text-color-basic">{data.data.date_post}</Moment>
                                     </div>
                                     <div className="p-8">
                                         <FontAwesomeIcon icon={faEllipsis}></FontAwesomeIcon>
@@ -53,12 +101,7 @@ function DetailPost(
                             </div>
                             {/* Comment Post */}
                             <div className="grow overflow-y-auto">
-                                <Comment></Comment>
-                                <Comment></Comment>
-                                <Comment></Comment>
-                                <Comment></Comment>
-                                <Comment></Comment>
-                                <Comment></Comment>
+                                {renderComment}
                             </div>
                             {/* Writing Comment */}
                             <div className="flex flex-row p-2 rounded-b-3xl items-center border-t">
@@ -69,17 +112,23 @@ function DetailPost(
                                     onChange={(e)=>{ setTextComment(e.target.value)}} 
                                     className="grow outline-none" max={300} placeholder="Comment..."></input>
                                 <div className="text-sm text-color-basic">{textComment.length}/300</div>
-                                <button className="bg-sky-300 text-sm w-16 ml-4 rounded-md hover:opacity-60  p-2 font-medium text-white">
+                                <button className="bg-sky-300 text-sm w-16 ml-4 rounded-md hover:opacity-60  p-2 font-medium text-white" onClick={createComment}>
                                     Sent
                                 </button>
                             </div>
                         </div>
                         <div className="w-1/3"> 
-                            <div className="p-8 font-medium text-xl"> 
+                            <div className="p-4 font-medium text-xl"> 
                                 Details 
                             </div>
-                            <div>
-
+                            <div className="pl-16 py-4 font-medium text-base text-green-700">
+                                Positive : {sentimentPost?.positive }
+                            </div>
+                            <div className="pl-16 py-4 font-medium text-base text-red-700">
+                                Negative : {sentimentPost?.negative}
+                            </div>
+                            <div className="pl-16 py-4 font-medium text-base text-gray-700">
+                                Neutral : {sentimentPost?.neutral}
                             </div>
 
                         </div>
