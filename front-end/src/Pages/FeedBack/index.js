@@ -29,8 +29,9 @@ function FeedBack() {
             <InfoPost data={post} key={index} setCurrentPost={setCurrentPost} onClick={currentPost?.id_post ===post?.id_post ? true :false} ></InfoPost>
         )
     })
-    
-    console.log(createPost)
+
+    //Generate Comment 
+
     return (
         <div>
         <DefaultLayout type={"FeedBack"}>
