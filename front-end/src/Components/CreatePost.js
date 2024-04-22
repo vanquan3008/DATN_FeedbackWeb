@@ -55,7 +55,7 @@ function CreatePost(
                 <div className="w-full h-20 flex items-center pl-4 pr-4 justify-between border border-b ">
                     <div className="flex flex-row p-4 item-center">
                         <div className="border p-2 rounded-full object-contain">
-                            <img alt="" src={infoUser.url_image ? infoUser.url_image : images.imgNoAvtar} className="w-10 h-10"></img>
+                            <img alt="" src={infoUser?.url_image ? infoUser?.url_image : images.imgNoAvtar} className="w-10 h-10"></img>
                         </div>
                         <span className="text-base p-4 font-medium">
                           {infoUser.fullname}

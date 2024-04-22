@@ -10,6 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
         try:
             user = User.objects.get(user_id=user_id)
             return {
+                'id': user.user_id,
                 'fullname': user.fullname,
                 'url_image': user.url_image
             }

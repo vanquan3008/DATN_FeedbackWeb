@@ -26,7 +26,7 @@ function FeedBack() {
     });
     const renderPostSentiment =  _listPost_line.map((post , index)=>{
         return (
-            <InfoPost data={post} key={index} setCurrentPost={setCurrentPost} onClick={currentPost?.id_post ===post?.id_post ? true :false} ></InfoPost>
+            <InfoPost data={post} key={index} setCurrentPost={setCurrentPost} onClick={currentPost?.id_post === post?.id_post ? true :false} ></InfoPost>
         )
     })
 

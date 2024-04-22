@@ -56,7 +56,17 @@ function DetailPost(
         )
     })
 
-   
+    // Delete Post 
+    const deletePost =  async ()=>{
+        
+        const  idPost =  {
+            "id_post" : data.data?.id_post
+        }
+        
+        await axios.post(`http://127.0.0.1:8000/delete_post`,idPost);
+        window.location.reload();
+       
+    }
 
     return (
         <>{
@@ -80,7 +90,7 @@ function DetailPost(
                                         </div>
                                         <div className="px-4 text-base font-medium text-sky-500">{data?.data?.user_post?.fullname}</div>
                                         <div className="p-2">•</div>
-                                        <Moment format="LL" className="text-base text-color-basic">{data.data.date_post}</Moment>
+                                        <Moment format="LL" className="text-base text-color-basic">{data?.data.date_post}</Moment>
                                     </div>
                                     <div className="p-8">
                                         <FontAwesomeIcon icon={faEllipsis}></FontAwesomeIcon>
@@ -89,15 +99,28 @@ function DetailPost(
                                 {/*  */}
                                 <div className="px-8 w-full h-auto font-normal">
                                     {data?.data?.content}
-                                </div>
-                                <div className="w-full h-14 border-b flex flex-row text-color-basic pl-6">
-                                    <div className="p-2">
-                                        Edit Post
+                                </div>{
+                                    userLogin?.userLogin.user_id === data.data?.user_post.id?
+                                    <div>
+                                        <div className="w-full h-14 border-b flex flex-row text-color-basic pl-6">
+                                            <div className="p-2 cursor-pointer hover:opacity-60">
+                                                Edit Post
+                                            </div>
+                                            <div className="p-2 cursor-pointer hover:opacity-60 " onClick={deletePost} >
+                                                Delete Post
+                                            </div>
+                                        </div>
+                                    </div>:<div>
+                                        <div className="w-full h-14 border-b flex flex-row text-color-basic pl-6">
+                                                <div className="p-2 cursor-pointer hover:opacity-60">
+                                                    Info User
+                                                </div>
+                                                <div className="p-2 cursor-pointer hover:opacity-60 " >
+                                                    Detail Post
+                                                </div>
+                                            </div>
                                     </div>
-                                    <div className="p-2">
-                                        Delete Post
-                                    </div>
-                                </div>
+                                }
                             </div>
                             {/* Comment Post */}
                             <div className="grow overflow-y-auto">

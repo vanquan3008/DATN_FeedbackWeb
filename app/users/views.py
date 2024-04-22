@@ -368,7 +368,7 @@ def analyze_csv_file(request):
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
 
-
+# Các request liên quan den Post
 @csrf_exempt
 def create_post(request):
     if request.method == "POST":
@@ -451,6 +451,32 @@ def get_all_post_by_userid(request):
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
 
+
+@csrf_exempt  
+def delete_post(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        try:
+            r_post_id = data.get("id_post")
+            if r_post_id is None:
+                raise ValueError("id_post are required")
+
+            # Check exist post
+            if not Post.objects.filter(id_post=r_post_id).exists():
+                return JsonResponse({"error": "Post not found"}, status=404)
+            post_delete = Post.objects.get(id_post=r_post_id)
+            post_delete.delete()
+            return JsonResponse({"message": "Delete  post successfully"},
+                status=200,
+            )
+            
+            
+        except Exception as e:
+            return JsonResponse({"Error": str(e)}, status=400)
+
+    else:
+        return JsonResponse({"error": "Only POST requests are allowed for this endpoint"}, status=500 )
+# Comment
 
 @csrf_exempt
 def get_all_comments_on_post(request):
