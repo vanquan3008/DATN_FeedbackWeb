@@ -15,9 +15,9 @@ import os
 from dotenv import load_dotenv
 import openai
 from openai import OpenAI
-from .serializers import (
-    UserSerializer
-)
+from .serializers import UserSerializer
+
+from models.views import sentiment_a_sentence
 
 load_dotenv()
 API_SECRET_KEY = os.getenv("api_gpt_key")
@@ -90,6 +90,7 @@ def signin(request):
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
 
+
 @csrf_exempt
 def get_all_user(request):
     if request.method == "GET":
@@ -103,7 +104,6 @@ def get_all_user(request):
                         "user_id": user.user_id,
                         "fullname": user.fullname,
                         "email": user.email,
-                       
                     }
                     for user in user_all
                 ]
@@ -113,6 +113,7 @@ def get_all_user(request):
                 )
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
+
 
 @csrf_exempt
 def logout(request):
@@ -127,31 +128,14 @@ def analyze_text(request):
         data = json.loads(request.body.decode("utf-8"))
         text = data["text"]
 
-        prompt = f"""You are trained to analyze and detect the sentiment of the given text.
-    If you are unsure of an answer, you can say "not sure" and recommend the user review manually.
-
-    Analyze the following text and determine if the sentiment is: Positive, Negative, or Neutral.
-    {text}"""
-
-        # Call the OpenAI API to generate a response
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",  # Use a powerful model for sentiment analysis
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": prompt},
-            ],
-            max_tokens=1,  # Limit response to a single word
-            temperature=0,  # Keep response consistent
-        )
-
-        # Extract the sentiment from the response
-        sentiment = response.choices[0].message.content.strip().lower()
+        sentiment = sentiment_a_sentence(text)
 
         return JsonResponse({"message": sentiment}, status=200)
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
+
 
 @csrf_exempt
 def get_all_post(request):
@@ -164,18 +148,19 @@ def get_all_post(request):
             else:
                 posts_data = [
                     {
-                        "title":post.title_post,
+                        "title": post.title_post,
                         "id_post": post.id_post,
                         "content": post.content_post,
                         "date_post": post.date_post,
                         "image_content_url": post.image_content_url,
-                        "user_post" :serializer.get_user_id(post.user.user_id)
+                        "user_post": serializer.get_user_id(post.user.user_id),
                     }
                     for post in all_post
                 ]
-                
+
                 return JsonResponse(
-                    {"message": "Get all post successfully" ,"list_post": posts_data }, status=200
+                    {"message": "Get all post successfully", "list_post": posts_data},
+                    status=200,
                 )
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
@@ -184,27 +169,6 @@ def get_all_post(request):
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
-def sentiment_each_sentence(text):
-    prompt = f"""You are trained to analyze and detect the sentiment of the given text.
-    If you are unsure of an answer, you can say "not sure" and recommend the user review manually.
-
-    Analyze the following text and determine if the sentiment is: Positive, Negative, or Neutral.
-    {text}"""
-
-    # Call the OpenAI API to generate a response
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",  # Use a powerful model for sentiment analysis
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt},
-        ],
-        max_tokens=1,  # Limit response to a single word
-        temperature=0,  # Keep response consistent
-    )
-
-    # Extract the sentiment from the response
-    sentiment = response.choices[0].message.content.strip().lower()
-    return sentiment
 
 
 def extract_txt_string(data):
@@ -227,7 +191,7 @@ def analyze_txt_file(request):
         num_negative = 0
         num_neutral = 0
         for sentence in sentences:
-            sentiment = sentiment_each_sentence(sentence)
+            sentiment = sentiment_a_sentence(sentence)
             if sentiment == "positive":
                 num_positive += 1
             elif sentiment == "negative":
@@ -278,11 +242,12 @@ def extract_json_string(data):
     extracted_string = data[start_index:end_index]
     return extracted_string
 
+
 @csrf_exempt
 def analyze_json_file(request):
     if request.method == "POST":
         data = request.body.decode("utf-8")
-        json_string = extract_json_string(data)   
+        json_string = extract_json_string(data)
         json_data = json.loads(json_string)
 
         key_word = "review"
@@ -292,7 +257,7 @@ def analyze_json_file(request):
         num_negative = 0
         num_neutral = 0
         for sentence in texts:
-            sentiment = sentiment_each_sentence(sentence)
+            sentiment = sentiment_a_sentence(sentence)
             if sentiment == "positive":
                 num_positive += 1
             elif sentiment == "negative":
@@ -310,6 +275,7 @@ def analyze_json_file(request):
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
+
 
 def extract_string_csv(data):
     start_index = data.find("Content-Type: text/csv") + len("Content-Type: text/csv")
@@ -346,7 +312,7 @@ def analyze_csv_file(request):
             num_negative = 0
             num_neutral = 0
             for sentence in texts:
-                sentiment = sentiment_each_sentence(sentence)
+                sentiment = sentiment_a_sentence(sentence)
                 if sentiment == "positive":
                     num_positive += 1
                 elif sentiment == "negative":
@@ -368,6 +334,7 @@ def analyze_csv_file(request):
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
 
+
 # Các request liên quan den Post
 @csrf_exempt
 def create_post(request):
@@ -384,7 +351,7 @@ def create_post(request):
                 user=User.objects.get(user_id=r_user_id),
                 content_post=r_content_post,
                 image_content_url=r_image_content_url,
-                date_post=time_post
+                date_post=time_post,
             )
             return JsonResponse({"message": "Post status successfully"}, status=200)
         except Exception as e:
@@ -441,7 +408,7 @@ def get_all_post_by_userid(request):
                     }
                     for post in user_posts
                 ]
-    
+
                 return JsonResponse({"message": posts_data}, status=200)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
@@ -452,7 +419,7 @@ def get_all_post_by_userid(request):
         )
 
 
-@csrf_exempt  
+@csrf_exempt
 def delete_post(request):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -466,17 +433,22 @@ def delete_post(request):
                 return JsonResponse({"error": "Post not found"}, status=404)
             post_delete = Post.objects.get(id_post=r_post_id)
             post_delete.delete()
-            return JsonResponse({"message": "Delete  post successfully"},
+            return JsonResponse(
+                {"message": "Delete  post successfully"},
                 status=200,
             )
-            
-            
+
         except Exception as e:
             return JsonResponse({"Error": str(e)}, status=400)
 
     else:
-        return JsonResponse({"error": "Only POST requests are allowed for this endpoint"}, status=500 )
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+
 # Comment
+
 
 @csrf_exempt
 def get_all_comments_on_post(request):
@@ -485,7 +457,7 @@ def get_all_comments_on_post(request):
         serializer = UserSerializer()
         try:
             r_post_id = data.get("id_post")
-            if  r_post_id is None:
+            if r_post_id is None:
                 raise ValueError("id_post are required")
 
             # Check exist post
@@ -498,7 +470,7 @@ def get_all_comments_on_post(request):
                 {
                     "id": comment.comment_id,
                     "content": comment.comment_content,
-                    "user_comment" :serializer.get_user_id(comment.user.user_id)
+                    "user_comment": serializer.get_user_id(comment.user.user_id),
                 }
                 for comment in post_comments
             ]
@@ -517,8 +489,8 @@ def get_all_comments_on_post(request):
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
-        
-        
+
+
 @csrf_exempt
 def static_all_comments_on_post(request):
     if request.method == "POST":
