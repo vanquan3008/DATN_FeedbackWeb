@@ -23,14 +23,10 @@ from models.views import (
     sentiment_basedaspect_a_sentence,
 )
 
-load_dotenv()
-API_SECRET_KEY = os.getenv("api_gpt_key")
-openai.api_key = API_SECRET_KEY
-# Initialize the OpenAI client
-client = OpenAI(api_key=openai.api_key)
+
+############### User ###############
 
 
-# Create your views here.
 @csrf_exempt
 def signup(request):
     if request.method == "POST":
@@ -96,6 +92,13 @@ def signin(request):
 
 
 @csrf_exempt
+def logout(request):
+    response = JsonResponse({"message": "Logged out successfully"})
+    response.delete_cookie("jwt")
+    return response
+
+
+@csrf_exempt
 def get_all_user(request):
     if request.method == "GET":
         try:
@@ -119,11 +122,25 @@ def get_all_user(request):
             return JsonResponse({"error": str(e)}, status=500)
 
 
-@csrf_exempt
-def logout(request):
-    response = JsonResponse({"message": "Logged out successfully"})
-    response.delete_cookie("jwt")
-    return response
+####################################################################
+
+
+############## Text analysis ###############
+
+
+def extract_detail_basedaspect_from_response(json_data):
+    text_data = ""
+    for key, value in json_data.items():
+        if isinstance(value, list):
+            # Xử lý các khóa có giá trị là danh sách
+            for item in value:
+                # Duyệt qua từng mục trong danh sách
+                item_text = f"'sentence analyze': '{item['sentence analyze']}', 'sentiment': '{item['sentiment']}', 'aspect': '{item['aspect']}', 'opinion': '{item['opinion']}'"  # Tạo chuỗi văn bản từ từ điển mục
+                text_data += f"{{{item_text}}}\n"
+            text_data += "\n"
+        else:
+            pass
+    return text_data
 
 
 @csrf_exempt
@@ -131,8 +148,25 @@ def analyze_text(request):
     if request.method == "POST":
         data = json.loads(request.body.decode("utf-8"))
         text = data["text"]
-        print(text)
+        user_id = data["user_id"]
+        # print(text)
         sentiment = sentiment_a_sentence(text)
+        detail_sentiment = json.loads(sentiment_basedaspect_a_sentence(text))
+        detail_sentiment = extract_detail_basedaspect_from_response(detail_sentiment)
+        print(detail_sentiment)
+
+        if user_id:
+            time_save = datetime.datetime.now()
+            result_text = Result_text.objects.create(
+                user=user_id,
+                text_content=text,
+                sentiment=sentiment,
+                date_save=time_save,
+                detail_sentiment=json.dumps(
+                    detail_sentiment
+                ),  # Lưu dưới dạng chuỗi JSON
+            )
+            result_text.save()
 
         return JsonResponse({"message": sentiment}, status=200)
     else:
@@ -142,37 +176,24 @@ def analyze_text(request):
 
 
 @csrf_exempt
-def get_all_post(request):
-    if request.method == "GET":
-        try:
-            all_post = Post.objects.all()
-            serializer = UserSerializer()
-            if not all_post.exists():
-                return JsonResponse({"error": "Do not have user id"}, status=404)
-            else:
-                posts_data = [
-                    {
-                        "title": post.title_post,
-                        "id_post": post.id_post,
-                        "content": post.content_post,
-                        "date_post": post.date_post,
-                        "image_content_url": post.image_content_url,
-                        "user_post": serializer.get_user_id(post.user.user_id),
-                    }
-                    for post in all_post
-                ]
+def analyze_detail_text(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        text = data["text"]
+        print(text)
+        detail_sentiment = sentiment_basedaspect_a_sentence(text)
 
-                return JsonResponse(
-                    {"message": "Get all post successfully", "list_post": posts_data},
-                    status=200,
-                )
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
-
+        return JsonResponse({"message": detail_sentiment}, status=200)
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
+
+
+####################################################################
+
+
+############## Txt file analysis ###############
 
 
 def extract_txt_string(data):
@@ -200,44 +221,10 @@ def analyze_txt_file(request):
         )
 
 
-def extract_json_string(data):
-    start_index = data.find("Content-Type: application/json") + len(
-        "Content-Type: application/json"
-    )
-    end_index = start_index
-
-    # Tìm index của dấu - kết thúc file csv, chọn là 5 dấu -
-    string_end = "-"
-    count = 0
-    while end_index < len(data) and count < 5:
-        if data[end_index] == string_end:
-            count += 1
-        else:
-            count = 0
-        end_index += 1
-    end_index = end_index - 5
-
-    extracted_string = data[start_index:end_index]
-    return extracted_string
+####################################################################
 
 
-@csrf_exempt
-def analyze_json_file(request):
-    if request.method == "POST":
-        data = request.body.decode("utf-8")
-        json_string = extract_json_string(data)
-        json_data = json.loads(json_string)
-
-        key_word = "review"
-        texts = [json_data[i][key_word] for i in range(len(json_data))]
-
-        data_response = count_pos_neg_neu_sentences(texts)
-
-        return JsonResponse({"message": data_response}, status=200)
-    else:
-        return JsonResponse(
-            {"error": "Only POST requests are allowed for this endpoint"}, status=500
-        )
+############### CSV file Analysis ###############
 
 
 def extract_string_csv(data):
@@ -282,7 +269,92 @@ def analyze_csv_file(request):
         )
 
 
-# Các request liên quan den Post
+####################################################################
+
+
+############### Json file Analysis ###############
+
+
+def extract_json_string(data):
+    start_index = data.find("Content-Type: application/json") + len(
+        "Content-Type: application/json"
+    )
+    end_index = start_index
+
+    # Tìm index của dấu - kết thúc file csv, chọn là 5 dấu -
+    string_end = "-"
+    count = 0
+    while end_index < len(data) and count < 5:
+        if data[end_index] == string_end:
+            count += 1
+        else:
+            count = 0
+        end_index += 1
+    end_index = end_index - 5
+
+    extracted_string = data[start_index:end_index]
+    return extracted_string
+
+
+@csrf_exempt
+def analyze_json_file(request):
+    if request.method == "POST":
+        data = request.body.decode("utf-8")
+        json_string = extract_json_string(data)
+        json_data = json.loads(json_string)
+
+        key_word = "review"
+        texts = [json_data[i][key_word] for i in range(len(json_data))]
+
+        data_response = count_pos_neg_neu_sentences(texts)
+
+        return JsonResponse({"message": data_response}, status=200)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+
+####################################################################
+
+
+############### Handle with Post, Comment ###############
+
+
+@csrf_exempt
+def get_all_post(request):
+    if request.method == "GET":
+        try:
+            all_post = Post.objects.all()
+            serializer = UserSerializer()
+            if not all_post.exists():
+                return JsonResponse({"error": "Do not have user id"}, status=404)
+            else:
+                posts_data = [
+                    {
+                        "title": post.title_post,
+                        "id_post": post.id_post,
+                        "content": post.content_post,
+                        "date_post": post.date_post,
+                        "image_content_url": post.image_content_url,
+                        "user_post": serializer.get_user_id(post.user.user_id),
+                    }
+                    for post in all_post
+                ]
+
+                return JsonResponse(
+                    {"message": "Get all post successfully", "list_post": posts_data},
+                    status=200,
+                )
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+
 @csrf_exempt
 def create_post(request):
     if request.method == "POST":
@@ -394,9 +466,6 @@ def delete_post(request):
         )
 
 
-# Comment
-
-
 @csrf_exempt
 def get_all_comments_on_post(request):
     if request.method == "POST":
@@ -460,23 +529,7 @@ def static_all_comments_on_post(request):
 
             texts = [comment for comment in comments_data if len(comment) > 0]
 
-            num_positive = 0
-            num_negative = 0
-            num_neutral = 0
-            for sentence in texts:
-                sentiment = sentiment_a_sentence(sentence)
-                if sentiment == "positive":
-                    num_positive += 1
-                elif sentiment == "negative":
-                    num_negative += 1
-                else:
-                    num_neutral += 1
-
-            data_response = {
-                "positive": num_positive,
-                "negative": num_negative,
-                "neutral": num_neutral,
-            }
+            data_response = count_pos_neg_neu_sentences(texts)
 
             return JsonResponse(
                 {
@@ -494,16 +547,4 @@ def static_all_comments_on_post(request):
         )
 
 
-@csrf_exempt
-def analyze_detail_text(request):
-    if request.method == "POST":
-        data = json.loads(request.body.decode("utf-8"))
-        text = data["text"]
-        print(text)
-        detail_sentiment = sentiment_basedaspect_a_sentence(text)
-
-        return JsonResponse({"message": detail_sentiment}, status=200)
-    else:
-        return JsonResponse(
-            {"error": "Only POST requests are allowed for this endpoint"}, status=500
-        )
+####################################################################
