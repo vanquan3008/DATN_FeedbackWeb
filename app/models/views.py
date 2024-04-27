@@ -48,7 +48,7 @@ def sentiment_a_sentence(sentence):
 
 
 def sentiment_basedaspect_a_sentence(sentence):
-    prompt = f"""You are trained to analyze and extract sentiment based-aspect opinion pairs from the given text. \nI want result has performance: this is json format include\n\"sentence analyze\":\"part of sentence that you analyze aspect and sentiment\",\"sentiment\": \"sentiment\",\"aspect\": \"aspect\",\"opinion\":\"opinion\"\\n\n\n{sentence}"""
+    prompt = f"""You are trained to analyze and extract sentiment based-aspect opinion pairs from the given text. \nI want result has performance: this is json format only include\n\"sentence analyze\":\"part of sentence that you analyze aspect and sentiment\",\"sentiment\": \"sentiment\",\"aspect\": \"aspect\",\"opinion\":\"opinion\"\n\n\n{sentence}"""
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
@@ -59,7 +59,6 @@ def sentiment_basedaspect_a_sentence(sentence):
         presence_penalty=0,
     )
     data_response = response.choices[0].message.content
-    print(data_response)
     return data_response
 
 
