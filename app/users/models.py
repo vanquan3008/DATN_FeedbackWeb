@@ -60,3 +60,4 @@ class Result_text(models.Model):
     text_content = models.CharField(max_length=10000)
     date_save = models.DateTimeField(default=timezone.now)
     sentiment = models.FloatField(null=True, blank=True)
+    detail_sentiment = models.CharField(max_length=10000)
