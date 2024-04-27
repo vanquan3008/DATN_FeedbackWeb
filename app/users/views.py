@@ -17,7 +17,7 @@ import openai
 from openai import OpenAI
 from .serializers import UserSerializer
 
-from models.views import sentiment_a_sentence
+from models.views import sentiment_a_sentence, count_pos_neg_neu_sentences
 
 load_dotenv()
 API_SECRET_KEY = os.getenv("api_gpt_key")
@@ -127,7 +127,7 @@ def analyze_text(request):
     if request.method == "POST":
         data = json.loads(request.body.decode("utf-8"))
         text = data["text"]
-
+        print(text)
         sentiment = sentiment_a_sentence(text)
 
         return JsonResponse({"message": sentiment}, status=200)
@@ -187,39 +187,13 @@ def analyze_txt_file(request):
         txt_data = extract_txt_string(data).split("\r\n")
         sentences = [sentence for sentence in txt_data if len(sentence) > 0]
 
-        num_positive = 0
-        num_negative = 0
-        num_neutral = 0
-        for sentence in sentences:
-            sentiment = sentiment_a_sentence(sentence)
-            if sentiment == "positive":
-                num_positive += 1
-            elif sentiment == "negative":
-                num_negative += 1
-            else:
-                num_neutral += 1
-
-        data_response = {
-            "positive": num_positive,
-            "negative": num_negative,
-            "neutral": num_neutral,
-        }
+        data_response = count_pos_neg_neu_sentences(sentences)
 
         return JsonResponse({"message": data_response}, status=200)
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
-
-
-# def extract_json_string(data):
-#     match = re.search(r"\[([\s\S]*)\]", data)
-#     print(match)
-#     if match:
-#         json_string = match.group(0)  # Lấy phần nằm trong cặp [ ]
-#         return json_string
-#     else:
-#         return None
 
 
 def extract_json_string(data):
@@ -253,23 +227,8 @@ def analyze_json_file(request):
         key_word = "review"
         texts = [json_data[i][key_word] for i in range(len(json_data))]
 
-        num_positive = 0
-        num_negative = 0
-        num_neutral = 0
-        for sentence in texts:
-            sentiment = sentiment_a_sentence(sentence)
-            if sentiment == "positive":
-                num_positive += 1
-            elif sentiment == "negative":
-                num_negative += 1
-            else:
-                num_neutral += 1
+        data_response = count_pos_neg_neu_sentences(texts)
 
-        data_response = {
-            "positive": num_positive,
-            "negative": num_negative,
-            "neutral": num_neutral,
-        }
         return JsonResponse({"message": data_response}, status=200)
     else:
         return JsonResponse(
@@ -308,23 +267,7 @@ def analyze_csv_file(request):
             key_word = "product_description"
             texts = df[key_word].tolist()
 
-            num_positive = 0
-            num_negative = 0
-            num_neutral = 0
-            for sentence in texts:
-                sentiment = sentiment_a_sentence(sentence)
-                if sentiment == "positive":
-                    num_positive += 1
-                elif sentiment == "negative":
-                    num_negative += 1
-                else:
-                    num_neutral += 1
-
-            data_response = {
-                "positive": num_positive,
-                "negative": num_negative,
-                "neutral": num_neutral,
-            }
+            data_response = count_pos_neg_neu_sentences(texts)
 
             return JsonResponse({"message": data_response}, status=200)
         except Exception as e:
@@ -517,7 +460,7 @@ def static_all_comments_on_post(request):
             num_negative = 0
             num_neutral = 0
             for sentence in texts:
-                sentiment = sentiment_each_sentence(sentence)
+                sentiment = sentiment_a_sentence(sentence)
                 if sentiment == "positive":
                     num_positive += 1
                 elif sentiment == "negative":

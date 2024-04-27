@@ -45,3 +45,39 @@ def sentiment_a_sentence(sentence):
     sentiment = response.choices[0].message.content.strip().lower()
 
     return sentiment
+
+
+def sentiment_basedaspect_a_sentence(sentence):
+    prompt = f"""You are trained to analyze and extract sentiment based-aspect opinion pairs from the given text. \nI want result has performance: \"Aspect: .....\" , \"Opinion: ......\" , \"Sentiment: positive, negative or neutral\". If you do not enough information about the aspect, sentiment is \"not sure\"\n\n\n{sentence}"""
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=1.15,
+        max_tokens=676,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0,
+    )
+    data_response = response.choices[0].message.content
+    print(data_response)
+    return data_response
+
+
+def count_pos_neg_neu_sentences(sentences):
+    num_positive = 0
+    num_negative = 0
+    num_neutral = 0
+    for sentence in sentences:
+        sentiment = sentiment_a_sentence(sentence)
+        if sentiment == "positive":
+            num_positive += 1
+        elif sentiment == "negative":
+            num_negative += 1
+        else:
+            num_neutral += 1
+    data_response = {
+        "positive": num_positive,
+        "negative": num_negative,
+        "neutral": num_neutral,
+    }
+    return data_response
