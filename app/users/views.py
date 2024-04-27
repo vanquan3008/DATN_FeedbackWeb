@@ -17,7 +17,11 @@ import openai
 from openai import OpenAI
 from .serializers import UserSerializer
 
-from models.views import sentiment_a_sentence, count_pos_neg_neu_sentences
+from models.views import (
+    sentiment_a_sentence,
+    count_pos_neg_neu_sentences,
+    sentiment_basedaspect_a_sentence,
+)
 
 load_dotenv()
 API_SECRET_KEY = os.getenv("api_gpt_key")
@@ -484,6 +488,21 @@ def static_all_comments_on_post(request):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+
+@csrf_exempt
+def analyze_detail_text(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        text = data["text"]
+        print(text)
+        detail_sentiment = sentiment_basedaspect_a_sentence(text)
+
+        return JsonResponse({"message": detail_sentiment}, status=200)
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
