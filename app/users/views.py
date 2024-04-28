@@ -135,7 +135,7 @@ def extract_detail_basedaspect_from_response(json_data):
             # Xử lý các khóa có giá trị là danh sách
             for item in value:
                 # Duyệt qua từng mục trong danh sách
-                item_text = f"'sentence analyze': '{item['sentence analyze']}', 'sentiment': '{item['sentiment']}', 'aspect': '{item['aspect']}', 'opinion': '{item['opinion']}'"  # Tạo chuỗi văn bản từ từ điển mục
+                item_text = f"'sentence analyze': '{item['sentence analyze']}', 'sentiment': '{item['sentiment']}', 'aspect': '{item['aspect']}', 'opinion': '{item['opinion']}'"
                 text_data += f"{{{item_text}}}\n"
             text_data += "\n"
         else:
@@ -149,25 +149,28 @@ def analyze_text(request):
         data = json.loads(request.body.decode("utf-8"))
         text = data["text"]
         user_id = data["user_id"]
-        # print(text)
-        sentiment = sentiment_a_sentence(text)
         detail_sentiment = json.loads(sentiment_basedaspect_a_sentence(text))
-        detail_sentiment = extract_detail_basedaspect_from_response(detail_sentiment)
         print(detail_sentiment)
-
+        detail_sentiment = extract_detail_basedaspect_from_response(detail_sentiment)
+        sentiment = ""
         if user_id:
+            try:
+                user_instance = User.objects.get(pk=user_id)
+            except User.DoesNotExist:
+                return JsonResponse({"error": "User not found"}, status=404)
             time_save = datetime.datetime.now()
             result_text = Result_text.objects.create(
-                user=user_id,
+                user_id=user_instance,
                 text_content=text,
                 sentiment=sentiment,
                 date_save=time_save,
-                detail_sentiment=json.dumps(
-                    detail_sentiment
-                ),  # Lưu dưới dạng chuỗi JSON
+                # detail_sentiment=json.dumps(
+                #     detail_sentiment
+                # ),  # Lưu dưới dạng chuỗi JSON
+                detail_sentiment=detail_sentiment,
             )
             result_text.save()
-
+        sentiment = sentiment_a_sentence(text)
         return JsonResponse({"message": sentiment}, status=200)
     else:
         return JsonResponse(

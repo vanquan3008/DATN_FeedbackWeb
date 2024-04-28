@@ -24,10 +24,7 @@ client = OpenAI(api_key=openai.api_key)
 
 
 def sentiment_a_sentence(sentence):
-    prompt = f"""You are trained to analyze and detect the sentiment of the given text.
-    If you are unsure of an answer, you can say "not sure" and recommend the user review manually.
-
-    Analyze the following text and determine if the sentiment is: Positive, Negative, or Neutral.
+    prompt = f"""You are trained to analyze and detect the sentiment of the given text.\n    If you are unsure of an answer, you can say \"not sure\" and recommend the user review manually.\n\n    i want output sentiment only are one word: Positive, Negative,Neutral.\n\n
     {sentence}"""
 
     # Call the OpenAI API to generate a response
@@ -37,18 +34,30 @@ def sentiment_a_sentence(sentence):
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt},
         ],
-        max_tokens=1,  # Limit response to a single word
-        temperature=0,  # Keep response consistent
+        temperature=1,
+        max_tokens=256,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0,
     )
 
     # Extract the sentiment from the response
+    print(response)
     sentiment = response.choices[0].message.content.strip().lower()
-
     return sentiment
 
 
 def sentiment_basedaspect_a_sentence(sentence):
-    prompt = f"""You are trained to analyze and extract sentiment based-aspect opinion pairs from the given text. \nI want result has performance: this is json format only include\n\"sentence analyze\":\"part of sentence that you analyze aspect and sentiment\",\"sentiment\": \"sentiment\",\"aspect\": \"aspect\",\"opinion\":\"opinion\"\n\n\n{sentence}"""
+    prompt = """You are trained to analyze and extract sentiment based-aspect opinion pairs from the given text. I want result has performance: this is json format only include
+\"sentence analyze\":\"part of sentence that you analyze aspect and sentiment\",\"sentiment\": \"sentiment\",\"aspect\": \"aspect\",\"opinion\":\"opinion\"
+I have many note: sentiment only are  positive, negative, neutral. The important that There only are in results: [ ]. For example architecture for json: { "results": [{ "sentence analyze": "this product is low battery","sentiment":"negative","aspect": "battery","opinion": "low"},{ "sentence analyze": "I love the product very much",
+      "sentiment": "positive",
+      "aspect": "product",
+      "opinion": "love"
+    }, {"sentence analyze": "my wife do not like it","sentiment": "negative","aspect": "product", "opinion": "not like"},
+    { "sentence analyze": "It is beautiful",  "sentiment": "positive","aspect": "product","opinion": "beautiful" },{"sentence analyze": "I regret to this","sentiment": "negative", "aspect": "product", "opinion": "regret"},]}
+"""
+    prompt += sentence
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
@@ -59,6 +68,7 @@ def sentiment_basedaspect_a_sentence(sentence):
         presence_penalty=0,
     )
     data_response = response.choices[0].message.content
+    # print(data_response)
     return data_response
 
 
