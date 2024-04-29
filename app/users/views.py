@@ -150,7 +150,6 @@ def analyze_text(request):
         text = data["text"]
         user_id = data["user_id"]
         detail_sentiment = json.loads(sentiment_basedaspect_a_sentence(text))
-        print(detail_sentiment)
         detail_sentiment = extract_detail_basedaspect_from_response(detail_sentiment)
         sentiment = ""
         if user_id:
@@ -164,9 +163,6 @@ def analyze_text(request):
                 text_content=text,
                 sentiment=sentiment,
                 date_save=time_save,
-                # detail_sentiment=json.dumps(
-                #     detail_sentiment
-                # ),  # Lưu dưới dạng chuỗi JSON
                 detail_sentiment=detail_sentiment,
             )
             result_text.save()
@@ -178,12 +174,39 @@ def analyze_text(request):
         )
 
 
+
+@csrf_exempt
+def get_list_history_sentiment(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        user_id = data["user_id"]
+        user = User.objects.filter(user_id=user_id)
+        if  user.exists() :
+            listHistory = Result_text.objects.filter(user_id = user_id)
+            data = [
+                    {
+                        "id_text" : history.id_text , 
+                        "text_content" : history.text_content,
+                        "date_save" : history.date_save,
+                        "sentiment" : history.sentiment,
+                        "detail_sentiment" : history.detail_sentiment
+                    }
+                    for history in listHistory
+                ]
+            
+            return JsonResponse({"history": data}, status=200)
+        else:
+            return JsonResponse({"message": "Can not find User "}, status=404)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
 @csrf_exempt
 def analyze_detail_text(request):
     if request.method == "POST":
         data = json.loads(request.body.decode("utf-8"))
         text = data["text"]
-        print(text)
         detail_sentiment = sentiment_basedaspect_a_sentence(text)
 
         return JsonResponse({"message": detail_sentiment}, status=200)
