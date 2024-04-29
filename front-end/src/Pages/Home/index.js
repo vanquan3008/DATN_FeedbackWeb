@@ -3,6 +3,7 @@ import {DefaultLayout} from "../../Components/Layouts/DefaultLayout.js";
 // Rechard
 import { ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import axios from "axios";
+import { useSelector } from "react-redux";
 
 // Data biểu đồ tròn
 
@@ -31,9 +32,22 @@ function Home() {
         setTextLength(textInput.length);
     };
 
-    const sentimentText = async ()=>{
+    const userLogin = useSelector((state)=> state.auth.login.currentUser)
+    const infoUser = userLogin?.userLogin;
+
+
+    const sentimentText = async ()=>{ 
+        let user_id = null;
+        if(infoUser?.user_id){
+            user_id = infoUser.user_id;
+        }
+
         try{
-            const text ={ "text" : textRef.current?.value}
+            const text =
+            {
+                "text" : textRef.current?.value,
+                "user_id" : user_id
+            }
             const generation_stm = await axios.post('http://127.0.0.1:8000/text_analysis',text);
             setTextSentiment(textRef.current?.value)
             setSentimentSuccess(true);
@@ -43,6 +57,7 @@ function Home() {
             setSentimentSuccess(false);
         }
     }
+
 
     const sentimentFile = async ()=>{ 
         const filename = file['0'].name;
@@ -75,7 +90,6 @@ function Home() {
         { name: 'Negative', value: sentimentF?.negative },
         { name: 'Neutral', value: sentimentF?.neutral },
     ]
-    console.log(sentimentSuccess)
     return ( 
        <DefaultLayout type={"Dashboard"}>
             <div className="flex flex-col w-full h-full">
