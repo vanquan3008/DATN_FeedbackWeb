@@ -159,7 +159,7 @@ def analyze_text(request):
                 return JsonResponse({"error": "User not found"}, status=404)
             time_save = datetime.datetime.now()
             result_text = Result_text.objects.create(
-                user_id=user_instance,
+                user=user_instance,
                 text_content=text,
                 sentiment=sentiment,
                 date_save=time_save,
@@ -182,7 +182,7 @@ def get_list_history_sentiment(request):
         user_id = data["user_id"]
         user = User.objects.filter(user_id=user_id)
         if  user.exists() :
-            listHistory = Result_text.objects.filter(user_id = user_id)
+            listHistory = Result_text.objects.filter(user = user_id)
             data = [
                     {
                         "id_text" : history.id_text , 
@@ -440,7 +440,7 @@ def get_all_post_by_userid(request):
         data = json.loads(request.body)
         try:
             r_user_id = data.get("user_id")
-            user_posts = Post.objects.filter(user_id=r_user_id)
+            user_posts = Post.objects.filter(user=r_user_id)
             if not user_posts.exists():
                 return JsonResponse({"error": "Do not have user id"}, status=404)
             else:

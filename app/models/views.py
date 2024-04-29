@@ -42,7 +42,6 @@ def sentiment_a_sentence(sentence):
     )
 
     # Extract the sentiment from the response
-    print(response)
     sentiment = response.choices[0].message.content.strip().lower()
     return sentiment
 
