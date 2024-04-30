@@ -18,7 +18,7 @@ urlpatterns = [
     # Comment
     path("get_all_comments_on_post", views.get_all_comments_on_post),
     path("get_sentiment_comments_on_post", views.static_all_comments_on_post),
-    path("get_list_history_sentiment", views.get_list_history_sentiment),
+    path("get_list_history_sentiment/", views.get_list_history_sentiment , name='page'),
     # Based-aspect level
     path("text_detail_analysis", views.analyze_detail_text),
 ]
