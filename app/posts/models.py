@@ -1,6 +1,8 @@
 from django.db import models
 from users.models import User
 from django.utils import timezone
+
+
 # Create your models here.
 class Post(models.Model):
     id_post = models.AutoField(primary_key=True)
@@ -11,7 +13,8 @@ class Post(models.Model):
     image_content_url = models.URLField(max_length=200, null=True, blank=True)
     list_likes = models.TextField(null=True, blank=True)
     sentiment = models.TextField(null=True, blank=True)
-    
+
+
 # class Detail_post(models.Model):
 #     post = models.ForeignKey(Post, on_delete=models.CASCADE)
 #     user= models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id")

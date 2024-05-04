@@ -13,12 +13,15 @@ import os
 from dotenv import load_dotenv
 import openai
 from openai import OpenAI
+from django.core.paginator import Paginator
+
 # Models
 from comments.models import Detail_post
 from users.models import User
-from posts.models import Post , Report , Result_file , Result_text
+from posts.models import Post, Report, Result_file, Result_text
 
 from users.serializers import UserSerializer
+
 # Create your views here.
 from models.views import (
     sentiment_a_sentence,
@@ -27,33 +30,6 @@ from models.views import (
 )
 
 
-
-@csrf_exempt
-def create_post(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        try:
-            r_user_id = data.get("user_id")
-            r_content_post = data.get("content")
-            r_image_content_url = data.get("image_content_url")
-
-            time_post = datetime.datetime.now()
-
-            Post.objects.create(
-                user=User.objects.get(user_id=r_user_id),
-                content_post=r_content_post,
-                image_content_url=r_image_content_url,
-                date_post=time_post,
-            )
-            return JsonResponse({"message": "Post status successfully"}, status=200)
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
-
-    else:
-        return JsonResponse(
-            {"error": "Only POST requests are allowed for this endpoint"}, status=500
-        )
-        
 def extract_detail_basedaspect_from_response(json_data):
     text_data = ""
     for key, value in json_data.items():
@@ -67,6 +43,9 @@ def extract_detail_basedaspect_from_response(json_data):
         else:
             pass
     return text_data
+
+
+############### Text Analysis ###############
 
 
 @csrf_exempt
@@ -106,37 +85,38 @@ def get_list_history_sentiment(request):
     if request.method == "POST":
         data = json.loads(request.body.decode("utf-8"))
         page_size = 5
-    
+
         user_id = data["user_id"]
         user = User.objects.filter(user_id=user_id)
         print(user)
-        
-        if user.exists() :
-            listHistory = Result_text.objects.filter(user = user_id)
+
+        if user.exists():
+            listHistory = Result_text.objects.filter(user=user_id)
             # Paginator page
             paginator = Paginator(listHistory, page_size)
-            page = request.GET.get('page' , 1)
+            page = request.GET.get("page", 1)
             page_obj = paginator.get_page(page)
-            
+
             data_loads = [
-                    {
-                        "id_text" : history.id_text , 
-                        "text_content" : history.text_content,
-                        "date_save" : history.date_save,
-                        "sentiment" : history.sentiment,
-                        "detail_sentiment" : history.detail_sentiment
-                    }
-                    for history in page_obj
-                ]
-            
+                {
+                    "id_text": history.id_text,
+                    "text_content": history.text_content,
+                    "date_save": history.date_save,
+                    "sentiment": history.sentiment,
+                    "detail_sentiment": history.detail_sentiment,
+                }
+                for history in page_obj
+            ]
+
             return JsonResponse({"history": data_loads}, status=200)
-        
+
         else:
             return JsonResponse({"message": "Can not find User "}, status=404)
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
+
 
 @csrf_exempt
 def analyze_detail_text(request):
@@ -280,7 +260,34 @@ def analyze_json_file(request):
 ####################################################################
 
 
-############### Handle with Post, Comment ###############
+############### Handle with Post ###############
+
+
+@csrf_exempt
+def create_post(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        try:
+            r_user_id = data.get("user_id")
+            r_content_post = data.get("content")
+            r_image_content_url = data.get("image_content_url")
+
+            time_post = datetime.datetime.now()
+
+            Post.objects.create(
+                user=User.objects.get(user_id=r_user_id),
+                content_post=r_content_post,
+                image_content_url=r_image_content_url,
+                date_post=time_post,
+            )
+            return JsonResponse({"message": "Post status successfully"}, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
 
 
 @csrf_exempt
@@ -313,7 +320,7 @@ def get_all_post(request):
 
     else:
         return JsonResponse(
-            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+            {"error": "Only GET requests are allowed for this endpoint"}, status=500
         )
 
 

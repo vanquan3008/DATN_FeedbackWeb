@@ -13,12 +13,17 @@ import os
 from dotenv import load_dotenv
 import openai
 from openai import OpenAI
+
 # Model
 from .models import Detail_post
 from posts.models import Post
 from users.models import User
-#Selilazer 
+
+# Selilazer
 from users.serializers import UserSerializer
+
+from models.views import count_pos_neg_neu_sentences
+
 
 # Create your views here.
 @csrf_exempt
@@ -35,7 +40,7 @@ def create_comment_post(request):
                 post=Post.objects.get(id_post=r_post_id),
                 user=User.objects.get(user_id=r_user_id),
                 comment_content=r_comment_content,
-                date_comment = time_comment
+                date_comment=time_comment,
             )
             return JsonResponse(
                 {"message": "Comment on status successfully"}, status=200
@@ -47,7 +52,8 @@ def create_comment_post(request):
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
-        
+
+
 @csrf_exempt
 def get_all_comments_on_post(request):
     if request.method == "POST":
@@ -127,4 +133,3 @@ def static_all_comments_on_post(request):
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
-
