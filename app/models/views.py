@@ -138,3 +138,77 @@ def count_pos_neg_neu_sentences(sentences):
         "neutral": num_neutral,
     }
     return data_response
+
+
+def emotion_a_sentence(sentence):
+    prompt = (
+        'You are trained to analyze and detect the emotion of the given text.\n\n    i want output emotion only one of there: angry, joyful, sad, fearful, ashame, pround, elated. And if you do not sure, you can return "not sure". The important is that output has one word.\n'
+        + sentence
+    )
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {
+                "role": "user",
+                "content": prompt,
+            }
+        ],
+        temperature=1,
+        max_tokens=10,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0,
+    )
+    emotion = response.choices[0].message.content
+    return emotion
+
+
+def attitude_a_sentence(sentence):
+    prompt = (
+        'You are trained to analyze and detect the attitude of the given text.\n\n    i want output attitude only one of there: liking, loving, hating, valuing, desiring . And if you do not sure, you can return "not sure". The important is that output has one word.\n'
+        + sentence
+    )
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {
+                "role": "user",
+                "content": prompt,
+            }
+        ],
+        temperature=1,
+        max_tokens=10,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0,
+    )
+    attitude = response.choices[0].message.content.strip().lower()
+    return attitude
+
+
+@csrf_exempt
+def test_model_emotion(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        text = data["text"]
+        detail_sentiment = emotion_a_sentence(text)
+        print(detail_sentiment)
+        return JsonResponse({"message": detail_sentiment}, status=200)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+
+@csrf_exempt
+def test_model_attitude(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        text = data["text"]
+        detail_sentiment = attitude_a_sentence(text)
+
+        return JsonResponse({"message": detail_sentiment}, status=200)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
