@@ -10,7 +10,7 @@ import axios from "axios";
 function CreatePost(
     {
         stateCreatePost,
-        setCreatePost
+        setCreatePost,
         
     }
 ) {
@@ -20,7 +20,7 @@ function CreatePost(
     const wrapRef = useRef();
     const titleRef = useRef();
     const contentRef = useRef();
-    console.log(createPostSuccess);
+    console.log(infoUser);
     // Create post
     const handleCreatePost = async ()=>{
         const createPost ={
@@ -29,7 +29,10 @@ function CreatePost(
             "title": titleRef.current.value,
         }
         try{
-            await axios.post(`http://127.0.0.1:8000/create_post`,createPost);
+            await axios.post(`http://127.0.0.1:8000/posts/create_post`, createPost ,{
+                withCredentials : true, 
+                headers : {token : `Bearer ${userLogin.jwt}`}
+            });
             setCreatePost(false);
             setCreatePostSuccess(true);
             window.location.reload();

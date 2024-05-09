@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { DefaultLayout } from "../../Components/Layouts/DefaultLayout";
 import SentenceHistory from "../../Components/SentenceHistory";
 
@@ -27,6 +28,6 @@ function History() {
                 </div>
         </DefaultLayout>
     );
-}
+};
 
 export default History;

@@ -1,4 +1,4 @@
-import {  useRef, useState } from "react";
+import {  useEffect, useRef, useState } from "react";
 import {DefaultLayout} from "../../Components/Layouts/DefaultLayout.js";
 // Rechard
 import { ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
@@ -19,6 +19,7 @@ function Home() {
     const [sentiment ,setSentiment] = useState("");
     const [textSentiment ,setTextSentiment] = useState("");
     const [sentimentF ,setSentimentF] = useState(null);
+    const [text ,setText] = useState(null);
     const textRef = useRef();
     const [file ,setFile] = useState(null);
 
@@ -35,6 +36,9 @@ function Home() {
     const userLogin = useSelector((state)=> state.auth.login.currentUser)
     const infoUser = userLogin?.userLogin;
 
+    useEffect(()=>{
+        setSentimentSuccess(false);
+    },[options])
 
     const sentimentText = async ()=>{ 
         let user_id = null;
@@ -42,13 +46,14 @@ function Home() {
             user_id = infoUser.user_id;
         }
 
+        setText(textRef.current?.value);
         try{
             const text =
             {
                 "text" : textRef.current?.value,
                 "user_id" : user_id
             }
-            const generation_stm = await axios.post('http://127.0.0.1:8000/text_analysis',text);
+            const generation_stm = await axios.post('http://127.0.0.1:8000/posts/text_analysis',text);
             setTextSentiment(textRef.current?.value)
             setSentimentSuccess(true);
             setSentiment(capitalizeFirstLetter(generation_stm.data.message));
@@ -59,21 +64,21 @@ function Home() {
     }
 
 
-    const sentimentFile = async ()=>{ 
+    const sentimentFile = async()=>{ 
         const filename = file['0'].name;
         const extension = filename.split('.').pop();
         try{
            
             if(extension === 'txt'){
-                const generation_stm = await axios.post('http://127.0.0.1:8000/txt_analysis',file);
+                const generation_stm = await axios.post('http://127.0.0.1:8000/posts/txt_analysis',file);
                 setSentimentF(generation_stm.data.message)
             }
             else if(extension === 'json'){
-                const generation_stm = await axios.post('http://127.0.0.1:8000/json_analysis',file);
+                const generation_stm = await axios.post('http://127.0.0.1:8000/posts/json_analysis',file);
                 setSentimentF(generation_stm.data.message)
             }
             else if(extension === 'csv'){
-                const generation_stm = await axios.post('http://127.0.0.1:8000/csv_analysis',file);
+                const generation_stm = await axios.post('http://127.0.0.1:8000/posts/csv_analysis',file);
                 setSentimentF(generation_stm.data.message)
             }
             setSentimentSuccess(true);
@@ -138,42 +143,47 @@ function Home() {
                                        <label className="border-b-2 font-semibold text-sky-500"> Overview</label>
                                     </div>
                                     <div>{
-                                        options === "textarea" ? <div>
+                                        options === "textarea" ?
+                                        <div>
                                             {textSentiment ?
-                                            <div className="flex flex-col ml-8 pl-12 py-8">
-                                                <div className="text-2xl text-sky-500 font-semibold ">Sentence</div>
-                                                <span className="text-xl p-4  ml-4 font-normal">{textRef.current.value}</span>
-                                            </div>:<div className="flex justify-center font-bold text-center text-2xl text-sky-500">No Content</div>
-                                            }
-                                            {sentiment ?
-                                            <div className={`flex flex-col ml-8 pl-12 `}>
-                                                <div className="text-2xl text-sky-500 font-semibold ">Sentiment</div>
-                                                <div className="text-xl p-4 ml-4 font-normal">{sentiment}</div>
-                                            </div>:<div></div>
+                                            <>
+                                                <div className="flex flex-col ml-8 pl-12 py-8">
+                                                    <div className="text-2xl text-sky-500 font-semibold ">Sentence</div>
+                                                    <span className="text-xl p-4  ml-4 font-normal">{text}</span>
+                                                    </div> <div className={`${sentiment ? "flex flex-col" : "hidden"} ml-8 pl-12 `}>
+                                                    <div className="text-2xl text-sky-500 font-semibold ">Sentiment</div>
+                                                    <div className="text-xl p-4 ml-4 font-normal">{sentiment}</div>
+                                                </div>
+                                            </>
+                                            :
+                                                <div className="flex justify-center font-bold text-center text-2xl text-sky-500">No Content</div>
                                             }
                                         </div> :
-                                        <div className={` flex flex-col  justify-center text-center `}>
-                                        <div>Sentiment Review Chart</div>
-                                            <ResponsiveContainer width="100%" height={300}>
-                                                <PieChart>
-                                                    <Pie
-                                                        data={data}
-                                                        dataKey="value"
-                                                        nameKey="name"
-                                                        cx="50%"
-                                                        cy="50%"
-                                                        outerRadius={80}
-                                                        fill="#8884d8"
-                                                        label
-                                                    >
-                                                        {data.map((entry, index) => (
-                                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                                        ))}
-                                                    </Pie>
-                                                <Legend />
-                                                </PieChart>
-                                            </ResponsiveContainer>
-                                        </div>
+                                        <div>
+                                            <div className={`${file && sentimentSuccess?'hidden':"flex flex-col"} justify-center font-bold text-center text-2xl text-sky-500`}>No Content</div>
+                                            <div className={`${file && sentimentSuccess ?"flex flex-col" :'hidden'} flex flex-col  justify-center text-center `}>
+                                                <div>Sentiment Review Chart</div>
+                                                    <ResponsiveContainer width="100%" height={300}>
+                                                        <PieChart>
+                                                            <Pie
+                                                                data={data}
+                                                                dataKey="value"
+                                                                nameKey="name"
+                                                                cx="50%"
+                                                                cy="50%"
+                                                                outerRadius={80}
+                                                                fill="#8884d8"
+                                                                label
+                                                            >
+                                                                {data.map((entry, index) => (
+                                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                                ))}
+                                                            </Pie>
+                                                        <Legend />
+                                                        </PieChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                            </div>
                                         }
                                     </div>
                                 </div>

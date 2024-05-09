@@ -25,7 +25,7 @@ function DetailPost(
             "id_post": data.data?.id_post,
             "comment_content" : textComment
         }
-        await axios.post(`http://127.0.0.1:8000/post_comment_to_status`,comment);
+        await axios.post(`http://127.0.0.1:8000/comments/create_comment_post`,comment);
         window.location.reload();
     }
 
@@ -36,10 +36,10 @@ function DetailPost(
                 const  idPost =  {
                     "id_post" : data.data?.id_post
                 }
-                const comment = await axios.post(`http://127.0.0.1:8000/get_all_comments_on_post`,idPost);
+                const comment = await axios.post(`http://127.0.0.1:8000/comments/get_all_comments_on_post`,idPost);
                 setListComment(comment.data.comments)
 
-                const sentiment = await axios.post(`http://127.0.0.1:8000/get_sentiment_comments_on_post`,idPost);
+                const sentiment = await axios.post(`http://127.0.0.1:8000/posts/get_sentiment_comments_on_post`,idPost);
                 setSentimentPost(sentiment.data.comments)
             }
             getComment();
@@ -60,10 +60,14 @@ function DetailPost(
     const deletePost =  async ()=>{
         
         const  idPost =  {
-            "id_post" : data.data?.id_post
+            "id_post" : data.data?.id_post,
+            "user_id": infoUser.user_id
         }
         
-        await axios.post(`http://127.0.0.1:8000/delete_post`,idPost);
+        await axios.post(`http://127.0.0.1:8000/posts/delete_post`,idPost , {
+            withCredentials : true, 
+            headers : {token : `Bearer ${userLogin.jwt}`}
+        });
         window.location.reload();
        
     }

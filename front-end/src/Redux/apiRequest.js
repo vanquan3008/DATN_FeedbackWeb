@@ -18,11 +18,16 @@ export const loginUser = async (user , dispatch ,navigator) =>{
 }
 
 
-export const logOut = async ( dispatch ,navigate )=>{
+export const logOut = async ( dispatch ,navigate ,infoUser )=>{
     dispatch(logoutStart())
     try{
-        await axios.get('http://localhost:8000/logout',{
-         withCredentials : true});
+        await axios.post('http://localhost:8000/logout',
+            { "email" : infoUser.userLogin.email } ,
+            {
+                withCredentials : true, 
+                headers : {token : `Bearer ${infoUser.jwt}`}
+            } 
+        );
         dispatch(logoutSuccess())
         navigate('/')
     }

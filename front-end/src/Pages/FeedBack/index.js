@@ -15,7 +15,7 @@ function FeedBack() {
 
     useEffect(()=>{
         const renderPost = async () =>{
-            const listPost = await axios.get('http://127.0.0.1:8000/get_all_post');
+            const listPost = await axios.get('http://127.0.0.1:8000/posts/get_all_post');
             setListPost(listPost.data.list_post);
         };
         renderPost();

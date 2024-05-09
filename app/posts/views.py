@@ -18,8 +18,11 @@ from django.core.paginator import Paginator
 # Models
 from comments.models import Detail_post
 from users.models import User
-from posts.models import Post, Report, Result_file, Result_text
-
+from posts.models import Post, Report
+from histories.models import Result_file ,Result_text
+from users.permissions import (
+    verify_token
+)
 from users.serializers import UserSerializer
 
 # Create your views here.
@@ -56,7 +59,7 @@ def analyze_text(request):
         user_id = data["user_id"]
         detail_sentiment = json.loads(sentiment_basedaspect_a_sentence(text))
         detail_sentiment = extract_detail_basedaspect_from_response(detail_sentiment)
-        sentiment = ""
+        sentiment = sentiment_a_sentence(text)
         if user_id:
             try:
                 user_instance = User.objects.get(pk=user_id)
@@ -71,51 +74,12 @@ def analyze_text(request):
                 detail_sentiment=detail_sentiment,
             )
             result_text.save()
-        sentiment = sentiment_a_sentence(text)
         return JsonResponse({"message": sentiment}, status=200)
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
 
-
-# http://127.0.0.1:8000/get_list_history_sentiment/?page=2
-@csrf_exempt
-def get_list_history_sentiment(request):
-    if request.method == "POST":
-        data = json.loads(request.body.decode("utf-8"))
-        page_size = 5
-
-        user_id = data["user_id"]
-        user = User.objects.filter(user_id=user_id)
-        print(user)
-
-        if user.exists():
-            listHistory = Result_text.objects.filter(user=user_id)
-            # Paginator page
-            paginator = Paginator(listHistory, page_size)
-            page = request.GET.get("page", 1)
-            page_obj = paginator.get_page(page)
-
-            data_loads = [
-                {
-                    "id_text": history.id_text,
-                    "text_content": history.text_content,
-                    "date_save": history.date_save,
-                    "sentiment": history.sentiment,
-                    "detail_sentiment": history.detail_sentiment,
-                }
-                for history in page_obj
-            ]
-
-            return JsonResponse({"history": data_loads}, status=200)
-
-        else:
-            return JsonResponse({"message": "Can not find User "}, status=404)
-    else:
-        return JsonResponse(
-            {"error": "Only POST requests are allowed for this endpoint"}, status=500
-        )
 
 
 @csrf_exempt
@@ -130,10 +94,6 @@ def analyze_detail_text(request):
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
-
-
-####################################################################
-
 
 ############## Txt file analysis ###############
 
@@ -161,9 +121,6 @@ def analyze_txt_file(request):
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
-
-
-####################################################################
 
 
 ############### CSV file Analysis ###############
@@ -211,9 +168,6 @@ def analyze_csv_file(request):
         )
 
 
-####################################################################
-
-
 ############### Json file Analysis ###############
 
 
@@ -257,7 +211,6 @@ def analyze_json_file(request):
         )
 
 
-####################################################################
 
 
 ############### Handle with Post ###############
@@ -270,17 +223,29 @@ def create_post(request):
         try:
             r_user_id = data.get("user_id")
             r_content_post = data.get("content")
+            r_title_post = data.get("title")
             r_image_content_url = data.get("image_content_url")
-
-            time_post = datetime.datetime.now()
-
-            Post.objects.create(
-                user=User.objects.get(user_id=r_user_id),
-                content_post=r_content_post,
-                image_content_url=r_image_content_url,
-                date_post=time_post,
-            )
-            return JsonResponse({"message": "Post status successfully"}, status=200)
+            user_created = User.objects.get(user_id=r_user_id)
+            
+            authorization_header = request.headers.get("token")
+            
+            
+            if verify_token(authorization_header , user_created.email):
+                time_post = datetime.datetime.now()
+                
+                Post.objects.create(
+                    user=User.objects.get(user_id=r_user_id),
+                    content_post=r_content_post,
+                    title_post=r_title_post,
+                    image_content_url=r_image_content_url,
+                    date_post=time_post,
+                )
+                
+                response = JsonResponse({"message": "Post status successfully"}, status=200)
+            else : 
+                response = JsonResponse({"message": "You are not Authentication"}, status=403)
+            
+            return response
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 
@@ -328,23 +293,32 @@ def get_all_post(request):
 def get_all_post_by_userid(request):
     if request.method == "POST":
         data = json.loads(request.body)
+        authorization_header = request.headers.get("token")
         try:
             r_user_id = data.get("user_id")
+            user = User.objects.get(user_id=r_user_id)
             user_posts = Post.objects.filter(user=r_user_id)
+            
             if not user_posts.exists():
                 return JsonResponse({"error": "Do not have user id"}, status=404)
             else:
-                posts_data = [
-                    {
-                        "id_post": post.id_post,
-                        "content": post.content_post,
-                        "date_post": post.date_post,
-                        "image_content_url": post.image_content_url,
-                    }
-                    for post in user_posts
-                ]
+                if verify_token(authorization_header , user.email) : 
+                    posts_data = [
+                        {
+                            "id_post": post.id_post,
+                            "content": post.content_post,
+                            "date_post": post.date_post,
+                            "image_content_url": post.image_content_url,
+                        }
+                        for post in user_posts
+                    ]
+                    res = JsonResponse({"message": posts_data}, status=200)
+                else : 
+                    res = JsonResponse(
+                        {"error" :"You are not Authentication"} ,status = 403 
+                    )
 
-                return JsonResponse({"message": posts_data}, status=200)
+                return res
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 
@@ -358,20 +332,28 @@ def get_all_post_by_userid(request):
 def delete_post(request):
     if request.method == "POST":
         data = json.loads(request.body)
+        r_post_id = data.get("id_post")
+        r_user_id = data.get("user_id") 
         try:
-            r_post_id = data.get("id_post")
+            user_delete = User.objects.get(user_id=r_user_id)
+            authorization_header = request.headers.get("token")                 
+            
             if r_post_id is None:
                 raise ValueError("id_post are required")
-
             # Check exist post
             if not Post.objects.filter(id_post=r_post_id).exists():
                 return JsonResponse({"error": "Post not found"}, status=404)
-            post_delete = Post.objects.get(id_post=r_post_id)
-            post_delete.delete()
-            return JsonResponse(
-                {"message": "Delete  post successfully"},
-                status=200,
-            )
+            
+            if verify_token(authorization_header , user_delete.email) : 
+                post_delete = Post.objects.get(id_post=r_post_id)
+                post_delete.delete()
+                res =  JsonResponse(
+                    {"message": "Delete  post successfully"},
+                    status=200,
+                )
+            else : 
+                res = JsonResponse({"message": "Can not authentication user to delete post"}, status=403)
+            return res
 
         except Exception as e:
             return JsonResponse({"Error": str(e)}, status=400)
@@ -398,7 +380,10 @@ def static_all_comments_on_post(request):
             # Get all comment of post
             post_comments = Detail_post.objects.filter(post=r_post_id)
             comments_data = [
-                {"id": comment.comment_id, "content": comment.comment_content}
+                {
+                    "id": comment.comment_id, 
+                    "content": comment.comment_content
+                }
                 for comment in post_comments
             ]
 
