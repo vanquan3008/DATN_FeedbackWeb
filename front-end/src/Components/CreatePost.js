@@ -46,7 +46,7 @@ function CreatePost(
     return ( 
         <div
             ref={wrapRef} 
-            className={`fixed  justify-center text-center items-center top-0 left-0  w-screen h-screen bg-color-background z-auto ${stateCreatePost === true?"flex" :"hidden"}`}
+            className={`fixed ustify-center text-center items-center top-0 left-0  w-screen h-screen bg-color-background z-auto ${stateCreatePost === true?"flex" :"hidden"}`}
             onClick={(e)=>{
                 if(e.target === wrapRef.current){
                     setCreatePost(false);

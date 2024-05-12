@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 // Time
 import Moment from 'react-moment';
+import FormAccess from "./FormAccess";
 
 function DetailPost(
         data,
@@ -14,6 +15,7 @@ function DetailPost(
     const [textComment ,setTextComment] = useState("");
     const [listComment ,setListComment] = useState([]);
     const [sentimentPost ,setSentimentPost] = useState(null);
+    const [deletePost , setDeletePost] = useState(false);
     const userLogin = useSelector((state)=> state.auth.login.currentUser)
     const infoUser = userLogin?.userLogin;
 
@@ -56,22 +58,6 @@ function DetailPost(
         )
     })
 
-    // Delete Post 
-    const deletePost =  async ()=>{
-        
-        const  idPost =  {
-            "id_post" : data.data?.id_post,
-            "user_id": infoUser.user_id
-        }
-        
-        await axios.post(`http://127.0.0.1:8000/posts/delete_post`,idPost , {
-            withCredentials : true, 
-            headers : {token : `Bearer ${userLogin.jwt}`}
-        });
-        window.location.reload();
-       
-    }
-
     return (
         <>{
          data.data  ? 
@@ -110,7 +96,9 @@ function DetailPost(
                                             <div className="p-2 cursor-pointer hover:opacity-60">
                                                 Edit Post
                                             </div>
-                                            <div className="p-2 cursor-pointer hover:opacity-60 " onClick={deletePost} >
+                                            <div className="p-2 cursor-pointer hover:opacity-60 " onClick={()=>{
+                                                setDeletePost(true);
+                                            }} >
                                                 Delete Post
                                             </div>
                                         </div>
@@ -171,6 +159,13 @@ function DetailPost(
                 </div>
             </div>
         }
+
+            <FormAccess 
+                datadelete={data.data?.id_post} 
+                deleteClick={deletePost} 
+                setDelete={setDeletePost}
+                formtype={"post"}
+            ></FormAccess>
         </>
      );
 }

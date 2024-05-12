@@ -50,14 +50,16 @@ function FeedBack() {
                     </div> */}
                     <div className=" w-full h-full bg-white rounded-3xl border-solid border-8">
                         <div className="w-full h-full">
-                            <DetailPost data = {currentPost} setCreatePost={setCreatePost}></DetailPost>
+                            <DetailPost 
+                                data = {currentPost} 
+                                setCreatePost={setCreatePost}>    
+                            </DetailPost>
                         </div>
                     </div>
                 </div>
             </div>
         </DefaultLayout>
         <CreatePost stateCreatePost={createPost} setCreatePost={setCreatePost} >
-
         </CreatePost>
         </div>
     );

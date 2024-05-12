@@ -32,6 +32,9 @@ from models.views import (
     sentiment_basedaspect_a_sentence,
 )
 
+from certifications.certification import (
+    upload_file
+)
 
 def extract_detail_basedaspect_from_response(json_data):
     text_data = ""
@@ -150,7 +153,7 @@ def analyze_csv_file(request):
     if request.method == "POST":
         try:
             data = request.body.decode("utf-8")
-            print(data)
+           
             csv_string = extract_string_csv(data)
             df = pd.read_csv(io.StringIO(csv_string))
 
@@ -197,6 +200,7 @@ def analyze_json_file(request):
     if request.method == "POST":
         data = request.body.decode("utf-8")
         json_string = extract_json_string(data)
+        
         json_data = json.loads(json_string)
 
         key_word = "review"

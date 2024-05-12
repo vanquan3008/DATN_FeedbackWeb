@@ -7,6 +7,7 @@ urlpatterns = [
     path("csv_analysis", views.analyze_csv_file),
     path("text_analysis", views.analyze_text),
     path("txt_analysis", views.analyze_txt_file),
+    
     path("create_post", views.create_post),
     path("get_all_post_by_userid", views.get_all_post_by_userid),
     path("get_all_post", views.get_all_post),

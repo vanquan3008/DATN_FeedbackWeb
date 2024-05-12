@@ -1,21 +1,32 @@
-import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 import axios from "axios";
 import { useEffect ,useState } from "react";
 import { useSelector } from 'react-redux';
 import Moment from 'react-moment';
+import * as React from 'react';
+import Pagination from '@mui/material/Pagination';
+import Stack from '@mui/material/Stack';
+
 
 function capitalizeFirstLetter(str) {
     return str.replace(/\b\w/g, (match) => match.toUpperCase());
 }
 
-function SentenceHistory() {
+function SentenceHistory( {
+    setDataHistoryText,
+    setDelete,
+    setpostCurrent
+    
+}
+) {
     const [pageCurrent ,setPageCurrent] = useState(1);
     const [page ,setPage ] = useState(null);
-    const [listHistory , setlistHistory] = useState([])
-
+    const [listHistory , setlistHistory] = useState([]);
+    // const [postCurrent , setpostCurrent] = useState(null);
     const user = useSelector((state)=> state.auth.login.currentUser)
 
+
+    
     
     useEffect(() => {
         const renderHistory = async ()=>{
@@ -25,15 +36,16 @@ function SentenceHistory() {
             const listPost = await axios.post(`http://127.0.0.1:8000/history/get_list_history_sentiment/?page=${pageCurrent}` ,data);
             setPage(listPost.data.numberPage)
             setlistHistory(listPost.data.history)
+            if(listPost.data.history.length === 0 ){
+                setDataHistoryText(false)
+            }
         }
         renderHistory()
     },[pageCurrent])
 
+    // Render history
 
-    const _listHistory = listHistory.map((cur, index) => {
-        return listHistory[listHistory.length - index - 1];
-    });
-    const renderHistory =  _listHistory.map((his , index)=>{
+    const renderHistory =  listHistory.map((his , index)=>{
         return (
             <div className="flex flex-grow h-12 w-full text-center items-center border-b">
                     <div className="w-1/12 "> {index} </div>
@@ -53,13 +65,22 @@ function SentenceHistory() {
                             <button className="text-white font-semibold text-xs rounded-xl w-16 h-9 bg-sky-500">DETAIL</button>
                         </div>
                         <div className=" w-1/4 flex items-center justify-center  ">
-                            <button className="text-white font-semibold text-xs rounded-xl  w-16 h-9 bg-red-500">DELETE</button>
+                            <button className="text-white font-semibold text-xs rounded-xl  w-16 h-9 bg-red-500" 
+                                onClick={()=>{
+                                    setpostCurrent(his.id_text);
+                                    setDelete(true);
+                                }}
+                            >DELETE</button>
                         </div>
                     </div>
                 </div>
         )
     })
 
+    // Render page
+    const handleChange = (event, value) => {
+        setPageCurrent(value);
+    };
     
     return (
         <div className="w-full h-full flex flex-col ">
@@ -89,15 +110,10 @@ function SentenceHistory() {
                 {/*  */}
                 {renderHistory}
             </div>
-            <div className="h-10 w-full mb-4 flex justify-center items-center">
-               <FontAwesomeIcon icon={faChevronLeft}></FontAwesomeIcon>
-               <div className="px-4 font-normal text-base text-color-basic">
-                1
-               </div>
-               <div className="px-5 font-normal text-base text-color-basic">2</div>
-               <div className="px-5 font-normal text-base text-color-basic">...</div>
-               <div className="px-5 font-normal text-base text-color-basic">5</div>
-               <FontAwesomeIcon icon={faChevronRight}></FontAwesomeIcon>
+            <div className="h-10 w-full  flex justify-center items-center">
+                <Stack spacing={2}>
+                    <Pagination count={page}  color="primary" onChange={handleChange}/>
+                </Stack>
             </div>
         </div>
     );
