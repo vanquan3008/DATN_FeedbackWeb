@@ -7,21 +7,21 @@ import Profile from './Pages/Profile';
 import FeedBack from './Pages/FeedBack';
 import { store } from './Redux/store.js';
 import History from './Pages/History/index.js';
+import DetailSentiment from './Pages/DetailSentiment/index.js';
 
 function App() {
   const user = store.getState().auth.login.currentUser;
-  console.log(user)
   return (
     <BrowserRouter>
       <div className="App">
          <Routes>          
             <Route path="/Register" element={<Register/>}/>
-            <Route path="/" element={<Login/>}/>
+            <Route path="/" element={user?<Home/>:<Login/>}/>
             <Route path="/Home" element={<Home/>}/>
             <Route path="/History" element={user?<History/>:<Home/>}/>
             <Route path="/Profile" element={user?<Profile/>:<Home/>}/>
             <Route path="/FeedBack" element={user?<FeedBack/>:<Home/>}/>
-            
+            <Route path="/Details" element={user?<DetailSentiment/>:<Home/>}/>
           </Routes>
       </div>
    </BrowserRouter>

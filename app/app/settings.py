@@ -47,8 +47,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "corsheaders",
+    
     "users",
     "models",
+    "posts",
+    "comments",
+    "histories",
 ]
 
 MIDDLEWARE = [
@@ -72,13 +77,20 @@ ORS_ALLOW_ALL_ORIGINS = (
     True  # If this is used then `CORS_ALLOWED_ORIGINS` will not have any effect
 )
 CORS_ALLOW_CREDENTIALS = True
+
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-]  # If this is used, then not need to use `CORS_ALLOW_ALL_ORIGINS = True`
+] 
 CORS_ALLOWED_ORIGIN_REGEXES = [
     "http://localhost:3000",
 ]
-
+CORS_ALLOW_HEADERS = [
+    'token',
+    'Content-Type',
+    'Authorization',
+    # Add other headers as needed
+]
 
 ROOT_URLCONF = "app.urls"
 

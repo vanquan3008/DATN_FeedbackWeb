@@ -15,7 +15,7 @@ function FeedBack() {
 
     useEffect(()=>{
         const renderPost = async () =>{
-            const listPost = await axios.get('http://127.0.0.1:8000/get_all_post');
+            const listPost = await axios.get('http://127.0.0.1:8000/posts/get_all_post');
             setListPost(listPost.data.list_post);
         };
         renderPost();
@@ -50,14 +50,16 @@ function FeedBack() {
                     </div> */}
                     <div className=" w-full h-full bg-white rounded-3xl border-solid border-8">
                         <div className="w-full h-full">
-                            <DetailPost data = {currentPost} setCreatePost={setCreatePost}></DetailPost>
+                            <DetailPost 
+                                data = {currentPost} 
+                                setCreatePost={setCreatePost}>    
+                            </DetailPost>
                         </div>
                     </div>
                 </div>
             </div>
         </DefaultLayout>
         <CreatePost stateCreatePost={createPost} setCreatePost={setCreatePost} >
-
         </CreatePost>
         </div>
     );

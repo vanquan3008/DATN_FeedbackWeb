@@ -10,7 +10,7 @@ import axios from "axios";
 function CreatePost(
     {
         stateCreatePost,
-        setCreatePost
+        setCreatePost,
         
     }
 ) {
@@ -20,7 +20,7 @@ function CreatePost(
     const wrapRef = useRef();
     const titleRef = useRef();
     const contentRef = useRef();
-    console.log(createPostSuccess);
+
     // Create post
     const handleCreatePost = async ()=>{
         const createPost ={
@@ -29,7 +29,10 @@ function CreatePost(
             "title": titleRef.current.value,
         }
         try{
-            await axios.post(`http://127.0.0.1:8000/create_post`,createPost);
+            await axios.post(`http://127.0.0.1:8000/posts/create_post`, createPost ,{
+                withCredentials : true, 
+                headers : {token : `Bearer ${userLogin.jwt}`}
+            });
             setCreatePost(false);
             setCreatePostSuccess(true);
             window.location.reload();
@@ -43,7 +46,7 @@ function CreatePost(
     return ( 
         <div
             ref={wrapRef} 
-            className={`fixed  justify-center text-center items-center top-0 left-0  w-screen h-screen bg-color-background z-auto ${stateCreatePost === true?"flex" :"hidden"}`}
+            className={`fixed justify-center text-center items-center top-0 left-0  w-screen h-screen bg-color-background z-auto ${stateCreatePost === true?"flex" :"hidden"}`}
             onClick={(e)=>{
                 if(e.target === wrapRef.current){
                     setCreatePost(false);

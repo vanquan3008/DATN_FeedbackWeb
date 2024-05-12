@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 // Time
 import Moment from 'react-moment';
+import FormAccess from "./FormAccess";
 
 function DetailPost(
         data,
@@ -14,6 +15,7 @@ function DetailPost(
     const [textComment ,setTextComment] = useState("");
     const [listComment ,setListComment] = useState([]);
     const [sentimentPost ,setSentimentPost] = useState(null);
+    const [deletePost , setDeletePost] = useState(false);
     const userLogin = useSelector((state)=> state.auth.login.currentUser)
     const infoUser = userLogin?.userLogin;
 
@@ -25,7 +27,7 @@ function DetailPost(
             "id_post": data.data?.id_post,
             "comment_content" : textComment
         }
-        await axios.post(`http://127.0.0.1:8000/post_comment_to_status`,comment);
+        await axios.post(`http://127.0.0.1:8000/comments/create_comment_post`,comment);
         window.location.reload();
     }
 
@@ -36,10 +38,10 @@ function DetailPost(
                 const  idPost =  {
                     "id_post" : data.data?.id_post
                 }
-                const comment = await axios.post(`http://127.0.0.1:8000/get_all_comments_on_post`,idPost);
+                const comment = await axios.post(`http://127.0.0.1:8000/comments/get_all_comments_on_post`,idPost);
                 setListComment(comment.data.comments)
 
-                const sentiment = await axios.post(`http://127.0.0.1:8000/get_sentiment_comments_on_post`,idPost);
+                const sentiment = await axios.post(`http://127.0.0.1:8000/posts/get_sentiment_comments_on_post`,idPost);
                 setSentimentPost(sentiment.data.comments)
             }
             getComment();
@@ -55,18 +57,6 @@ function DetailPost(
             <Comment  data={comment}></Comment>
         )
     })
-
-    // Delete Post 
-    const deletePost =  async ()=>{
-        
-        const  idPost =  {
-            "id_post" : data.data?.id_post
-        }
-        
-        await axios.post(`http://127.0.0.1:8000/delete_post`,idPost);
-        window.location.reload();
-       
-    }
 
     return (
         <>{
@@ -106,7 +96,9 @@ function DetailPost(
                                             <div className="p-2 cursor-pointer hover:opacity-60">
                                                 Edit Post
                                             </div>
-                                            <div className="p-2 cursor-pointer hover:opacity-60 " onClick={deletePost} >
+                                            <div className="p-2 cursor-pointer hover:opacity-60 " onClick={()=>{
+                                                setDeletePost(true);
+                                            }} >
                                                 Delete Post
                                             </div>
                                         </div>
@@ -167,6 +159,13 @@ function DetailPost(
                 </div>
             </div>
         }
+
+            <FormAccess 
+                datadelete={data.data?.id_post} 
+                deleteClick={deletePost} 
+                setDelete={setDeletePost}
+                formtype={"post"}
+            ></FormAccess>
         </>
      );
 }

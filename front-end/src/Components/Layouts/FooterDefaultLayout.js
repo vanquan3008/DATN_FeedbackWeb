@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function FooterDefaultLayout() {
     return (
-    <div className="flex flex-row justify-between text-sm text-color-basic p-4">
+    <div className="flex flex-row justify-between text-sm text-color-basic p-4 ">
         <div>
             <span>© 2021, made with <FontAwesomeIcon style={{color:"#ff0000"}} icon={faHeart}></FontAwesomeIcon> by NLP Team for a better web.</span>
         </div>

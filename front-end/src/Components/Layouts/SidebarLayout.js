@@ -9,9 +9,9 @@ function Sidebar({type}) {
     )
     const dispatch= useDispatch();
     const navigate = useNavigate();
-
+    
     const handleLogout = (e)=>{
-        logOut(dispatch,navigate)
+        logOut(dispatch,navigate, userLogin)
     }
     return ( 
         <div className="flex flex-col h-full">
