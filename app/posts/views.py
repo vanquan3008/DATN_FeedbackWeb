@@ -28,6 +28,8 @@ from models.views import (
     sentiment_a_sentence,
     count_pos_neg_neu_sentences,
     sentiment_basedaspect_a_sentence,
+    emotion_a_sentence,
+    attitude_a_sentence,
 )
 
 # from certifications.certification import (
@@ -47,6 +49,22 @@ def extract_detail_basedaspect_from_response(json_data):
             text_data += "\n"
         else:
             pass
+    return text_data
+
+
+def extract_detail_emotion_a_sentence(sentences):
+    text_data = ""
+    for sentence in sentences:
+        emotion = emotion_a_sentence(sentence)
+        text_data += f"'sentence': '{sentence}', 'emotion': '{emotion}'\n"
+    return text_data
+
+
+def extract_detail_attitude_a_sentence(sentences):
+    text_data = ""
+    for sentence in sentences:
+        attitude = attitude_a_sentence(sentence)
+        text_data += f"'sentence': '{sentence}', 'attitude': '{attitude}'\n"
     return text_data
 
 
@@ -108,17 +126,54 @@ def extract_txt_string(data):
     )
     end_index = data.find("\r\n\r\n-")
     extracted_string = data[start_index:end_index]
+
     return extracted_string
+
+
+def extract_filename(data):
+    start_index_filename = data.find("filename=") + len("filename=")
+    end_index_filename = data.find("\nContent-Type")
+    filename = data[start_index_filename:end_index_filename]
+    filename = filename.split("\\")[-1]
+    filename = filename.strip('"').strip()
+    filename = filename.rstrip('"')
+    return filename
 
 
 @csrf_exempt
 def analyze_txt_file(request):
     if request.method == "POST":
         data = request.body.decode("utf-8")
+        user_id = request.POST.get("user_id")
         txt_data = extract_txt_string(data).split("\r\n")
+        filename = extract_filename(data)
         sentences = [sentence for sentence in txt_data if len(sentence) > 0]
 
+        # based_aspect_sentiment = sentiment_basedaspect_a_sentence(sentences)
+        emotion_sentiment = extract_detail_emotion_a_sentence(sentences)
+        attitude_sentiment = extract_detail_attitude_a_sentence(sentences)
         data_response = count_pos_neg_neu_sentences(sentences)
+        pos_count = data_response["positive"]
+        neg_count = data_response["negative"]
+        neu_count = data_response["neutral"]
+        if user_id:
+            try:
+                user_instance = User.objects.get(pk=user_id)
+
+            except User.DoesNotExist:
+                return JsonResponse({"error": "User not found"}, status=404)
+            time_save = datetime.datetime.now()
+            result_file = Result_file.objects.create(
+                user=user_instance,
+                file_name=filename,
+                date_save=time_save,
+                emotion_sentiment=emotion_sentiment,
+                attitude_sentiment=attitude_sentiment,
+                number_pos=pos_count,
+                number_neg=neg_count,
+                number_neu=neu_count,
+            )
+            result_file.save()
 
         return JsonResponse({"message": data_response}, status=200)
     else:
@@ -154,16 +209,41 @@ def analyze_csv_file(request):
     if request.method == "POST":
         try:
             data = request.body.decode("utf-8")
-
+            user_id = request.POST.get("user_id")
+            filename = extract_filename(data)
             csv_string = extract_string_csv(data)
             df = pd.read_csv(io.StringIO(csv_string))
 
             key_word = "product_description"
             texts = df[key_word].tolist()
 
+            emotion_sentiment = extract_detail_emotion_a_sentence(texts)
+            attitude_sentiment = extract_detail_attitude_a_sentence(texts)
             data_response = count_pos_neg_neu_sentences(texts)
+            pos_count = data_response["positive"]
+            neg_count = data_response["negative"]
+            neu_count = data_response["neutral"]
 
-            return JsonResponse({"message": data_response}, status=200)
+            if user_id:
+                try:
+                    user_instance = User.objects.get(pk=user_id)
+
+                except User.DoesNotExist:
+                    return JsonResponse({"error": "User not found"}, status=404)
+                time_save = datetime.datetime.now()
+                result_file = Result_file.objects.create(
+                    user=user_instance,
+                    file_name=filename,
+                    date_save=time_save,
+                    emotion_sentiment=emotion_sentiment,
+                    attitude_sentiment=attitude_sentiment,
+                    number_pos=pos_count,
+                    number_neg=neg_count,
+                    number_neu=neu_count,
+                )
+                result_file.save()
+
+            return JsonResponse({"message": attitude_sentiment}, status=200)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
     else:
@@ -200,6 +280,8 @@ def extract_json_string(data):
 def analyze_json_file(request):
     if request.method == "POST":
         data = request.body.decode("utf-8")
+        user_id = request.POST.get("user_id")
+        filename = extract_filename(data)
         json_string = extract_json_string(data)
 
         json_data = json.loads(json_string)
@@ -207,7 +289,31 @@ def analyze_json_file(request):
         key_word = "review"
         texts = [json_data[i][key_word] for i in range(len(json_data))]
 
+        emotion_sentiment = extract_detail_emotion_a_sentence(texts)
+        attitude_sentiment = extract_detail_attitude_a_sentence(texts)
         data_response = count_pos_neg_neu_sentences(texts)
+        pos_count = data_response["positive"]
+        neg_count = data_response["negative"]
+        neu_count = data_response["neutral"]
+
+        if user_id:
+            try:
+                user_instance = User.objects.get(pk=user_id)
+
+            except User.DoesNotExist:
+                return JsonResponse({"error": "User not found"}, status=404)
+            time_save = datetime.datetime.now()
+            result_file = Result_file.objects.create(
+                user=user_instance,
+                file_name=filename,
+                date_save=time_save,
+                emotion_sentiment=emotion_sentiment,
+                attitude_sentiment=attitude_sentiment,
+                number_pos=pos_count,
+                number_neg=neg_count,
+                number_neu=neu_count,
+            )
+            result_file.save()
 
         return JsonResponse({"message": data_response}, status=200)
     else:
