@@ -2,7 +2,7 @@ from . import views
 from django.urls import path
 
 urlpatterns = [
-    path("text_sentiment", views.sentiment_analysis),
-    path("json_file_sentiment", views.sentiment_file_json_analysis),
-    path("csv_file_sentiment", views.sentiment_file_csv_analysis),
+    path("response_attitude", views.test_model_attitude),
+    path("response_emotion", views.test_model_emotion),
+    path("response_score_sentiment", views.test_score_sentiment),
 ]
