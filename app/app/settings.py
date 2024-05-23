@@ -48,12 +48,12 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "corsheaders",
-    
     "users",
     "models",
     "posts",
     "comments",
     "histories",
+    "others",
 ]
 
 MIDDLEWARE = [
@@ -81,14 +81,14 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-] 
+]
 CORS_ALLOWED_ORIGIN_REGEXES = [
     "http://localhost:3000",
 ]
 CORS_ALLOW_HEADERS = [
-    'token',
-    'Content-Type',
-    'Authorization',
+    "token",
+    "Content-Type",
+    "Authorization",
     # Add other headers as needed
 ]
 
