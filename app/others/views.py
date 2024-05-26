@@ -157,18 +157,70 @@ def comments_shopee_analysis(request):
 
 #################### LAZADA ####################
 
+headers_lazada = {
+    "Accept": "*/*",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Accept-Language": "vi,en;q=0.9,en-GB;q=0.8,en-US;q=0.7",
+    "Referer": "https://lazada.vn/",
+    "Sec-Ch-Ua": '"Microsoft Edge";v="119", "Chromium";v="119", "Not?A_Brand";v="24"',
+    "Sec-Ch-Ua-Mobile": "?0",
+    "Sec-Ch-Ua-Platform": '"Windows"',
+    "Sec-Fetch-Dest": "empty",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Site": "same-origin",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+}
 
-def extract_idshop_iditem_from_url_lazada(url):
-    pattern = re.compile(r"i(\d+)-s(\d+)")
-    match = pattern.search(url)
+
+def extract_item_id_from_url(url):
+    match = re.search(r"i(\d+)-", url)
     if match:
-        item_id = match.group(1)
-        shop_id = match.group(2)
-    else:
-        item_id = None
-        shop_id = None
+        return match.group(1)
+    return None
 
-    return item_id, shop_id
+
+def fetch_lazada_reviews(item_id, headers, page=1):
+    url = "https://acs-m.lazada.vn/h5/mtop.lazada.review.item.getreviewlist/1.0/"
+    params = {
+        "jsv": "2.6.1",
+        "appKey": "24677475",
+        "t": "1716458217367",
+        "sign": "4ed541065aced334b71a05258bfce034",
+        "api": "mtop.lazada.review.item.getreviewlist",
+        "v": "1.0",
+        "type": "originaljson",
+        "isSec": "1",
+        "AntiCreep": "true",
+        "timeout": "20000",
+        "dataType": "json",
+        "sessionOption": "AutoLoginOnly",
+        "x-i18n-language": "vi",
+        "x-i18n-regionID": "VN",
+        "isFirstScreenRequest": "true",
+        "data": json.dumps(
+            {"itemId": item_id, "isHidden": 0, "hasPageVersion": 1, "pageNo": page}
+        ),
+    }
+    response = requests.get(url, headers=headers, params=params)
+    print(response.json())
+    if response.status_code == 200:
+        return response.json().get("data", {}).get("reviewList", [])
+    return []
+
+
+def crawl_lazada_comments(url):
+    item_id = extract_item_id_from_url(url)
+    all_comments = []
+    if item_id:
+        for page in range(1, 6):
+            reviews = fetch_lazada_reviews(item_id, headers_lazada, page=page)
+            if not reviews:
+                break
+            for review in reviews:
+                comment = review.get("reviewContent")
+                if comment:
+                    all_comments.append(comment)
+    return all_comments
 
 
 @csrf_exempt
@@ -179,9 +231,8 @@ def comments_lazada_analysis(request):
         if not url:
             return JsonResponse({"error": "url is required"}, status=400)
 
-        shop_id, item_id = extract_idshop_iditem_from_url_lazada(url)
-        comments = ""
-        # comments = crawl_lazada_comments(url)
+        item_id = extract_item_id_from_url(url)
+        comments = crawl_lazada_comments(url)
         # comments = clean_text_comment_lazada(comments)
 
         # emotion_sentiment = count_unique_emotions_sentences(comments)
@@ -194,7 +245,6 @@ def comments_lazada_analysis(request):
         return JsonResponse(
             {
                 "comments": comments,
-                "shop_id": shop_id,
                 "item_id": item_id,
                 # "emotion_sentiment": emotion_sentiment,
                 # "attitude_sentiment": attitude_sentiment,

@@ -13,6 +13,7 @@ import io, csv
 import os
 from dotenv import load_dotenv
 import openai
+
 from openai import OpenAI
 
 
@@ -221,6 +222,194 @@ def test_score_sentiment(request):
         text = data["text"]
         detail_sentiment = score_sentiment_a_sentence(text)
 
+        return JsonResponse({"message": detail_sentiment}, status=200)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+
+def implicit_sentiment_analysis(text):
+    # Set the prompt for GPT-3.5
+    prompt = (
+        f"Phân tích tình cảm tiềm ẩn và giải thích trong phần sau. text:\n\n{text}\n\nSentiment: "
+        f"Các từ gây ra tình cảm tiềm ẩn là gì "
+    )
+
+    # Send the request to the OpenAI API
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",  # Use "gpt-3.5-turbo" for GPT-3.5
+        messages=[
+            {"role": "system", "content": "You are a sentiment analysis assistant."},
+            {"role": "user", "content": prompt},
+        ],
+        temperature=1,
+        max_tokens=256,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0,
+    )
+
+    # Get the result from the API
+    sentiment = response.choices[0].message.content.strip().lower()
+    return sentiment
+
+
+@csrf_exempt
+def test_implicit_sentiment_model(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        text = data["text"]
+        detail_sentiment = implicit_sentiment_analysis(text)
+        print(detail_sentiment)
+        return JsonResponse({"message": detail_sentiment}, status=200)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+
+def detect_hate_speech(text):
+    # Set the prompt for GPT-3.5 or GPT-4
+    prompt = (
+        f"Phân tích đoạn văn sau để xác định liệu nó chứa lời lẽ kích động thù địch hay không "
+        f" Nếu nó chứa lời lẽ kích động thù địch, hãy chỉ ra 'Lời lẽ kích động thù địch' và cung cấp từ hoặc cụm từ cụ thể gây ra điều này."
+        f"Nếu không chứa lời nói hate Speech thì trả về 'Không có từ gây căm thù'.\n\n"
+        f"Trả về object theo từng mục"
+        f"Text: {text}\n\nResponse:"
+    )
+
+    # Send request to OpenAI API
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a sentiment analysis assistant."},
+            {"role": "user", "content": prompt},
+        ],
+    )
+
+    # Get the result from the API
+    result = response.choices[0].message.content.strip().lower()
+    return result
+
+
+@csrf_exempt
+def test_hate_detect_model(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        text = data["text"]
+        detail_sentiment = detect_hate_speech(text)
+        print(detail_sentiment)
+        return JsonResponse({"message": detail_sentiment}, status=200)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+
+def detect_offensive_language(text):
+    # Set the prompt for GPT-3.5 or GPT-4
+    prompt = (
+        f"Phân tích đoạn văn sau để xác định liệu nó chứa ngôn ngữ xúc phạm hay không. "
+        f"Nếu nó chứa ngôn ngữ xúc phạm, hãy chỉ ra 'Ngôn ngữ xúc phạm' và cung cấp từ hoặc cụm từ cụ thể gây ra điều này, cùng với mô tả ngắn gọn về ngôn ngữ xúc phạm là gì? "
+        f"Nếu nó không chứa ngôn ngữ xúc phạm, hãy chỉ ra 'Không chứa ngôn ngữ xúc phạm'.'.\n\n"
+        f"Text: {text}\n\nResponse:"
+    )
+
+    # Send request to OpenAI API
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a language analysis assistant."},
+            {"role": "user", "content": prompt},
+        ],
+    )
+
+    # Get the result from the API
+    result = response.choices[0].message.content.strip().lower()
+    return result
+
+
+@csrf_exempt
+def test_offensive_detection_model(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        text = data["text"]
+        detail_sentiment = detect_offensive_language(text)
+        print(detail_sentiment)
+        return JsonResponse({"message": detail_sentiment}, status=200)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+
+def detect_irony(text):
+    # Đặt prompt để phát hiện mỉa mai
+    prompt = (
+        f"Phân tích văn bản sau để xác định xem nó có chứa mỉa mai hay không. "
+        f"Nếu có chứa mỉa mai, hãy ghi 'Mỉa mai' và cung cấp một giải thích ngắn gọn về sự mỉa mai này. "
+        f"Nếu không chứa mỉa mai, hãy ghi 'Không mỉa mai'.\n\n"
+        f'Văn bản: "{text}"\n\nPhản hồi:'
+    )
+
+    # Gửi yêu cầu tới OpenAI API
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a language analysis assistant."},
+            {"role": "user", "content": prompt},
+        ],
+    )
+
+    # Lấy kết quả từ API
+    result = response.choices[0].message.content.strip().lower()
+    return result
+
+
+@csrf_exempt
+def test_detect_irony_model(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        text = data["text"]
+        detail_sentiment = detect_irony(text)
+        print(detail_sentiment)
+        return JsonResponse({"message": detail_sentiment}, status=200)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+
+def emotion_recognition(text):
+    prompt = (
+        f"Phân tích cảm xúc trong đoạn văn . "
+        f"Cảm xúc của đoạn văn là gì (Chỉ đưa ra từ đó không cần dài dòng) và giải thích ngắn gọn ý nghĩa của câu"
+        f"Các từ nào liên quan đến việc cảm xúc trong câu.\n\n"
+        f'Văn bản: "{text}"\n\nPhản hồi:'
+    )
+
+    # Gửi yêu cầu tới OpenAI API
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a language analysis assistant."},
+            {"role": "user", "content": prompt},
+        ],
+    )
+
+    # Lấy kết quả từ API
+    result = response.choices[0].message.content.strip().lower()
+    return result
+
+
+@csrf_exempt
+def test_emotion_recognition_model(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        text = data["text"]
+        detail_sentiment = emotion_recognition(text)
+        print(detail_sentiment)
         return JsonResponse({"message": detail_sentiment}, status=200)
     else:
         return JsonResponse(

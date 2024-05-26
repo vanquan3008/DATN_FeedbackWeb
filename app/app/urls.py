@@ -25,4 +25,5 @@ urlpatterns = [
     path("comments/", include("comments.urls")),
     path("history/", include("histories.urls")),
     path("others/", include("others.urls")),
+    path("test_models/", include("models.url")),
 ]
