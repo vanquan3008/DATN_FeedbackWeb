@@ -19,10 +19,8 @@ from django.core.paginator import Paginator
 from comments.models import Detail_post
 from users.models import User
 from posts.models import Post, Report
-from histories.models import Result_file ,Result_text
-from users.permissions import (
-    verify_token
-)
+from histories.models import Result_file, Result_text
+from users.permissions import verify_token
 from users.serializers import UserSerializer
 
 # Create your views here.
@@ -30,11 +28,14 @@ from models.views import (
     sentiment_a_sentence,
     count_pos_neg_neu_sentences,
     sentiment_basedaspect_a_sentence,
+    emotion_a_sentence,
+    attitude_a_sentence,
 )
 
 # from certifications.certification import (
 #     upload_file
 # )
+
 
 def extract_detail_basedaspect_from_response(json_data):
     text_data = ""
@@ -48,6 +49,22 @@ def extract_detail_basedaspect_from_response(json_data):
             text_data += "\n"
         else:
             pass
+    return text_data
+
+
+def extract_detail_emotion_a_sentence(sentences):
+    text_data = ""
+    for sentence in sentences:
+        emotion = emotion_a_sentence(sentence)
+        text_data += f"'sentence': '{sentence}', 'emotion': '{emotion}'\n"
+    return text_data
+
+
+def extract_detail_attitude_a_sentence(sentences):
+    text_data = ""
+    for sentence in sentences:
+        attitude = attitude_a_sentence(sentence)
+        text_data += f"'sentence': '{sentence}', 'attitude': '{attitude}'\n"
     return text_data
 
 
@@ -66,6 +83,7 @@ def analyze_text(request):
         if user_id:
             try:
                 user_instance = User.objects.get(pk=user_id)
+
             except User.DoesNotExist:
                 return JsonResponse({"error": "User not found"}, status=404)
             time_save = datetime.datetime.now()
@@ -77,12 +95,12 @@ def analyze_text(request):
                 detail_sentiment=detail_sentiment,
             )
             result_text.save()
+        print(detail_sentiment)
         return JsonResponse({"message": sentiment}, status=200)
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
-
 
 
 @csrf_exempt
@@ -98,6 +116,7 @@ def analyze_detail_text(request):
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
 
+
 ############## Txt file analysis ###############
 
 
@@ -107,17 +126,54 @@ def extract_txt_string(data):
     )
     end_index = data.find("\r\n\r\n-")
     extracted_string = data[start_index:end_index]
+
     return extracted_string
+
+
+def extract_filename(data):
+    start_index_filename = data.find("filename=") + len("filename=")
+    end_index_filename = data.find("\nContent-Type")
+    filename = data[start_index_filename:end_index_filename]
+    filename = filename.split("\\")[-1]
+    filename = filename.strip('"').strip()
+    filename = filename.rstrip('"')
+    return filename
 
 
 @csrf_exempt
 def analyze_txt_file(request):
     if request.method == "POST":
         data = request.body.decode("utf-8")
+        user_id = request.POST.get("user_id")
         txt_data = extract_txt_string(data).split("\r\n")
+        filename = extract_filename(data)
         sentences = [sentence for sentence in txt_data if len(sentence) > 0]
 
+        # based_aspect_sentiment = sentiment_basedaspect_a_sentence(sentences)
+        emotion_sentiment = extract_detail_emotion_a_sentence(sentences)
+        attitude_sentiment = extract_detail_attitude_a_sentence(sentences)
         data_response = count_pos_neg_neu_sentences(sentences)
+        pos_count = data_response["positive"]
+        neg_count = data_response["negative"]
+        neu_count = data_response["neutral"]
+        if user_id:
+            try:
+                user_instance = User.objects.get(pk=user_id)
+
+            except User.DoesNotExist:
+                return JsonResponse({"error": "User not found"}, status=404)
+            time_save = datetime.datetime.now()
+            result_file = Result_file.objects.create(
+                user=user_instance,
+                file_name=filename,
+                date_save=time_save,
+                emotion_sentiment=emotion_sentiment,
+                attitude_sentiment=attitude_sentiment,
+                number_pos=pos_count,
+                number_neg=neg_count,
+                number_neu=neu_count,
+            )
+            result_file.save()
 
         return JsonResponse({"message": data_response}, status=200)
     else:
@@ -153,16 +209,41 @@ def analyze_csv_file(request):
     if request.method == "POST":
         try:
             data = request.body.decode("utf-8")
-           
+            user_id = request.POST.get("user_id")
+            filename = extract_filename(data)
             csv_string = extract_string_csv(data)
             df = pd.read_csv(io.StringIO(csv_string))
 
             key_word = "product_description"
             texts = df[key_word].tolist()
 
+            emotion_sentiment = extract_detail_emotion_a_sentence(texts)
+            attitude_sentiment = extract_detail_attitude_a_sentence(texts)
             data_response = count_pos_neg_neu_sentences(texts)
+            pos_count = data_response["positive"]
+            neg_count = data_response["negative"]
+            neu_count = data_response["neutral"]
 
-            return JsonResponse({"message": data_response}, status=200)
+            if user_id:
+                try:
+                    user_instance = User.objects.get(pk=user_id)
+
+                except User.DoesNotExist:
+                    return JsonResponse({"error": "User not found"}, status=404)
+                time_save = datetime.datetime.now()
+                result_file = Result_file.objects.create(
+                    user=user_instance,
+                    file_name=filename,
+                    date_save=time_save,
+                    emotion_sentiment=emotion_sentiment,
+                    attitude_sentiment=attitude_sentiment,
+                    number_pos=pos_count,
+                    number_neg=neg_count,
+                    number_neu=neu_count,
+                )
+                result_file.save()
+
+            return JsonResponse({"message": attitude_sentiment}, status=200)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
     else:
@@ -199,22 +280,46 @@ def extract_json_string(data):
 def analyze_json_file(request):
     if request.method == "POST":
         data = request.body.decode("utf-8")
+        user_id = request.POST.get("user_id")
+        filename = extract_filename(data)
         json_string = extract_json_string(data)
-        
+
         json_data = json.loads(json_string)
 
         key_word = "review"
         texts = [json_data[i][key_word] for i in range(len(json_data))]
 
+        emotion_sentiment = extract_detail_emotion_a_sentence(texts)
+        attitude_sentiment = extract_detail_attitude_a_sentence(texts)
         data_response = count_pos_neg_neu_sentences(texts)
+        pos_count = data_response["positive"]
+        neg_count = data_response["negative"]
+        neu_count = data_response["neutral"]
+
+        if user_id:
+            try:
+                user_instance = User.objects.get(pk=user_id)
+
+            except User.DoesNotExist:
+                return JsonResponse({"error": "User not found"}, status=404)
+            time_save = datetime.datetime.now()
+            result_file = Result_file.objects.create(
+                user=user_instance,
+                file_name=filename,
+                date_save=time_save,
+                emotion_sentiment=emotion_sentiment,
+                attitude_sentiment=attitude_sentiment,
+                number_pos=pos_count,
+                number_neg=neg_count,
+                number_neu=neu_count,
+            )
+            result_file.save()
 
         return JsonResponse({"message": data_response}, status=200)
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
-
-
 
 
 ############### Handle with Post ###############
@@ -230,13 +335,12 @@ def create_post(request):
             r_title_post = data.get("title")
             r_image_content_url = data.get("image_content_url")
             user_created = User.objects.get(user_id=r_user_id)
-            
+
             authorization_header = request.headers.get("token")
-            
-            
-            if verify_token(authorization_header , user_created.email):
+
+            if verify_token(authorization_header, user_created.email):
                 time_post = datetime.datetime.now()
-                
+
                 Post.objects.create(
                     user=User.objects.get(user_id=r_user_id),
                     content_post=r_content_post,
@@ -244,11 +348,15 @@ def create_post(request):
                     image_content_url=r_image_content_url,
                     date_post=time_post,
                 )
-                
-                response = JsonResponse({"message": "Post status successfully"}, status=200)
-            else : 
-                response = JsonResponse({"message": "You are not Authentication"}, status=403)
-            
+
+                response = JsonResponse(
+                    {"message": "Post status successfully"}, status=200
+                )
+            else:
+                response = JsonResponse(
+                    {"message": "You are not Authentication"}, status=403
+                )
+
             return response
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
@@ -267,9 +375,7 @@ def get_all_post(request):
             serializer = UserSerializer()
             if not all_post.exists():
                 return JsonResponse(
-                    {"error": "Do not have user id" ,"list_post": []},
-                    
-                    status=200
+                    {"error": "Do not have user id", "list_post": []}, status=200
                 )
             else:
                 posts_data = [
@@ -306,11 +412,11 @@ def get_all_post_by_userid(request):
             r_user_id = data.get("user_id")
             user = User.objects.get(user_id=r_user_id)
             user_posts = Post.objects.filter(user=r_user_id)
-            
+
             if not user_posts.exists():
                 return JsonResponse({"error": "Do not have user id"}, status=404)
             else:
-                if verify_token(authorization_header , user.email) : 
+                if verify_token(authorization_header, user.email):
                     posts_data = [
                         {
                             "id_post": post.id_post,
@@ -321,9 +427,9 @@ def get_all_post_by_userid(request):
                         for post in user_posts
                     ]
                     res = JsonResponse({"message": posts_data}, status=200)
-                else : 
+                else:
                     res = JsonResponse(
-                        {"error" :"You are not Authentication"} ,status = 403 
+                        {"error": "You are not Authentication"}, status=403
                     )
 
                 return res
@@ -341,26 +447,29 @@ def delete_post(request):
     if request.method == "POST":
         data = json.loads(request.body)
         r_post_id = data.get("id_post")
-        r_user_id = data.get("user_id") 
+        r_user_id = data.get("user_id")
         try:
             user_delete = User.objects.get(user_id=r_user_id)
-            authorization_header = request.headers.get("token")                 
-            
+            authorization_header = request.headers.get("token")
+
             if r_post_id is None:
                 raise ValueError("id_post are required")
             # Check exist post
             if not Post.objects.filter(id_post=r_post_id).exists():
                 return JsonResponse({"error": "Post not found"}, status=404)
-            
-            if verify_token(authorization_header , user_delete.email) : 
+
+            if verify_token(authorization_header, user_delete.email):
                 post_delete = Post.objects.get(id_post=r_post_id)
                 post_delete.delete()
-                res =  JsonResponse(
+                res = JsonResponse(
                     {"message": "Delete  post successfully"},
                     status=200,
                 )
-            else : 
-                res = JsonResponse({"message": "Can not authentication user to delete post"}, status=403)
+            else:
+                res = JsonResponse(
+                    {"message": "Can not authentication user to delete post"},
+                    status=403,
+                )
             return res
 
         except Exception as e:
@@ -388,10 +497,7 @@ def static_all_comments_on_post(request):
             # Get all comment of post
             post_comments = Detail_post.objects.filter(post=r_post_id)
             comments_data = [
-                {
-                    "id": comment.comment_id, 
-                    "content": comment.comment_content
-                }
+                {"id": comment.comment_id, "content": comment.comment_content}
                 for comment in post_comments
             ]
 
