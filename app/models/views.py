@@ -121,6 +121,20 @@ I have many note: sentiment only are  positive, negative, neutral. The important
     return data_response
 
 
+@csrf_exempt
+def test_sentiment_basedaspect_level(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        text = data["text"]
+        detail_sentiment = sentiment_basedaspect_a_sentence(text)
+
+        return JsonResponse({"message": detail_sentiment}, status=200)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+
 def count_pos_neg_neu_sentences(sentences):
     num_positive = 0
     num_negative = 0

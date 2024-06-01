@@ -97,6 +97,7 @@ def clean_text_comment_shopee(all_comments):
         .replace("Tính năng nổi bật:", "")
         .replace("Hương vị:", "")
         .replace("Mẫu mã:", "")
+        .replace("Bao bì/", "")
         .replace("\n", " ")
         .strip()
         for comment in all_comments
