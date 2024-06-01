@@ -5,5 +5,7 @@ export const bg_image ={
 }
 
 export const images ={
-    imgNoAvtar : require("./img-noAvatar.jpg")
+    imgNoAvtar : require("./img-noAvatar.jpg"),
+    iconTiki : require("./tiki-icons.png"),
+    iconShopee : require("./icon-shopee.jpg")
 }

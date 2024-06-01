@@ -2,9 +2,6 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.hashers import make_password, check_password
-import datetime
-import jwt
 import json
 from django.forms.models import model_to_dict
 import re
@@ -15,6 +12,13 @@ from dotenv import load_dotenv
 import openai
 from openai import OpenAI
 
+from models.helper import (
+    emotion_a_sentence ,
+    attitude_a_sentence ,
+    score_sentiment_a_sentence,
+    mapping_detail_sentiment
+)
+
 
 load_dotenv()
 API_SECRET_KEY = os.getenv("api_gpt_key")
@@ -22,54 +26,6 @@ openai.api_key = API_SECRET_KEY
 # Initialize the OpenAI client
 client = OpenAI(api_key=openai.api_key)
 
-
-def mapping_sentiment(score):
-    if round(score, 3) > 0.333:
-        return "positive"
-    elif round(score, 3) < -0.333:
-        return "negative"
-    elif round(score, 3) >= -0.333 and round(score, 3) <= 0.333:
-        return "neutral"
-
-
-def mapping_detail_sentiment(score):
-    if round(score, 3) >= -1 and round(score, 3) <= -0.8:
-        return "strong negative"
-    elif round(score, 3) > -0.8 and round(score, 3) <= -0.5:
-        return "negative"
-    elif round(score, 3) > -0.5 and round(score, 3) <= -0.3:
-        return "light negative"
-    elif round(score, 3) > -0.3 and round(score, 3) <= -0.15:
-        return "neural negative"
-    elif round(score, 3) >= -0.15 and round(score, 3) <= 0.15:
-        return "neutral"
-    elif round(score, 3) > 0.15 and round(score, 3) <= 0.3:
-        return "neural positive"
-    elif round(score, 3) > 0.3 and round(score, 3) <= 0.5:
-        return "light positive"
-    elif round(score, 3) > 0.5 and round(score, 3) <= 0.8:
-        return "positive"
-    elif round(score, 3) > 0.8 and round(score, 3) <= 1:
-        return "strong positive"
-
-
-def score_sentiment_a_sentence(sentence):
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {
-                "role": "user",
-                "content": 'You are trained to analyze and detect the sentiment of the given text.\n\n    i want output sentiment is a number has float type and value has range from -1 to 1. The closer -1, the sentiment more negative, the closer 1, the sentiment more postive. And the closer 0, the sentiment more neural. \nThe most important that output only a float number.\n\n"There are many book. They are old and ugly, but in my opinion, I see there are new. So , i decide buy it in the future. Besides, I hope everyone like this",    \n',
-            }
-        ],
-        temperature=1,
-        max_tokens=256,
-        top_p=1,
-        frequency_penalty=0,
-        presence_penalty=0,
-    )
-    score_sentiment = response.choices[0].message.content.strip().lower()
-    return score_sentiment
 
 
 def sentiment_a_sentence(sentence):
@@ -116,7 +72,6 @@ I have many note: sentiment only are  positive, negative, neutral. The important
         presence_penalty=0,
     )
     data_response = response.choices[0].message.content
-    # print(data_response)
     return data_response
 
 
@@ -138,3 +93,46 @@ def count_pos_neg_neu_sentences(sentences):
         "neutral": num_neutral,
     }
     return data_response
+
+# Model Details
+
+# Sentimet details 
+@csrf_exempt
+def sentiment_text_details(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        text = data["text"]
+        score_details = score_sentiment_a_sentence(text)
+        detail_sentiment = mapping_detail_sentiment(score_details)
+        
+        return JsonResponse({"message": detail_sentiment}, status=200)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+@csrf_exempt
+def test_model_emotion(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        text = data["text"]
+        detail_sentiment = emotion_a_sentence(text)
+        return JsonResponse({"message": detail_sentiment}, status=200)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+
+@csrf_exempt
+def test_model_attitude(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        text = data["text"]
+        detail_sentiment = attitude_a_sentence(text)
+
+        return JsonResponse({"message": detail_sentiment}, status=200)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )

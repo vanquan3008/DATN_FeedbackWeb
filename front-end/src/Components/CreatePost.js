@@ -31,7 +31,7 @@ function CreatePost(
         try{
             await axios.post(`http://127.0.0.1:8000/posts/create_post`, createPost ,{
                 withCredentials : true, 
-                headers : {token : `Bearer ${userLogin.jwt}`}
+                headers : {token : `Bearer ${userLogin?.jwt}`}
             });
             setCreatePost(false);
             setCreatePostSuccess(true);
@@ -61,7 +61,7 @@ function CreatePost(
                             <img alt="" src={infoUser?.url_image ? infoUser?.url_image : images.imgNoAvtar} className="w-10 h-10"></img>
                         </div>
                         <span className="text-base p-4 font-medium">
-                          {infoUser.fullname}
+                          {infoUser?.fullname}
                         </span>
                     </div>
                     <div className="p-4 hover:opacity-50" onClick={()=>{

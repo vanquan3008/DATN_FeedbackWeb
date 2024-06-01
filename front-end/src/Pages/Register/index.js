@@ -86,10 +86,7 @@ function Register() {
                                 <img alt="" src={icons.iconFacebook}></img>
                             </div>
                             <div className="border-solid border-2 w-[76px] h-[56px] flex justify-center items-center rounded-lg ml-1 mr-1 ">
-                                <img alt="" src={icons.iconApple}></img>
-                            </div>
-                            <div className="border-solid border-2 w-[76px] h-[56px] flex justify-center items-center rounded-lg ml-1 mr-1">
-                                <img alt="" src={icons.iconFacebook}></img>
+                                <img alt="" src="https://th.bing.com/th?id=ODLS.2c7081e6-f447-4ee8-95d5-8078b7672447&w=32&h=32&qlt=90&pcl=fffffa&o=6&pid=1.2"></img>
                             </div>
                         </div>
                         <span className="text-lg text-color-basic font-semibold p-4">or</span>

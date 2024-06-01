@@ -2,6 +2,7 @@ import { useState } from "react";
 import { DefaultLayout } from "../../Components/Layouts/DefaultLayout";
 import SentenceHistory from "../../Components/SentenceHistory";
 import FormAccess from "../../Components/FormAccess";
+import FileHistory from "../../Components/FileHistory";
 
 function History() {
     const [dataHistoryText , setDataHistoryText] = useState(null);
@@ -36,12 +37,14 @@ function History() {
                             <div className="h-1/2 m-4">
                                 <div className="text-xl font-semibold text-sky-700 ">
                                     File
+                                </div> 
+                                <div className="w-full h-full bg-white">
+                                    <FileHistory>
+                                    </FileHistory>
                                 </div>
                             </div>
                         </div>
-                        <div className="w-full h-20 bg-white">
-
-                        </div>
+                       
                     </div>
                 
             </DefaultLayout> 

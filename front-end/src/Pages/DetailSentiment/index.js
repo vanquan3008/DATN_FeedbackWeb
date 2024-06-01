@@ -3,8 +3,10 @@ import { DefaultLayout } from "../../Components/Layouts/DefaultLayout";
 import { faArrowAltCircleLeft, faDownload } from "@fortawesome/free-solid-svg-icons";
 import NavbarDefaultLayout from "../../Components/Layouts/NavbarDefaultLayout";
 import FooterDefaultLayout from "../../Components/Layouts/FooterDefaultLayout";
+import { useState } from "react";
 
 function DetailSentiment() {
+    const [typeHistory , setTypeHistory] = useState(null)
     return (
         <div className="p-8 w-full flex flex-col h-screen  bg-color-background-main">
             <NavbarDefaultLayout type="Detail Sentiment"></NavbarDefaultLayout>
@@ -19,7 +21,13 @@ function DetailSentiment() {
                         Downloads 
                     </div>
                 </div>
-                <div>
+                <div className="flex flex-col">
+                    <div className="h-20 text-2xl font-bold p-4 ml-6">
+                        Sentiment Details
+                    </div>
+                    <div>
+                        
+                    </div>
 
                 </div>
             </div> 

@@ -48,7 +48,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "corsheaders",
-    
     "users",
     "models",
     "posts",
@@ -113,6 +112,12 @@ TEMPLATES = [
 WSGI_APPLICATION = "app.wsgi.application"
 
 
+
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES' :{
+#         'oauth2_provider.contrib.rest_framework.OAuth2Authentication'
+#     }
+# }
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 

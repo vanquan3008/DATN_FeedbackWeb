@@ -8,6 +8,7 @@ import FeedBack from './Pages/FeedBack';
 import { store } from './Redux/store.js';
 import History from './Pages/History/index.js';
 import DetailSentiment from './Pages/DetailSentiment/index.js';
+import InputURL from './Pages/InputURL/index.js';
 
 function App() {
   const user = store.getState().auth.login.currentUser;
@@ -22,6 +23,7 @@ function App() {
             <Route path="/Profile" element={user?<Profile/>:<Home/>}/>
             <Route path="/FeedBack" element={user?<FeedBack/>:<Home/>}/>
             <Route path="/Details" element={user?<DetailSentiment/>:<Home/>}/>
+            <Route path="/InputURL" element={user?<InputURL/>:<Home/>}/>
           </Routes>
       </div>
    </BrowserRouter>

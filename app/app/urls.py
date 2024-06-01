@@ -23,5 +23,6 @@ urlpatterns = [
     path("", include("users.url")),
     path("posts/" , include("posts.urls")),
     path("comments/" , include("comments.urls")),
-    path("history/" , include("histories.urls"))
+    path("history/" , include("histories.urls")),
+    path("models/" , include("models.urls"))
 ]
