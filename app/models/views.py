@@ -225,8 +225,8 @@ def sentiment_text_details(request):
         text = data["text"]
         score_details =float(score_sentiment_a_sentence(text))
         detail_sentiment = mapping_detail_sentiment(score_details)
-        
-        return JsonResponse({"message": detail_sentiment}, status=200)
+        sentiment_basedaspect = sentiment_basedaspect_a_sentence(text)
+        return JsonResponse({"message": detail_sentiment,"base_aspect" : sentiment_basedaspect }, status=200)
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
