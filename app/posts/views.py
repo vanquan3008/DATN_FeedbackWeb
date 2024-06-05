@@ -32,9 +32,7 @@ from models.views import (
     attitude_a_sentence,
 )
 
-# from certifications.certification import (
-#     upload_file
-# )
+
 
 
 def extract_detail_basedaspect_from_response(json_data):
@@ -95,7 +93,6 @@ def analyze_text(request):
                 detail_sentiment=detail_sentiment,
             )
             result_text.save()
-        print(detail_sentiment)
         return JsonResponse({"message": sentiment}, status=200)
     else:
         return JsonResponse(

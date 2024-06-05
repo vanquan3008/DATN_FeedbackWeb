@@ -4,6 +4,7 @@ import {DefaultLayout} from "../../Components/Layouts/DefaultLayout.js";
 import { ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 // Data biểu đồ tròn
 
@@ -22,6 +23,7 @@ function Home() {
     const [text ,setText] = useState(null);
     const textRef = useRef();
     const [file ,setFile] = useState(null);
+    const navigator = useNavigate();
 
     const handleChange = (event) => {
         setOption(event.target.value);
@@ -127,7 +129,7 @@ function Home() {
                                 }
                             </div>
                             <div className="flex justify-center ">
-                                <button className={`w-11/12 h-10 mb-10 rounded-lg text-white font-medium ${textLength === 0 && file ===null  ?"bg-sky-200" :"bg-sky-300 hover:opacity-70" }`} 
+                                <button className={`w-11/12 h-10 mb-10 rounded-lg text-white font-medium ${textLength === 0 && file ===null  ?"bg-sky-200" :"bg-sky-500 hover:opacity-70" }`} 
                                         onClick={options==="textarea" ? sentimentText :sentimentFile}
                                         disabled={textLength === 0 && file === null ? true : false}
                                 >Check</button></div>
@@ -189,7 +191,23 @@ function Home() {
                                 </div>
                             
                             </div>
-                            <button className="bg-sky-300 text-lg text-white font-medium p-1 m-10 float-right rounded-lg">
+                            <button className="bg-sky-500 hover:opacity-60 text-lg text-white font-medium p-1 m-10 float-right rounded-lg" 
+                                disabled={textLength === 0 && file === null ? true : false}
+                                onClick={()=>{
+                                    if(options === "textarea"){
+                                        navigator("/Details" , 
+                                        {
+                                            state: {
+                                                text
+                                            }
+                                          }
+                                        )
+                                    }  
+                                    else{
+                                        navigator("/DetailsFiles")
+                                    }
+                                }}
+                            >
                                 Detail 
                             </button>
                         </div>

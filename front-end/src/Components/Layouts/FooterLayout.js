@@ -57,7 +57,7 @@ function Footer() {
                 </ul>
             </div>
             <div className="text-color-basic pt-4 text-sm ">
-                <span>Copyright © 2021 Soft by NLPTeam</span>
+                <span>Copyright © 2024 Soft by NLPTeam</span>
             </div>
         </div>
     );

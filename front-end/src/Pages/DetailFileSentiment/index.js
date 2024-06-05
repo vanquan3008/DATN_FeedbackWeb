@@ -3,6 +3,7 @@ import NavbarDefaultLayout from "../../Components/Layouts/NavbarDefaultLayout";
 import { faArrowAltCircleDown, faDownload } from "@fortawesome/free-solid-svg-icons";
 import FooterDefaultLayout from "../../Components/Layouts/FooterDefaultLayout";
 import { ResponsiveContainer, PieChart, Pie, Cell, Legend,Bar,XAxis,YAxis,Tooltip,BarChart,CartesianGrid } from 'recharts';
+import { useLocation } from "react-router-dom";
 
 
 
@@ -14,6 +15,8 @@ function DetailFilesSentiment(
     }
 ) {
 
+    const {state} = useLocation();
+    console.log(state)
     const data =[
         { name: 'Positive',value: 1},
         { name: 'Negative',value:2 },
