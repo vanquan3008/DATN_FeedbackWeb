@@ -8,6 +8,9 @@ function History() {
     const [dataHistoryText , setDataHistoryText] = useState(null);
     const [deleteClick , setDelete] = useState(false);
     const [postCurrent , setpostCurrent] = useState(null);
+    const [dataHistoryFile , setDataHistoryFile] = useState(null);
+    const [fileCurrent , setFileCurrent] = useState(null);
+
 
     return (
         <div className="w-screen h-screen">
@@ -34,14 +37,20 @@ function History() {
                                 }
                             </div>
                             <div className="h-4 w-full bg-color-background-main"></div>
-                            <div className="h-1/2 m-4">
+                            <div className="h-1/2 m-4 flex flex-col">
+                                
                                 <div className="text-xl font-semibold text-sky-700 ">
                                     File
                                 </div> 
-                                <div className="w-full h-full bg-white">
-                                    <FileHistory>
-                                    </FileHistory>
-                                </div>
+                                    {dataHistoryFile===false? 
+                                    <div className="w-full grow  flex justify-center items-center font-bold text-2xl text-sky-700 ">
+                                        NO HISTORY
+                                    </div> :
+                                        <div className="w-full grow h-full bg-white">
+                                            <FileHistory setDataHistoryFile = {setDataHistoryFile}>
+                                            </FileHistory>
+                                        </div>
+                                }
                             </div>
                         </div>
                        

@@ -5,7 +5,7 @@ import { DefaultLayout } from "../../Components/Layouts/DefaultLayout";
 
 function InputURL() {
     const [closeForm , setCloseForm] = useState(true);
-    const [option,setOption] = useState("");
+    const [option,setOption] = useState("Tiki");
 
     return ( 
         <>
@@ -43,7 +43,7 @@ function InputURL() {
                     </div>
                 </div>
             </DefaultLayout>
-            <FormInputUrl close={closeForm} setCloseForm={setCloseForm}></FormInputUrl>
+            <FormInputUrl close={closeForm} option={option} setCloseForm={setCloseForm}></FormInputUrl>
         </>
 
         

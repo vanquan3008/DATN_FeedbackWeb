@@ -1,9 +1,9 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import NavbarDefaultLayout from "../../Components/Layouts/NavbarDefaultLayout";
-import { faArrowAltCircleDown, faDownload } from "@fortawesome/free-solid-svg-icons";
+import { faArrowAltCircleDown, faArrowAltCircleLeft, faDownload } from "@fortawesome/free-solid-svg-icons";
 import FooterDefaultLayout from "../../Components/Layouts/FooterDefaultLayout";
 import { ResponsiveContainer, PieChart, Pie, Cell, Legend,Bar,XAxis,YAxis,Tooltip,BarChart,CartesianGrid } from 'recharts';
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 
 
@@ -16,7 +16,10 @@ function DetailFilesSentiment(
 ) {
 
     const {state} = useLocation();
-    console.log(state)
+    const navigate = useNavigate();
+
+
+    
     const data =[
         { name: 'Positive',value: 1},
         { name: 'Negative',value:2 },
@@ -82,8 +85,8 @@ function DetailFilesSentiment(
             <NavbarDefaultLayout type="Detail Files Sentiment"></NavbarDefaultLayout>
             <div className="flex flex-col w-full h-full rounded-md pt-4">
                 <div className="w-full h-10 flex flex-row justify-between">
-                    <div className="p-4 flex items-center">
-                        <FontAwesomeIcon icon={faArrowAltCircleDown} className="p-4"></FontAwesomeIcon>    
+                <div className="p-2 flex items-center hover:bg-sky-200 hover:rounded-lg hover:text-white " onClick={()=> navigate("/")}>
+                        <FontAwesomeIcon icon={faArrowAltCircleLeft} className="pl-2 pr-4"></FontAwesomeIcon>    
                         Back to Home
                     </div>
                     <div className="p-4 flex items-center mr-12">

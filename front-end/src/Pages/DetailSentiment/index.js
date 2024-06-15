@@ -21,34 +21,32 @@ function DetailSentiment() {
     const [ idetection , setIDetection] = useState("");
     const [ emotion , setEmotion] = useState("");
     const [sentiment , setSentiment] = useState("");
-
     const {state} = useLocation();
-    
+    const [detailsSen , setDetail] = useState(null);
     useEffect(() =>{
         const Sentiment = async() =>{
             const data = {
-                text : state
+                "text" : state
             }
             const Implicit = await axios.post("http://127.0.0.1:8000/models/implicit_sentiment" , data);
-            setImplicit(Object(Implicit.data).message)
             const Hate = await axios.post("http://127.0.0.1:8000/models/hate_detection" , data);
-            setHate(Object(Hate.data).message)
             const odetec = await axios.post("http://127.0.0.1:8000/models/offensive_detection" , data);
-            setODetection(Object(odetec.data).message)
             const idetec = await axios.post("http://127.0.0.1:8000/models/irony_detection" , data);
-            setIDetection(Object(idetec.data).message)
             const emo = await axios.post("http://127.0.0.1:8000/models/emotion_recognition" , data);
+            setImplicit(Object(Implicit.data).message)
+            setHate(Object(Hate.data).message)
+            setODetection(Object(odetec.data).message)
+            setIDetection(Object(idetec.data).message)
             setEmotion(Object(emo.data).message)
         }
         Sentiment();
     },[]);
 
 
-
     useEffect(() =>{
-        const Sentiment = async() =>{
+        const Sentiment = async () =>{
             const data = {
-                text : state
+                "text" : state
             }
             const stm = await axios.post("http://127.0.0.1:8000/models/response_score_sentiment" , data);
             setSentiment(Object(stm.data).message)
@@ -57,6 +55,38 @@ function DetailSentiment() {
         Sentiment();
     },[]);
 
+    // useEffect(() =>{
+    //     const data = {
+    //         "text" : String(state)
+    //     }
+
+    //     const Sentiment = async() =>{
+            
+    //         const detailstm = await axios.post("http://127.0.0.1:8000/models/response_baseaspects" , data);
+    //         setDetail(JSON.parse(detailstm.data))
+    //         console.log(JSON.parse(detailstm.data.message))
+    //     }
+    //     Sentiment();
+    // },[]);
+
+    // const renderAsp = detailsSen.results.map((data,index)=>{
+    //     return(
+    //         <div className="py-2 border-b">
+    //             <div className="pl-4">
+    //                 <CustomTag nameTag={"Sentence"} text={"Hihi"}></CustomTag>
+    //                 </div>
+    //                     <div className="flex flex-col pl-4">
+    //                 <div className="">
+    //                     <CustomTag nameTag={"Sentiment"} data={data.sentiment} colorTag={"bg-cyan-500"}></CustomTag>
+    //                     </div>
+    //                         <div className="flex flex-row">
+    //                             <CustomTag nameTag={"Aspect"} colorTag={"bg-yellow-500"}></CustomTag>
+    //                         <CustomTag nameTag={"Opinion"} colorTag={"bg-orange-500"}></CustomTag>
+    //                     </div>
+    //             </div>
+    //         </div>
+    //     )
+    // })
     return (
         <div className="p-8 w-full flex flex-col h-full  bg-color-background-main">
             <NavbarDefaultLayout type="Detail Sentiment"></NavbarDefaultLayout>
@@ -76,7 +106,7 @@ function DetailSentiment() {
                         Sentiment Details
                     </div>
                     <div className="w-full h-auto flex flex-row px-10">
-                        <div className="w-5/12 mr-2 rounded-2xl bg-white h-72 border drop-shadow">
+                        <div className="w-5/12 mr-2 rounded-2xl bg-white min-h-72 border drop-shadow">
                             <div className="text-xl font-medium border-b items-center justify-center flex p-2"> Sentence </div>
                             <div className="w-full h-full p-4  text-xl font-thin text-color-basic">
                                 <span className="w-8 py-1 px-2 h-8 text-base  text-white font-medium bg-sky-500 rounded mr-4">TEXT</span>
@@ -108,6 +138,7 @@ function DetailSentiment() {
                                                 </div>
                                             </div>
                                         </div>
+                                        {/* {renderAsp} */}
                                     </div>
                                </div>
                             </div>

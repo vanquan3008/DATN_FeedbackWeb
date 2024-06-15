@@ -112,8 +112,6 @@ def delete_text_history(request, text_id):
         data = json.loads(request.body)
         token = request.headers.get("token")
         r_email = data.get("email")
-
-        print(r_email)
         if verify_token(token, email=r_email):
             text_history = Result_text.objects.filter(id_text=text_id)
             if text_history:

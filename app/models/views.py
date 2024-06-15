@@ -132,8 +132,13 @@ def test_sentiment_basedaspect_level(request):
         data = json.loads(request.body.decode("utf-8"))
         text = data["text"]
         detail_sentiment = sentiment_basedaspect_a_sentence(text)
+        detail_sentiment_json = json.dumps(
+            detail_sentiment, ensure_ascii=False, indent=2
+        )
 
-        return JsonResponse({"message": detail_sentiment}, status=200)
+        # Chuyển lại chuỗi JSON thành đối tượng Python
+        detail_sentiment_dict = json.loads(detail_sentiment_json)
+        return JsonResponse({"message": detail_sentiment_dict}, status=200)
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
@@ -254,8 +259,9 @@ def sentiment_text_details(request):
     if request.method == "POST":
         data = json.loads(request.body.decode("utf-8"))
         text = data["text"]
-        score_details =float(score_sentiment_a_sentence(text))
+        score_details =float(score_sentiment_a_sentence(text))        
         detail_sentiment = mapping_detail_sentiment(score_details)
+     
         sentiment_basedaspect = sentiment_basedaspect_a_sentence(text)
         return JsonResponse({"message": detail_sentiment,"base_aspect" : sentiment_basedaspect }, status=200)
     else:
@@ -269,7 +275,7 @@ def implicit_sentiment_analysis(text):
     prompt = (
         f"Phân tích tình cảm tiềm ẩn và giải thích trong phần sau. text:\n\n{text}\n\nSentiment: "
         f"Các từ gây ra tình cảm tiềm ẩn là gì. "
-        f"Viết hoa chữ cái đầu tiên "
+        f"Viết hoa chữ cái đầu tiên khi trả về"
     )
 
     # Send the request to the OpenAI API

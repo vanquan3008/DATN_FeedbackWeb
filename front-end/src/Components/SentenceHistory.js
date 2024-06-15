@@ -24,9 +24,6 @@ function SentenceHistory( {
     const [listHistory , setlistHistory] = useState([]);
     // const [postCurrent , setpostCurrent] = useState(null);
     const user = useSelector((state)=> state.auth.login.currentUser)
-
-
-    
     
     useEffect(() => {
         const renderHistory = async ()=>{
@@ -50,11 +47,11 @@ function SentenceHistory( {
             <div className="flex flex-grow h-12 w-full text-center items-center border-b">
                     <div className="w-1/12 "> {index} </div>
                     <div className="w-5/12  text-base text-color-basic text-start"> 
-                        <div className=" pl-10 w-max-96 overflow-hidden truncate ">
+                        <div className=" pl-10 max-w-[486px] overflow-hidden truncate ">
                             {his?.text_content}
                         </div> 
                    </div>
-                    <div className="text-color-basic font-normal text-base  w-1/2 justify-between text-center flex flex-row">
+                    <div className="text-color-basic font-normal text-base  w-1/2  justify-between text-center flex flex-row">
                         <div className={`p-4 w-1/4 ${his?.sentiment === "neutral" ? "text-color-basic" : his.sentiment === "positive" ? "text-green-500"  : "text-red-500" } font-semibold`}>
                             {capitalizeFirstLetter(his?.sentiment)}
                         </div>

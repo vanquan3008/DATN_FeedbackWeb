@@ -156,7 +156,6 @@ def analyze_txt_file(request):
         if user_id:
             try:
                 user_instance = User.objects.get(pk=user_id)
-
             except User.DoesNotExist:
                 return JsonResponse({"error": "User not found"}, status=404)
             time_save = datetime.datetime.now()
@@ -222,11 +221,7 @@ def analyze_csv_file(request):
             neu_count = data_response["neutral"]
 
             if user_id:
-                try:
-                    user_instance = User.objects.get(pk=user_id)
-
-                except User.DoesNotExist:
-                    return JsonResponse({"error": "User not found"}, status=404)
+                user_instance = User.objects.get(pk=user_id)
                 time_save = datetime.datetime.now()
                 result_file = Result_file.objects.create(
                     user=user_instance,
@@ -239,8 +234,10 @@ def analyze_csv_file(request):
                     number_neu=neu_count,
                 )
                 result_file.save()
+            else:
+                print("Required login user")
 
-            return JsonResponse({"message": attitude_sentiment}, status=200)
+            return JsonResponse({"message": data_response}, status=200)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
     else:
@@ -332,7 +329,6 @@ def create_post(request):
             r_title_post = data.get("title")
             r_image_content_url = data.get("image_content_url")
             user_created = User.objects.get(user_id=r_user_id)
-
             authorization_header = request.headers.get("token")
 
             if verify_token(authorization_header, user_created.email):

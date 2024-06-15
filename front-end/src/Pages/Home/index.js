@@ -67,20 +67,24 @@ function Home() {
 
 
     const sentimentFile = async()=>{ 
+    
         const filename = file['0'].name;
         const extension = filename.split('.').pop();
+        const data = new FormData();
+        data.append("file",file);
+        data.append("user_id",infoUser.user_id);
         try{
            
             if(extension === 'txt'){
-                const generation_stm = await axios.post('http://127.0.0.1:8000/posts/txt_analysis',file);
+                const generation_stm = await axios.post('http://127.0.0.1:8000/posts/txt_analysis',data ,{headers: { "Content-Type": "multipart/form-data" }});
                 setSentimentF(generation_stm.data.message)
             }
             else if(extension === 'json'){
-                const generation_stm = await axios.post('http://127.0.0.1:8000/posts/json_analysis',file);
+                const generation_stm = await axios.post('http://127.0.0.1:8000/posts/json_analysis',data ,{headers: { "Content-Type": "multipart/form-data" }});
                 setSentimentF(generation_stm.data.message)
             }
             else if(extension === 'csv'){
-                const generation_stm = await axios.post('http://127.0.0.1:8000/posts/csv_analysis',file);
+                const generation_stm = await axios.post('http://127.0.0.1:8000/posts/csv_analysis',data ,{headers: { "Content-Type": "multipart/form-data" }});
                 setSentimentF(generation_stm.data.message)
             }
             setSentimentSuccess(true);
@@ -119,8 +123,8 @@ function Home() {
                             <div className="grow flex items-center justify-center">
                                 {
                                     options === "textarea"?<div className="w-full h-full flex justify-center items-center flex-col">
-                                        <textarea ref={textRef} onChange={handleChangeText} maxLength={300} className="w-11/12 h-5/6 border-solid border-2 rounded-xl outline-none p-4"  placeholder="Input sentence ..." autoComplete="off"></textarea>
-                                        <div className=" text-color-basic">{textLength} / 300</div>
+                                        <textarea ref={textRef} onChange={handleChangeText} maxLength={1000} className="w-11/12 h-5/6 border-solid border-2 rounded-xl outline-none p-4"  placeholder="Input sentence ..." autoComplete="off"></textarea>
+                                        <div className=" text-color-basic">{textLength} / 1000</div>
                                     </div>
                                     :
                                     <div className=" flex justify-center items-center w-11/12 h-5/6 border-solid border-2 rounded-xl ">
