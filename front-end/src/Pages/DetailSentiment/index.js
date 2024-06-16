@@ -55,38 +55,38 @@ function DetailSentiment() {
         Sentiment();
     },[]);
 
-    // useEffect(() =>{
-    //     const data = {
-    //         "text" : String(state)
-    //     }
+    useEffect(() =>{
+        const data = {
+            "text" : String(state)
+        }
 
-    //     const Sentiment = async() =>{
+        const Sentiment = async() =>{
             
-    //         const detailstm = await axios.post("http://127.0.0.1:8000/models/response_baseaspects" , data);
-    //         setDetail(JSON.parse(detailstm.data))
-    //         console.log(JSON.parse(detailstm.data.message))
-    //     }
-    //     Sentiment();
-    // },[]);
+            const detailstm = await axios.post("http://127.0.0.1:8000/models/response_baseaspects" , data);
+            setDetail(detailstm.data)
+        }
+        Sentiment();
+    },[]);
 
-    // const renderAsp = detailsSen.results.map((data,index)=>{
-    //     return(
-    //         <div className="py-2 border-b">
-    //             <div className="pl-4">
-    //                 <CustomTag nameTag={"Sentence"} text={"Hihi"}></CustomTag>
-    //                 </div>
-    //                     <div className="flex flex-col pl-4">
-    //                 <div className="">
-    //                     <CustomTag nameTag={"Sentiment"} data={data.sentiment} colorTag={"bg-cyan-500"}></CustomTag>
-    //                     </div>
-    //                         <div className="flex flex-row">
-    //                             <CustomTag nameTag={"Aspect"} colorTag={"bg-yellow-500"}></CustomTag>
-    //                         <CustomTag nameTag={"Opinion"} colorTag={"bg-orange-500"}></CustomTag>
-    //                     </div>
-    //             </div>
-    //         </div>
-    //     )
-    // })
+    console.log(detailsSen?.message.results);
+    const renderAsp = detailsSen?.message.results.map((data,index)=>{
+        return(
+            <div className="py-2 border-b">
+                <div className="pl-4">
+                    <CustomTag nameTag={"Sentence"} text={data["sentence analyze"]}></CustomTag>
+                    </div>
+                        <div className="flex flex-col pl-4">
+                    <div className="">
+                        <CustomTag nameTag={"Sentiment"} data={data?.sentiment} colorTag={"bg-cyan-500"}></CustomTag>
+                        </div>
+                            <div className="flex flex-row">
+                                <CustomTag nameTag={"Aspect"} colorTag={"bg-yellow-500"} text={data?.aspect}></CustomTag>
+                            <CustomTag nameTag={"Opinion"} colorTag={"bg-orange-500"} text={data?.opinion}></CustomTag>
+                        </div>
+                </div>
+            </div>
+        )
+    })
     return (
         <div className="p-8 w-full flex flex-col h-full  bg-color-background-main">
             <NavbarDefaultLayout type="Detail Sentiment"></NavbarDefaultLayout>
@@ -124,7 +124,7 @@ function DetailSentiment() {
                                         Base aspects
                                     </div>
                                     <div className="scroll-smooth overflow-auto">
-                                        <div className="py-2 border-b">
+                                        {/* <div className="py-2 border-b">
                                             <div className="pl-4">
                                                 <CustomTag nameTag={"Sentence"}></CustomTag>
                                             </div>
@@ -137,8 +137,8 @@ function DetailSentiment() {
                                                     <CustomTag nameTag={"Opinion"} colorTag={"bg-orange-500"}></CustomTag>
                                                 </div>
                                             </div>
-                                        </div>
-                                        {/* {renderAsp} */}
+                                        </div> */}
+                                        {renderAsp}
                                     </div>
                                </div>
                             </div>

@@ -111,6 +111,7 @@ I have many note: sentiment only are  positive, negative, neutral. The important
       "opinion": "love"
     }, {"sentence analyze": "my wife do not like it","sentiment": "negative","aspect": "product", "opinion": "not like"},
     { "sentence analyze": "It is beautiful",  "sentiment": "positive","aspect": "product","opinion": "beautiful" },{"sentence analyze": "I regret to this","sentiment": "negative", "aspect": "product", "opinion": "regret"},]}
+    Không trả về những thông tin không có trong câu
 """
     prompt += sentence
     response = client.chat.completions.create(
@@ -132,12 +133,9 @@ def test_sentiment_basedaspect_level(request):
         data = json.loads(request.body.decode("utf-8"))
         text = data["text"]
         detail_sentiment = sentiment_basedaspect_a_sentence(text)
-        detail_sentiment_json = json.dumps(
-            detail_sentiment, ensure_ascii=False, indent=2
-        )
-
+    
         # Chuyển lại chuỗi JSON thành đối tượng Python
-        detail_sentiment_dict = json.loads(detail_sentiment_json)
+        detail_sentiment_dict = json.loads(detail_sentiment)
         return JsonResponse({"message": detail_sentiment_dict}, status=200)
     else:
         return JsonResponse(
@@ -314,10 +312,9 @@ def test_implicit_sentiment_model(request):
 def detect_hate_speech(text):
     # Set the prompt for GPT-3.5 or GPT-4
     prompt = (
-        f"Phân tích đoạn văn sau để xác định liệu nó chứa lời lẽ kích động thù địch hay không "
+        f"Phân tích đoạn văn sau để xác định liệu nó chứa lời lẽ kích động thù địch hay không và gây ra như thế nào?"
         f" Nếu nó chứa lời lẽ kích động thù địch, hãy chỉ ra 'Lời lẽ kích động thù địch' và cung cấp từ hoặc cụm từ cụ thể gây ra điều này."
         f"Nếu không chứa lời nói hate Speech thì trả về 'Không có từ gây căm thù'.\n\n"
-        f"Trả về object theo từng mục"
         f"Text: {text}\n\nResponse:"
     )
 
@@ -352,7 +349,7 @@ def test_hate_detect_model(request):
 def detect_offensive_language(text):
     # Set the prompt for GPT-3.5 or GPT-4
     prompt = (
-        f"Phân tích đoạn văn sau để xác định liệu nó chứa ngôn ngữ xúc phạm hay không. "
+        f"Phân tích đoạn văn sau để xác định liệu nó chứa ngôn ngữ xúc phạm hay không nếu có thì xúc phạm như thế nào?"
         f"Nếu nó chứa ngôn ngữ xúc phạm, hãy chỉ ra 'Ngôn ngữ xúc phạm' và cung cấp từ hoặc cụm từ cụ thể gây ra điều này, cùng với mô tả ngắn gọn về ngôn ngữ xúc phạm là gì? "
         f"Nếu nó không chứa ngôn ngữ xúc phạm, hãy chỉ ra 'Không chứa ngôn ngữ xúc phạm'.'.\n\n"
         f"Text: {text}\n\nResponse:"
