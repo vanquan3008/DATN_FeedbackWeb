@@ -28,6 +28,20 @@ function FormAccess(
                 console.log(err)
             }      
         }
+        else if(formtype === "filehistory"){
+            try{
+                await axios.post(`http://127.0.0.1:8000/history/delete_file_history/${datadelete}` , {
+                    "email" : user.userLogin?.email
+                } , {
+                    withCredentials : true, 
+                    headers : {token : `Bearer ${user.jwt}`}
+                })
+                    window.location.reload();
+            }
+            catch(err){
+                console.log(err)
+            }      
+        }
         else if(formtype === "post"){
             try{
                 const  idPost =  {

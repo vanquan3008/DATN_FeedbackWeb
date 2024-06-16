@@ -22,7 +22,6 @@ function SentenceHistory( {
     const [pageCurrent ,setPageCurrent] = useState(1);
     const [page ,setPage ] = useState(null);
     const [listHistory , setlistHistory] = useState([]);
-    // const [postCurrent , setpostCurrent] = useState(null);
     const user = useSelector((state)=> state.auth.login.currentUser)
     
     useEffect(() => {

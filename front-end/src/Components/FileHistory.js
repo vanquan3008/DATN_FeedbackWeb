@@ -6,7 +6,9 @@ import { useSelector } from "react-redux";
 
 function FileHistory(
     {
-        setDataHistoryFile
+        setDataHistoryFile,
+        setDelete,
+        setfileCurrent
     }
 ) {
     const [page ,setPage] = useState(0);
@@ -34,7 +36,12 @@ function FileHistory(
     console.log(user)
     const render =  listHistory.map((data , index)=>{
         return (
-            <FileHistoryComponent data={data} index={index}></FileHistoryComponent>
+            <FileHistoryComponent 
+                data={data} 
+                index={index} 
+                setDelete={setDelete} 
+                fileCurrent={setfileCurrent}
+            ></FileHistoryComponent>
         )
     });
 

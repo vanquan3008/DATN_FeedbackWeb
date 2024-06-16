@@ -7,10 +7,21 @@ import FileHistory from "../../Components/FileHistory";
 function History() {
     const [dataHistoryText , setDataHistoryText] = useState(null);
     const [deleteClick , setDelete] = useState(false);
+    // text sentiment
     const [postCurrent , setpostCurrent] = useState(null);
     const [dataHistoryFile , setDataHistoryFile] = useState(null);
+    // file sentiment
     const [fileCurrent , setFileCurrent] = useState(null);
 
+    // const [fileorTextDelete , setFileOrTextDelete] = useState(null);
+    // if(fileCurrent !== null ){
+    //     setFileOrTextDelete("history");
+    // }
+    
+    // if(postCurrent !== null){
+    //     setFileOrTextDelete("historyFile")
+    // }
+    
 
     return (
         <div className="w-screen h-screen">
@@ -29,7 +40,6 @@ function History() {
                                     <div className="w-full grow h-full">
                                         <SentenceHistory 
                                             setDataHistoryText = {setDataHistoryText}
-                                            deleteClick={deleteClick}
                                             setDelete={setDelete}
                                             setpostCurrent={setpostCurrent}
                                         ></SentenceHistory>
@@ -47,7 +57,10 @@ function History() {
                                         NO HISTORY
                                     </div> :
                                         <div className="w-full grow h-full bg-white">
-                                            <FileHistory setDataHistoryFile = {setDataHistoryFile}>
+                                            <FileHistory setDataHistoryFile = {setDataHistoryFile}
+                                                        setDelete={setDelete}
+                                                        setfileCurrent={setFileCurrent}
+                                            >    
                                             </FileHistory>
                                         </div>
                                 }
@@ -60,8 +73,8 @@ function History() {
             <FormAccess 
                 deleteClick={deleteClick} 
                 setDelete={setDelete}
-                formtype={"history"}
-                datadelete = {postCurrent}
+                formtype={postCurrent !== null ? "history" : "filehistory"}
+                datadelete = {postCurrent !==null ? postCurrent : fileCurrent}
             ></FormAccess>
         </div>
     );

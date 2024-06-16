@@ -11,4 +11,9 @@ urlpatterns = [
     path(
         "delete_text_history/<int:text_id>", views.delete_text_history, name="text_id"
     ),
+    path(
+        "delete_file_history/<int:file_id>",
+        views.delete_file_history,
+        name="delete_file_history",
+    ),
 ]

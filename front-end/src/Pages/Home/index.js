@@ -71,20 +71,31 @@ function Home() {
         const filename = file['0'].name;
         const extension = filename.split('.').pop();
         const data = new FormData();
-        data.append("file",file);
         data.append("user_id",infoUser.user_id);
+
+        console.log(file[0]);
         try{
            
             if(extension === 'txt'){
-                const generation_stm = await axios.post('http://127.0.0.1:8000/posts/txt_analysis',data ,{headers: { "Content-Type": "multipart/form-data" }});
+                data.append("file",file);
+                const generation_stm = await axios.post('http://localhost:8000/posts/txt_analysis',data ,{headers: { "Content-Type": "multipart/form-data" }});
                 setSentimentF(generation_stm.data.message)
             }
             else if(extension === 'json'){
-                const generation_stm = await axios.post('http://127.0.0.1:8000/posts/json_analysis',data ,{headers: { "Content-Type": "multipart/form-data" }});
+                data.append("file[]",file[0]);
+                const generation_stm = await axios.post('http://localhost:8000/posts/json_analysis',data,{
+                    'Accept': 'application/json',
+                    'Content-Type': 'multipart/form-data',
+            });
                 setSentimentF(generation_stm.data.message)
             }
             else if(extension === 'csv'){
-                const generation_stm = await axios.post('http://127.0.0.1:8000/posts/csv_analysis',data ,{headers: { "Content-Type": "multipart/form-data" }});
+                data.append("file[]",file[0]);
+                const generation_stm = await axios.post('http://localhost:8000/posts/csv_analysis',data ,
+                    {headers: {
+                         "Content-Type": "multipart/form-data"
+                 }
+                });
                 setSentimentF(generation_stm.data.message)
             }
             setSentimentSuccess(true);

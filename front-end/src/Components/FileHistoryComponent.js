@@ -1,7 +1,13 @@
 import Moment from "react-moment";
 
 function FileHistoryComponent(
-    {data ,index}
+    {
+        data ,
+        index ,
+        setDelete,
+        fileCurrent
+        
+    }
 ) {
     return ( 
         <div>
@@ -26,7 +32,12 @@ function FileHistoryComponent(
                     </div>
 
                     <div className=" w-2/12 flex items-center justify-center  ">
-                        <button className="text-white font-semibold text-xs rounded-xl  w-16 h-9 bg-red-500" >DELETE</button>
+                        <button className="text-white font-semibold text-xs rounded-xl  w-16 h-9 bg-red-500"
+                                onClick={()=>{
+                                    setDelete(true);
+                                    fileCurrent(data.id_file);
+                                }} 
+                        >DELETE</button>
                     </div>
                 </div>
         </div>

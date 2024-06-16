@@ -206,22 +206,25 @@ def analyze_csv_file(request):
         try:
             data = request.body.decode("utf-8")
             user_id = request.POST.get("user_id")
+            
             filename = extract_filename(data)
             csv_string = extract_string_csv(data)
             df = pd.read_csv(io.StringIO(csv_string))
-
-            key_word = "product_description"
-            texts = df[key_word].tolist()
-
+            texts = df['product_description'].tolist()
+            
             emotion_sentiment = extract_detail_emotion_a_sentence(texts)
             attitude_sentiment = extract_detail_attitude_a_sentence(texts)
             data_response = count_pos_neg_neu_sentences(texts)
+            
             pos_count = data_response["positive"]
             neg_count = data_response["negative"]
             neu_count = data_response["neutral"]
 
             if user_id:
-                user_instance = User.objects.get(pk=user_id)
+                try:
+                    user_instance = User.objects.get(pk=user_id)
+                except User.DoesNotExist:
+                    return JsonResponse({"error": "User not found"}, status=404)
                 time_save = datetime.datetime.now()
                 result_file = Result_file.objects.create(
                     user=user_instance,
@@ -239,7 +242,7 @@ def analyze_csv_file(request):
 
             return JsonResponse({"message": data_response}, status=200)
         except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
+            return JsonResponse({"error message": e}, status=400)
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500

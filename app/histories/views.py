@@ -32,8 +32,6 @@ def get_list_history_sentiment(request):
                 page = request.GET.get("page", 1)
                 page_obj = paginator.get_page(page)
                 number_page = int((len(listHistory) - 1) / 5) + 1
-                print(number_page)
-
                 data_loads = [
                     {
                         "id_text": history.id_text,
@@ -75,8 +73,6 @@ def get_list_file_history_sentiment(request):
                 page = request.GET.get("page", 1)
                 page_obj = paginator.get_page(page)
                 number_page = int((len(listHistory) - 1) / 5) + 1
-                print(number_page)
-
                 data_loads = [
                     {
                         "id_file": history.id_file,
@@ -136,4 +132,43 @@ def delete_text_history(request, text_id):
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def delete_file_history(request, file_id):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON data"}, status=400)
+
+        token = request.headers.get("token")
+        r_email = data.get("email")
+        if not token or not r_email:
+            return JsonResponse({"error": "Token and email are required"}, status=400)
+
+        if verify_token(token, email=r_email):  # Thêm tiền tố 'Bearer '
+            try:
+                file_history = Result_file.objects.filter(id_file=file_id)
+                if file_history.exists():
+                    if file_history.first().user.email == r_email:
+                        file_history.delete()
+                        return JsonResponse(
+                            {"Status": "Delete history is successfully"}, status=200
+                        )
+                    else:
+                        return JsonResponse(
+                            {"error": "File history does not belong to you"}, status=403
+                        )
+                else:
+                    return JsonResponse({"error": "File history not found"}, status=404)
+            except Exception as e:
+                return JsonResponse({"error": str(e)}, status=500)
+        else:
+            return JsonResponse({"error": "Cannot authenticate"}, status=403)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=405
         )
