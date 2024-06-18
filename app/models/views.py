@@ -127,8 +127,31 @@ def test_sentiment_basedaspect_level(request):
         data = json.loads(request.body.decode("utf-8"))
         text = data["text"]
         detail_sentiment = sentiment_basedaspect_a_sentence(text)
+        processed_results = []
+        try:
+            sentiment_data = json.loads(detail_sentiment)
+            results = sentiment_data.get("results", [])
+            print(results)
+            # Process each result
 
-        return JsonResponse({"message": detail_sentiment}, status=200)
+            for result in results:
+                sentence_analyze = result.get("sentence analyze", "")
+                sentiment = result.get("sentiment", "")
+                aspect = result.get("aspect", "")
+                opinion = result.get("opinion", "")
+
+                processed_results.append(
+                    {
+                        "sentence analyze": sentence_analyze,
+                        "sentiment": sentiment,
+                        "aspect": aspect,
+                        "opinion": opinion,
+                    }
+                )
+        except:
+            JsonResponse({"error": "Can not decode json file"}, status=500)
+
+        return JsonResponse({"message": processed_results}, status=200)
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
