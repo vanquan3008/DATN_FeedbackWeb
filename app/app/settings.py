@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "comments",
     "histories",
     "others",
+    "ollama_models",
 ]
 
 MIDDLEWARE = [

@@ -78,7 +78,7 @@ def analyze_text(request):
         text = data["text"]
         user_id = data["user_id"]
         detail_sentiment = json.loads(sentiment_basedaspect_a_sentence(text))
-        detail_sentiment = extract_detail_basedaspect_from_response(detail_sentiment)
+        # detail_sentiment = extract_detail_basedaspect_from_response(detail_sentiment)
         sentiment = sentiment_a_sentence(text)
         if user_id:
             try:
@@ -95,7 +95,7 @@ def analyze_text(request):
                 detail_sentiment=detail_sentiment,
             )
             result_text.save()
-        print(sentiment)
+        print(detail_sentiment)
         return JsonResponse({"message": sentiment}, status=200)
     else:
         return JsonResponse(
