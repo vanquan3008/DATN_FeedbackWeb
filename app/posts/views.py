@@ -96,7 +96,9 @@ def analyze_text(request):
             )
             result_text.save()
         print(detail_sentiment)
-        return JsonResponse({"message": sentiment}, status=200)
+        return JsonResponse(
+            {"message": sentiment, "detail_sentiment": detail_sentiment}, status=200
+        )
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
