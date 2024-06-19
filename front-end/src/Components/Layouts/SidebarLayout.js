@@ -3,6 +3,8 @@ import { useSelector } from 'react-redux'
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logOut } from "../../Redux/apiRequest";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFileImport, faHistory } from "@fortawesome/free-solid-svg-icons";
 function Sidebar({type}) {
     const userLogin = useSelector((state)=>
         state.auth.login.currentUser
@@ -44,7 +46,9 @@ function Sidebar({type}) {
                                 href="/history"
                                 
                             >
-                                <img alt="" className="mt-2 mr-2" src={icons.iconDashboardPage}></img>
+                                <div className="my-2 ml-1.5 mr-3 w-8 h-8 flex justify-center items-center rounded-lg shadow drop-shadow-lg bg-white">
+                                    <FontAwesomeIcon className="text-black" icon={faHistory}></FontAwesomeIcon>
+                                </div>
                                 <span className="text-sm mt-1.5 mb-1.5">History</span>
                             </a>
                             <a href="/FeedBack" className={`flex flex-row p-1.5 w-auto  hover:bg-sky-200
@@ -59,7 +63,9 @@ function Sidebar({type}) {
                              ${type === "InputURL" ? 'font-medium border-solid border bg-sky-300 text-white shadow-lg shadow-gray-200' :''}
                              ${userLogin?"" :'hidden'}
                             text-center  items-center rounded-2xl`} >
-                                <img alt="" className="mt-2 mr-2" src={icons.iconTablePage}></img>
+                               <div className="my-2 ml-1.5 mr-3 w-8 h-8 flex justify-center items-center rounded-lg shadow drop-shadow-lg bg-white">
+                                    <FontAwesomeIcon className="text-black" icon={faFileImport}></FontAwesomeIcon>
+                                </div>
                                 <span className="text-sm mt-1.5 mb-1.5">Input URL</span>
                             </a>
 

@@ -21,6 +21,8 @@ from models.views import (
 )
 
 
+from users.permissions import verify_token
+
 headers_shopee = {
     "Accept": "*/*",
     "Accept-Encoding": "gzip, deflate, br",
@@ -123,31 +125,36 @@ def count_unique_attitudes_sentences(sentences):
 def comments_shopee_analysis(request):
     if request.method == "POST":
         data = json.loads(request.body)
-        url = data.get("url")
-        if not url:
-            return JsonResponse({"error": "url is required"}, status=400)
+        token = request.headers.get("token")
+        r_email = data.get("email")
+        if verify_token(token, email=r_email):
+            url = data.get("url")
+            if not url:
+                return JsonResponse({"error": "url is required"}, status=400)
 
-        comments = crawl_shopee_comments(url)
-        comments = clean_text_comment_shopee(comments)
+            comments = crawl_shopee_comments(url)
+            comments = clean_text_comment_shopee(comments)
 
-        emotion_sentiment = count_unique_emotions_sentences(comments)
-        attitude_sentiment = count_unique_attitudes_sentences(comments)
-        data_response = count_pos_neg_neu_sentences(comments)
-        pos_count = data_response["positive"]
-        neg_count = data_response["negative"]
-        neu_count = data_response["neutral"]
+            emotion_sentiment = count_unique_emotions_sentences(comments)
+            attitude_sentiment = count_unique_attitudes_sentences(comments)
+            data_response = count_pos_neg_neu_sentences(comments)
+            pos_count = data_response["positive"]
+            neg_count = data_response["negative"]
+            neu_count = data_response["neutral"]
 
-        return JsonResponse(
-            {
-                "comments": comments,
-                "emotion_sentiment": emotion_sentiment,
-                "attitude_sentiment": attitude_sentiment,
-                "positive_count": pos_count,
-                "negative_count": neg_count,
-                "neutral_count": neu_count,
-            },
-            status=200,
-        )
+            return JsonResponse(
+                {
+                    "comments": comments,
+                    "emotion_sentiment": emotion_sentiment,
+                    "attitude_sentiment": attitude_sentiment,
+                    "positive_count": pos_count,
+                    "negative_count": neg_count,
+                    "neutral_count": neu_count,
+                },
+                status=200,
+            )
+        else:
+            return JsonResponse({"Un Authenticated"} , status=401)
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
@@ -201,7 +208,6 @@ def fetch_lazada_reviews(item_id, headers, page=1):
         ),
     }
     response = requests.get(url, headers=headers, params=params)
-    print(response.json())
     if response.status_code == 200:
         return response.json().get("data", {}).get("reviewList", [])
     return []
@@ -329,28 +335,35 @@ def crawl_tiki_comments(url):
 def comments_tiki_analysis(request):
     if request.method == "POST":
         data = json.loads(request.body)
-        url = data.get("url")
-        if not url:
-            return JsonResponse({"error": "url is required"}, status=400)
+        token = request.headers.get("token")
+        r_email = data.get("email")
+        if verify_token(token, email=r_email):
+            url = data.get("url")
+            if not url:
+                return JsonResponse({"error": "url is required"}, status=400)
 
-        comments = crawl_tiki_comments(url)
-        emotion_sentiment = count_unique_emotions_sentences(comments)
-        attitude_sentiment = count_unique_attitudes_sentences(comments)
-        data_response = count_pos_neg_neu_sentences(comments)
-        pos_count = data_response["positive"]
-        neg_count = data_response["negative"]
-        neu_count = data_response["neutral"]
+            comments = crawl_tiki_comments(url)
+            emotion_sentiment = count_unique_emotions_sentences(comments)
+            attitude_sentiment = count_unique_attitudes_sentences(comments)
+            data_response = count_pos_neg_neu_sentences(comments)
+            pos_count = data_response["positive"]
+            neg_count = data_response["negative"]
+            neu_count = data_response["neutral"]
 
-        return JsonResponse(
-            {
-                "comments": comments,
-                "emotion_sentiment": emotion_sentiment,
-                "attitude_sentiment": attitude_sentiment,
-                "positive_count": pos_count,
-                "negative_count": neg_count,
-                "neutral_count": neu_count,
-            },
-            status=200,
+            return JsonResponse(
+                {
+                    "comments": comments,
+                    "emotion_sentiment": emotion_sentiment,
+                    "attitude_sentiment": attitude_sentiment,
+                    "positive_count": pos_count,
+                    "negative_count": neg_count,
+                    "neutral_count": neu_count,
+                },
+                status=200,
+            )
+        else:
+            return JsonResponse(
+            {"error": "Un Authentication"}, status=401
         )
     else:
         return JsonResponse(

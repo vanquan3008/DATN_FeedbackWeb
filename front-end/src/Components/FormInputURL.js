@@ -17,11 +17,13 @@ function FormInputUrl(
         navigator("/DetailsFiles" , {
             state : {
                 url ,
-                type : "url",
+                type : "Url",
                 option
             }
         })
     }
+
+    
 
     return ( 
         <div className={` ${close === true?"hidden" : "flex fixed"} justify-center text-center items-center top-0 left-0  w-screen h-screen bg-color-background `}>

@@ -5,6 +5,7 @@ import { ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import ResultSentimentText from "../../Components/ResultSentimetText.js";
 
 // Data biểu đồ tròn
 
@@ -24,6 +25,7 @@ function Home() {
     const textRef = useRef();
     const [file ,setFile] = useState(null);
     const navigator = useNavigate();
+    const [loading ,setLoading] = useState(false);
 
     const handleChange = (event) => {
         setOption(event.target.value);
@@ -49,6 +51,7 @@ function Home() {
         }
 
         setText(textRef.current?.value);
+        setLoading(true);
         try{
             const text =
             {
@@ -59,21 +62,21 @@ function Home() {
             setTextSentiment(textRef.current?.value)
             setSentimentSuccess(true);
             setSentiment(capitalizeFirstLetter(generation_stm.data.message));
+            setLoading(false);
         }
         catch(err){
             setSentimentSuccess(false);
+            setLoading(false);
         }
     }
 
 
     const sentimentFile = async()=>{ 
-    
+        setLoading(true);
         const filename = file['0'].name;
         const extension = filename.split('.').pop();
         const data = new FormData();
         data.append("user_id",infoUser.user_id);
-
-        console.log(file[0]);
         try{
            
             if(extension === 'txt'){
@@ -99,9 +102,10 @@ function Home() {
                 setSentimentF(generation_stm.data.message)
             }
             setSentimentSuccess(true);
-            
+            setLoading(false);
         }
         catch(err){
+            setLoading(false);
             setSentimentSuccess(false);
         }
     }
@@ -159,7 +163,7 @@ function Home() {
                                     <div className="w-full pt-4 pb-4 pl-12">
                                        <label className="border-b-2 font-semibold text-sky-500"> Overview</label>
                                     </div>
-                                    <div>{
+                                    <div className="h-full">{
                                         options === "textarea" ?
                                         <div>
                                             {textSentiment ?
@@ -167,18 +171,53 @@ function Home() {
                                                 <div className="flex flex-col ml-8 pl-12 py-8">
                                                     <div className="text-2xl text-sky-500 font-semibold ">Sentence</div>
                                                     <span className="text-xl p-4  ml-4 font-normal">{text}</span>
-                                                    </div> <div className={`${sentiment ? "flex flex-col" : "hidden"} ml-8 pl-12 `}>
-                                                    <div className="text-2xl text-sky-500 font-semibold ">Sentiment</div>
-                                                    <div className="text-xl p-4 ml-4 font-normal">{sentiment}</div>
+                                                </div> 
+                                                <div className={`${sentiment ? "flex flex-col" : "hidden"} mx-8 px-12 `}>
+                                                    <div className="text-2xl text-sky-500 font-semibold  float-left">Sentiment</div>
+                                                    <div className="w-full h-full flex justify-center items-center">
+                                                    {
+                                                    loading === false?
+                                                    <ResultSentimentText sentimentdetail={sentiment}></ResultSentimentText>
+                                                    :
+                                                    <div aria-label="Loading..." role="status" class="flex items-center space-x-2 ">
+                                                        <svg class="h-20 w-20 animate-spin stroke-sky-500" viewBox="0 0 256 256">
+                                                            <line x1="128" y1="32" x2="128" y2="64" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line>
+                                                            <line x1="195.9" y1="60.1" x2="173.3" y2="82.7" stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="24"></line>
+                                                            <line x1="224" y1="128" x2="192" y2="128" stroke-linecap="round" stroke-linejoin="round" stroke-width="24">
+                                                            </line>
+                                                            <line x1="195.9" y1="195.9" x2="173.3" y2="173.3" stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="24"></line>
+                                                            <line x1="128" y1="224" x2="128" y2="192" stroke-linecap="round" stroke-linejoin="round" stroke-width="24">
+                                                            </line>
+                                                            <line x1="60.1" y1="195.9" x2="82.7" y2="173.3" stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="24"></line>
+                                                            <line x1="32" y1="128" x2="64" y2="128" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line>
+                                                            <line x1="60.1" y1="60.1" x2="82.7" y2="82.7" stroke-linecap="round" stroke-linejoin="round" stroke-width="24">
+                                                            </line>
+                                                        </svg>
+                                                        <span class="text-4xl font-medium text-blue-300">Loading...</span>
+                                                    </div>
+                                                    }
+                                                    </div>
                                                 </div>
                                             </>
                                             :
                                                 <div className="flex justify-center font-bold text-center text-2xl text-sky-500">No Content</div>
                                             }
                                         </div> :
-                                        <div>
-                                            <div className={`${file && sentimentSuccess?'hidden':"flex flex-col"} justify-center font-bold text-center text-2xl text-sky-500`}>No Content</div>
-                                            <div className={`${file && sentimentSuccess ?"flex flex-col" :'hidden'} flex flex-col  justify-center text-center `}>
+                                        <div className="h-full">
+                                            <div className={`${(file && sentimentSuccess) || loading===true?'hidden':"flex flex-col"} justify-center font-bold text-center text-2xl text-sky-500`}>No Content</div>
+                                            <div class={`flex items-center flex-col pt-40 justify-center h-full ${loading=== true ? "" :"hidden"}`}>
+                                                <div class="relative pb-4">
+                                                    <div class="h-16 w-16 rounded-full border-t-8 border-b-8 border-gray-200"></div>
+                                                    <div class="absolute top-0 left-0 h-16 w-16 rounded-full border-t-8 border-b-8 border-blue-400 animate-spin">
+                                                    </div>
+                                                </div>
+                                                <div className="text-xl text-sky-500">Processing data, please wait a few minutes.</div>
+                                            </div>
+
+                                            <div className={`${file && sentimentSuccess && loading === false ?"flex flex-col" :'hidden'} flex flex-col  justify-center text-center `}>
                                                 <div>Sentiment Review Chart</div>
                                                     <ResponsiveContainer width="100%" height={300}>
                                                         <PieChart>
@@ -200,6 +239,7 @@ function Home() {
                                                         </PieChart>
                                                     </ResponsiveContainer>
                                                 </div>
+                                            
                                             </div>
                                         }
                                     </div>

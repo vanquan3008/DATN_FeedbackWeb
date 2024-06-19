@@ -47,11 +47,11 @@ def mapping_detail_sentiment(score):
     elif round(score, 3) > -0.5 and round(score, 3) <= -0.3:
         return "light negative"
     elif round(score, 3) > -0.3 and round(score, 3) <= -0.15:
-        return "neural negative"
+        return "neutral negative"
     elif round(score, 3) >= -0.15 and round(score, 3) <= 0.15:
         return "neutral"
     elif round(score, 3) > 0.15 and round(score, 3) <= 0.3:
-        return "neural positive"
+        return "neutral positive"
     elif round(score, 3) > 0.3 and round(score, 3) <= 0.5:
         return "light positive"
     elif round(score, 3) > 0.5 and round(score, 3) <= 0.8:

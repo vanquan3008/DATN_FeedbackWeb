@@ -3,7 +3,8 @@ import { loginError, loginStart, loginSuccess, logoutError, logoutStart, logoutS
 
 
 //Login
-export const loginUser = async (user , dispatch ,navigator) =>{
+export const loginUser = async (user , dispatch ,navigator,setloading ) =>{
+
     dispatch(loginStart());
     try{
         const res = await axios.post("http://localhost:8000/signin", user ,{
@@ -14,6 +15,8 @@ export const loginUser = async (user , dispatch ,navigator) =>{
     }
     catch(err){
         dispatch(loginError())
+        setloading(false);
+
     }
 }
 

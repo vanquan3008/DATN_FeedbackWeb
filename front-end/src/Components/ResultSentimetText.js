@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+
 
 function ResultSentimentText(
     {
@@ -9,24 +9,30 @@ function ResultSentimentText(
     const colorSentiment = {
         'strong negative' :'bg-red-500',
         'negative': 'bg-red-400',
+        'Negative': 'bg-red-400',
         'light negative':'bg-red-300',
         'neutral negative' :'bg-red-100',
         'neutral' : 'bg-gray-500',
+        'Neutral' : 'bg-gray-500',
         'neutral positive' :' bg-green-100',
         'light positive' :'bg-green-300',
         'positive' : 'bg-green-400',
+        'Positive' : 'bg-green-400',
         'strong positive' :'bg-green-500'
     }
 
     const textColorSentiment = {
         'strong negative' :'text-red-500',
         'negative': 'text-red-400',
+        'Negative': 'text-red-400',
         'light negative':'text-red-300',
         'neutral negative' :'text-red-100',
+        'Neutral' : 'text-gray-500',
         'neutral' : 'text-gray-500',
         'neutral positive' :' text-green-100',
         'light positive' :'text-green-300',
         'positive' : 'text-green-400',
+        'Positive' : 'text-green-400',
         'strong positive' :'text-green-500'
     }
     return ( 

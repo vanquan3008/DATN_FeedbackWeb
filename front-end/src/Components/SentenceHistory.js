@@ -22,7 +22,8 @@ function SentenceHistory( {
     const [pageCurrent ,setPageCurrent] = useState(1);
     const [page ,setPage ] = useState(null);
     const [listHistory , setlistHistory] = useState([]);
-    const user = useSelector((state)=> state.auth.login.currentUser)
+    //const [loading ,setLoading] = useState(null);
+    const user = useSelector((state)=> state.auth?.login.currentUser)
     
     useEffect(() => {
         const renderHistory = async ()=>{
@@ -44,22 +45,22 @@ function SentenceHistory( {
     const renderHistory =  listHistory.map((his , index)=>{
         return (
             <div className="flex flex-grow h-12 w-full text-center items-center border-b">
-                    <div className="w-1/12 "> {index} </div>
-                    <div className="w-5/12  text-base text-color-basic text-start"> 
-                        <div className=" pl-10 max-w-[486px] overflow-hidden truncate ">
-                            {his?.text_content}
-                        </div> 
-                   </div>
-                    <div className="text-color-basic font-normal text-base  w-1/2  justify-between text-center flex flex-row">
-                        <div className={`p-4 w-1/4 ${his?.sentiment === "neutral" ? "text-color-basic" : his.sentiment === "positive" ? "text-green-500"  : "text-red-500" } font-semibold`}>
-                            {capitalizeFirstLetter(his?.sentiment)}
-                        </div>
-                        <div className="p-4 w-1/4">
-                            <Moment format="LL" className="text-base text-color-basic">{his?.date_save}</Moment>
-                        </div>
-                        <div className=" w-1/4 flex items-center justify-center  ">
-                            <button className="text-white font-semibold text-xs rounded-xl w-16 h-9 bg-sky-500">DETAIL</button>
-                        </div>
+                <div className="w-1/12 "> {index} </div>
+                <div className="w-5/12  text-base text-color-basic text-start"> 
+                    <div className=" pl-10 max-w-[486px] overflow-hidden truncate ">
+                        {his?.text_content}
+                </div> 
+               </div>
+                <div className="text-color-basic font-normal text-base  w-1/2  justify-between text-center flex flex-row">
+                    <div className={`p-4 w-1/4 ${his?.sentiment === "neutral" ? "text-color-basic" : his.sentiment === "positive" ? "text-green-500"  : "text-red-500" } font-semibold`}>
+                        {capitalizeFirstLetter(his?.sentiment)}
+                    </div>
+                    <div className="p-4 w-1/4">
+                        <Moment format="LL" className="text-base text-color-basic">{his?.date_save}</Moment>
+                    </div>
+                    <div className=" w-1/4 flex items-center justify-center  ">
+                        <button className="text-white font-semibold text-xs rounded-xl w-16 h-9 bg-sky-500">DETAIL</button>
+                    </div>
                         <div className=" w-1/4 flex items-center justify-center  ">
                             <button className="text-white font-semibold text-xs rounded-xl  w-16 h-9 bg-red-500" 
                                 onClick={()=>{
@@ -69,8 +70,7 @@ function SentenceHistory( {
                             >DELETE</button>
                         </div>
                     </div>
-                </div>
-        )
+                </div>)
     })
 
     // Render page

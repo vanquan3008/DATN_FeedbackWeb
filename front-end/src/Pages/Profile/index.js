@@ -49,13 +49,13 @@ function Profile() {
                            </div>
                         </div>
                         <div className="ml-8 text-base text-color-basic font-normal p-2"> 
-                            Full name  : { infoUser.fullname ?<span className="pl-2">{infoUser.fullname}</span> : <span className="pl-2">(trống)</span>}
+                            Full name  : { infoUser?.fullname ?<span className="pl-2">{infoUser?.fullname}</span> : <span className="pl-2">(trống)</span>}
                         </div>
                         <div className="ml-8 text-base text-color-basic font-normal p-2">
                             Age  : <span className="pl-2">(trống)</span>
                         </div>
                         <div className="ml-8 text-base text-color-basic font-normal p-2"> 
-                            Email  :{ infoUser.email ?<span className="pl-2">{infoUser.email}</span> : <span className="pl-2">(trống)</span>}
+                            Email  :{ infoUser?.email ?<span className="pl-2">{infoUser?.email}</span> : <span className="pl-2">(trống)</span>}
                         </div>
                         <div className="ml-8 text-base text-color-basic font-normal p-2"> 
                            Address  : <span className="pl-2">(trống)</span>
