@@ -60,7 +60,7 @@ def score_sentiment_a_sentence(sentence):
         messages=[
             {
                 "role": "user",
-                "content": f"You are trained to analyze and detect the sentiment of the given text.\n\n    i want output sentiment is a number has float type and value has range from -1 to 1. The closer -1, the sentiment more negative, the closer 1, the sentiment more postive. And the closer 0, the sentiment more neural. \nThe most important that output only a float number\n{sentence}",
+                "content": f"You are trained to analyze and detect the sentiment of the given text.\n\nPlease provide the sentiment score as a single float number ranging from -1 to 1. The closer the score is to -1, the more negative the sentiment; the closer to 1, the more positive the sentiment; and the closer to 0, the more neutral the sentiment. Make sure the output is only a float number, without any additional text or explanation.\n\n{sentence}",
             }
         ],
         temperature=1,
@@ -70,6 +70,13 @@ def score_sentiment_a_sentence(sentence):
         presence_penalty=0,
     )
     score_sentiment = response.choices[0].message.content.strip().lower()
+
+    try:
+        score_sentiment = float(score_sentiment)
+    except ValueError:
+        # If conversion fails, return 0.0
+        score_sentiment = 0.0
+
     return score_sentiment
 
 

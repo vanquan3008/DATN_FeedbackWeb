@@ -18,6 +18,9 @@ from models.views import (
     sentiment_basedaspect_a_sentence,
     emotion_a_sentence,
     attitude_a_sentence,
+    score_sentiment_a_sentence,
+    mapping_sentiment,
+    mapping_detail_sentiment,
 )
 
 
@@ -122,7 +125,7 @@ def count_unique_attitudes_sentences(sentences):
 
 
 @csrf_exempt
-def comments_shopee_analysis(request):
+def comments_shopee_count_sentiments(request):
     if request.method == "POST":
         data = json.loads(request.body)
         url = data.get("url")
@@ -141,12 +144,42 @@ def comments_shopee_analysis(request):
 
         return JsonResponse(
             {
-                "comments": comments,
                 "emotion_sentiment": emotion_sentiment,
                 "attitude_sentiment": attitude_sentiment,
                 "positive_count": pos_count,
                 "negative_count": neg_count,
                 "neutral_count": neu_count,
+            },
+            status=200,
+        )
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+
+@csrf_exempt
+def comments_shopee_analysis(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        url = data.get("url")
+        if not url:
+            return JsonResponse({"error": "url is required"}, status=400)
+
+        comments = crawl_shopee_comments(url)
+        comments = clean_text_comment_shopee(comments)
+
+        sentiment_comments = []
+        for comment in comments:
+            score = score_sentiment_a_sentence(comment)
+            float_score = float(score)
+            sentiment = mapping_detail_sentiment(float_score)
+            # print(sentiment)
+            sentiment_comments.append((comment, sentiment))
+
+        return JsonResponse(
+            {
+                "sentiment_detail_comments": sentiment_comments,
             },
             status=200,
         )
@@ -328,7 +361,7 @@ def crawl_tiki_comments(url):
 
 
 @csrf_exempt
-def comments_tiki_analysis(request):
+def comments_tiki_count_sentiments(request):
     if request.method == "POST":
         data = json.loads(request.body)
         url = data.get("url")
@@ -336,6 +369,7 @@ def comments_tiki_analysis(request):
             return JsonResponse({"error": "url is required"}, status=400)
 
         comments = crawl_tiki_comments(url)
+
         emotion_sentiment = count_unique_emotions_sentences(comments)
         attitude_sentiment = count_unique_attitudes_sentences(comments)
         data_response = count_pos_neg_neu_sentences(comments)
@@ -345,12 +379,41 @@ def comments_tiki_analysis(request):
 
         return JsonResponse(
             {
-                "comments": comments,
                 "emotion_sentiment": emotion_sentiment,
                 "attitude_sentiment": attitude_sentiment,
                 "positive_count": pos_count,
                 "negative_count": neg_count,
                 "neutral_count": neu_count,
+            },
+            status=200,
+        )
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+
+@csrf_exempt
+def comments_tiki_analysis(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        url = data.get("url")
+        if not url:
+            return JsonResponse({"error": "url is required"}, status=400)
+
+        comments = crawl_tiki_comments(url)
+
+        sentiment_comments = []
+        for comment in comments:
+            score = score_sentiment_a_sentence(comment)
+            float_score = float(score)
+            sentiment = mapping_detail_sentiment(float_score)
+            # print(sentiment)
+            sentiment_comments.append((comment, sentiment))
+
+        return JsonResponse(
+            {
+                "sentiment_detail_comments": sentiment_comments,
             },
             status=200,
         )
