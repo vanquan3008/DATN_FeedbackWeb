@@ -26,32 +26,32 @@ client = OpenAI(api_key=openai.api_key)
 
 def mapping_sentiment(score):
     if round(score, 3) > 0.333:
-        return "positive"
+        return "Positive"
     elif round(score, 3) < -0.333:
-        return "negative"
+        return "Negative"
     elif round(score, 3) >= -0.333 and round(score, 3) <= 0.333:
-        return "neutral"
+        return "Neutral"
 
 
 def mapping_detail_sentiment(score):
     if round(score, 3) >= -1 and round(score, 3) <= -0.8:
-        return "strong negative"
+        return "Strong negative"
     elif round(score, 3) > -0.8 and round(score, 3) <= -0.5:
-        return "negative"
+        return "Negative"
     elif round(score, 3) > -0.5 and round(score, 3) <= -0.3:
-        return "light negative"
+        return "Light negative"
     elif round(score, 3) > -0.3 and round(score, 3) <= -0.15:
-        return "neural negative"
+        return "Neural negative"
     elif round(score, 3) >= -0.15 and round(score, 3) <= 0.15:
-        return "neutral"
+        return "Neutral"
     elif round(score, 3) > 0.15 and round(score, 3) <= 0.3:
-        return "neural positive"
+        return "Neural positive"
     elif round(score, 3) > 0.3 and round(score, 3) <= 0.5:
-        return "light positive"
+        return "Light positive"
     elif round(score, 3) > 0.5 and round(score, 3) <= 0.8:
-        return "positive"
+        return "Positive"
     elif round(score, 3) > 0.8 and round(score, 3) <= 1:
-        return "strong positive"
+        return "Strong positive"
 
 
 def score_sentiment_a_sentence(sentence):
@@ -99,12 +99,12 @@ def sentiment_a_sentence(sentence):
 def sentiment_basedaspect_a_sentence(sentence):
     prompt = """You are trained to analyze and extract sentiment based-aspect opinion pairs from the given text. I want result has performance: this is json format only include
 \"sentence analyze\":\"part of sentence that you analyze aspect and sentiment\",\"sentiment\": \"sentiment\",\"aspect\": \"aspect\",\"opinion\":\"opinion\"
-I have many note: sentiment only are  positive, negative, neutral. The important that There only are in results: [ ]. For example architecture for json: { "results": [{ "sentence analyze": "this product is low battery","sentiment":"negative","aspect": "battery","opinion": "low"},{ "sentence analyze": "I love the product very much",
-      "sentiment": "positive",
-      "aspect": "product",
-      "opinion": "love"
-    }, {"sentence analyze": "my wife do not like it","sentiment": "negative","aspect": "product", "opinion": "not like"},
-    { "sentence analyze": "It is beautiful",  "sentiment": "positive","aspect": "product","opinion": "beautiful" },{"sentence analyze": "I regret to this","sentiment": "negative", "aspect": "product", "opinion": "regret"},]}
+I have many note: sentiment only are  Positive, Negative, Neutral. The important that There only are in results: [ ]. Keeping origin language from input. For example architecture for json: { "results": [{ "sentence analyze": "this product is low battery","sentiment":"Negative","aspect": "battery","opinion": "low"},{ "sentence analyze": "I love the product very much",
+      "Sentiment": "Positive",
+      "Aspect": "product",
+      "Opinion": "love"
+    }, {"sentence analyze": "my wife do not like it","sentiment": "Negative","aspect": "product", "opinion": "not like"},
+    { "sentence analyze": "It is beautiful",  "sentiment": "Positive","aspect": "product","opinion": "beautiful" },{"sentence analyze": "I regret to this","sentiment": "Negative", "aspect": "product", "opinion": "regret"},]}
 """
     prompt += sentence
     response = client.chat.completions.create(
