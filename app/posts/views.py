@@ -30,6 +30,8 @@ from models.views import (
     sentiment_basedaspect_a_sentence,
     emotion_a_sentence,
     attitude_a_sentence,
+    score_sentiment_a_sentence,
+    mapping_detail_sentiment,
 )
 
 # from certifications.certification import (
@@ -138,6 +140,30 @@ def extract_filename(data):
     filename = filename.strip('"').strip()
     filename = filename.rstrip('"')
     return filename
+
+
+@csrf_exempt
+def analyze_txt_detail_sentiment_file(request):
+    if request.method == "POST":
+        data = request.body.decode("utf-8")
+        user_id = request.POST.get("user_id")
+        txt_data = extract_txt_string(data).split("\r\n")
+        filename = extract_filename(data)
+        sentences = [sentence for sentence in txt_data if len(sentence) > 0]
+
+        sentiment_sentences = []
+        for sentence in sentences:
+            score = score_sentiment_a_sentence(sentence)
+            float_score = float(score)
+            sentiment = mapping_detail_sentiment(float_score)
+            # print(sentiment)
+            sentiment_sentences.append((sentence, sentiment))
+
+        return JsonResponse({"message": sentiment_sentences}, status=200)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
 
 
 @csrf_exempt
@@ -252,6 +278,36 @@ def analyze_csv_file(request):
         )
 
 
+@csrf_exempt
+def analyze_csv_detail_sentiment_file(request):
+    if request.method == "POST":
+        try:
+            data = request.body.decode("utf-8")
+            user_id = request.POST.get("user_id")
+            filename = extract_filename(data)
+            csv_string = extract_string_csv(data)
+            df = pd.read_csv(io.StringIO(csv_string))
+
+            key_word = "product_description"
+            texts = df[key_word].tolist()
+
+            sentiment_sentences = []
+            for sentence in texts:
+                score = score_sentiment_a_sentence(sentence)
+                float_score = float(score)
+                sentiment = mapping_detail_sentiment(float_score)
+                # print(sentiment)
+                sentiment_sentences.append((sentence, sentiment))
+
+            return JsonResponse({"message": sentiment_sentences}, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+
 ############### Json file Analysis ###############
 
 
@@ -316,6 +372,34 @@ def analyze_json_file(request):
             result_file.save()
 
         return JsonResponse({"message": data_response}, status=200)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+
+@csrf_exempt
+def analyze_json_detail_sentiment_file(request):
+    if request.method == "POST":
+        data = request.body.decode("utf-8")
+        user_id = request.POST.get("user_id")
+        filename = extract_filename(data)
+        json_string = extract_json_string(data)
+
+        json_data = json.loads(json_string)
+
+        key_word = "review"
+        texts = [json_data[i][key_word] for i in range(len(json_data))]
+
+        sentiment_sentences = []
+        for sentence in texts:
+            score = score_sentiment_a_sentence(sentence)
+            float_score = float(score)
+            sentiment = mapping_detail_sentiment(float_score)
+            # print(sentiment)
+            sentiment_sentences.append((sentence, sentiment))
+
+        return JsonResponse({"message": sentiment_sentences}, status=200)
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
