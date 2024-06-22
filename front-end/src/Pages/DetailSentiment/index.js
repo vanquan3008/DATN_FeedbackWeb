@@ -5,7 +5,7 @@ import FooterDefaultLayout from "../../Components/Layouts/FooterDefaultLayout";
 import ResultSentimentText from "../../Components/ResultSentimetText";
 import CustomTag from "../../Components/CustomTagSentiment";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 
 
@@ -23,6 +23,8 @@ function DetailSentiment() {
     const [sentiment , setSentiment] = useState("");
     const {state} = useLocation();
     const [detailsSen , setDetail] = useState(null);
+
+
     useEffect(() =>{
         const Sentiment = async() =>{
             const data = {
@@ -40,7 +42,7 @@ function DetailSentiment() {
             setEmotion(Object(emo.data).message)
         }
         Sentiment();
-    },[]);
+    },[state]);
 
 
     useEffect(() =>{
@@ -55,21 +57,19 @@ function DetailSentiment() {
         Sentiment();
     },[]);
 
-    useEffect(() =>{
-        const data = {
-            "text" : String(state)
-        }
 
+    useEffect(() =>{
         const Sentiment = async() =>{
-            
+            const data = {
+                "text" : state.text
+            }
             const detailstm = await axios.post("http://127.0.0.1:8000/models/response_baseaspects" , data);
             setDetail(detailstm.data)
+
         }
         Sentiment();
-    },[]);
-
-    console.log(detailsSen?.message.results);
-    const renderAsp = detailsSen?.message.results.map((data,index)=>{
+    },[state]);
+    const renderAsp = detailsSen?.message.map((data,index)=>{
         return(
             <div className="py-2 border-b">
                 <div className="pl-4">
@@ -77,11 +77,11 @@ function DetailSentiment() {
                     </div>
                         <div className="flex flex-col pl-4">
                     <div className="">
-                        <CustomTag nameTag={"Sentiment"} data={data?.sentiment} colorTag={"bg-cyan-500"}></CustomTag>
+                        <CustomTag nameTag={"Sentiment"} text={data['sentiment']} colorTag={"bg-cyan-500"}></CustomTag>
                         </div>
                             <div className="flex flex-row">
-                                <CustomTag nameTag={"Aspect"} colorTag={"bg-yellow-500"} text={data?.aspect}></CustomTag>
-                            <CustomTag nameTag={"Opinion"} colorTag={"bg-orange-500"} text={data?.opinion}></CustomTag>
+                                <CustomTag nameTag={"Aspect"} colorTag={"bg-yellow-500"} text={data['aspect']}></CustomTag>
+                            <CustomTag nameTag={"Opinion"} colorTag={"bg-orange-500"} text={data['opinion']}></CustomTag>
                         </div>
                 </div>
             </div>
@@ -105,21 +105,21 @@ function DetailSentiment() {
                     <div className="h-20 text-2xl font-bold p-4 ml-6">
                         Sentiment Details
                     </div>
-                    <div className="w-full h-auto flex flex-row px-10">
-                        <div className="w-5/12 mr-2 rounded-2xl bg-white min-h-72 border drop-shadow">
+                    <div className="w-full h-96 flex flex-row px-10">
+                        <div className="w-5/12 mr-2 rounded-2xl bg-white h-96 border drop-shadow">
                             <div className="text-xl font-medium border-b items-center justify-center flex p-2"> Sentence </div>
-                            <div className="w-full h-full p-4  text-xl font-thin text-color-basic">
+                            <div className="w-full h-full p-4  text-xl font-thin text-color-basic scroll-smooth overflow-auto ">
                                 <span className="w-8 py-1 px-2 h-8 text-base  text-white font-medium bg-sky-500 rounded mr-4">TEXT</span>
                                 {state.text}
                             </div>
                         </div>
-                        <div className="w-7/12 ml-2  flex flex-col rounded-2xl bg-white h-72 border drop-shadow ">
+                        <div className="w-7/12 ml-2  flex flex-col rounded-2xl bg-white border drop-shadow h-96" >
                             <div className="text-xl font-medium border-b flex items-center justify-center h-12 p-2"> Sentiment </div>
-                            <div className="flex h-60  w-full">
+                            <div className="flex w-full h-[336px]">
                                <div className="w-1/3 h-full flex justify-center items-center pb-4">
                                     <ResultSentimentText sentimentdetail={sentiment}></ResultSentimentText>
                                </div>
-                               <div className="w-2/3 h-60 flex flex-col ">
+                               <div className="w-2/3 h-full flex flex-col ">
                                     <div className="text-xl font-medium flex py-2 pr-2 border-b" >
                                         Base aspects
                                     </div>
@@ -144,7 +144,7 @@ function DetailSentiment() {
                             </div>
                         </div>
                     </div>
-                    <div className="h-20 text-2xl font-bold p-4 ml-6 ">Hehe</div>
+                    <div className="h-20 text-2xl font-bold p-4 ml-6 ">Sentimet emotional</div>
                    <div className="flex flex-col w-full px-10 h-full overflow-y-auto"> 
                         <div className="my-1"><CustomTag border={true} text={implicit} nameTag={"Implicit"} colorTag={"bg-orange-500"}></CustomTag></div>
                         <div className="my-1"><CustomTag border={true} text={hate} nameTag={"Hate Detection"} colorTag={"bg-red-500"}></CustomTag></div>

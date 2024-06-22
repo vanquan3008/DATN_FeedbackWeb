@@ -26,4 +26,5 @@ urlpatterns = [
     path("history/", include("histories.urls")),
     path("others/", include("others.urls")),
     path("models/", include("models.urls")),
+    path("ollama_models/", include("ollama_models.urls")),
 ]

@@ -32,32 +32,32 @@ client = OpenAI(api_key=openai.api_key)
 
 def mapping_sentiment(score):
     if round(score, 3) > 0.333:
-        return "positive"
+        return "Positive"
     elif round(score, 3) < -0.333:
-        return "negative"
+        return "Negative"
     elif round(score, 3) >= -0.333 and round(score, 3) <= 0.333:
-        return "neutral"
+        return "Neutral"
 
 
 def mapping_detail_sentiment(score):
     if round(score, 3) >= -1 and round(score, 3) <= -0.8:
-        return "strong negative"
+        return "Strong negative"
     elif round(score, 3) > -0.8 and round(score, 3) <= -0.5:
-        return "negative"
+        return "Negative"
     elif round(score, 3) > -0.5 and round(score, 3) <= -0.3:
-        return "light negative"
+        return "Light negative"
     elif round(score, 3) > -0.3 and round(score, 3) <= -0.15:
-        return "neutral negative"
+        return "Neutral negative"
     elif round(score, 3) >= -0.15 and round(score, 3) <= 0.15:
-        return "neutral"
+        return "Neutral"
     elif round(score, 3) > 0.15 and round(score, 3) <= 0.3:
-        return "neutral positive"
+        return "Neural positive"
     elif round(score, 3) > 0.3 and round(score, 3) <= 0.5:
-        return "light positive"
+        return "Light positive"
     elif round(score, 3) > 0.5 and round(score, 3) <= 0.8:
-        return "positive"
+        return "Positive"
     elif round(score, 3) > 0.8 and round(score, 3) <= 1:
-        return "strong positive"
+        return "Strong positive"
 
 
 def score_sentiment_a_sentence(sentence):
@@ -66,7 +66,7 @@ def score_sentiment_a_sentence(sentence):
         messages=[
             {
                 "role": "user",
-                "content": f"You are trained to analyze and detect the sentiment of the given text.\n\n i want output sentiment is a number has float type and value has range from -1 to 1. The closer -1, the sentiment more negative, the closer 1, the sentiment more postive. And the closer 0, the sentiment more neural. \nThe most important that output only a float number\n{sentence}",
+                "content": f"You are trained to analyze and detect the sentiment of the given text.\n\nPlease provide the sentiment score as a single float number ranging from -1 to 1. The closer the score is to -1, the more negative the sentiment; the closer to 1, the more positive the sentiment; and the closer to 0, the more neutral the sentiment. Make sure the output is only a float number, without any additional text or explanation.\n\n{sentence}",
             }
         ],
         temperature=1,
@@ -76,6 +76,13 @@ def score_sentiment_a_sentence(sentence):
         presence_penalty=0,
     )
     score_sentiment = response.choices[0].message.content.strip().lower()
+
+    try:
+        score_sentiment = float(score_sentiment)
+    except ValueError:
+        # If conversion fails, return 0.0
+        score_sentiment = 0.0
+
     return score_sentiment
 
 
@@ -105,13 +112,12 @@ def sentiment_a_sentence(sentence):
 def sentiment_basedaspect_a_sentence(sentence):
     prompt = """You are trained to analyze and extract sentiment based-aspect opinion pairs from the given text. I want result has performance: this is json format only include
 \"sentence analyze\":\"part of sentence that you analyze aspect and sentiment\",\"sentiment\": \"sentiment\",\"aspect\": \"aspect\",\"opinion\":\"opinion\"
-I have many note: sentiment only are  positive, negative, neutral. The important that There only are in results: [ ]. For example architecture for json: { "results": [{ "sentence analyze": "this product is low battery","sentiment":"negative","aspect": "battery","opinion": "low"},{ "sentence analyze": "I love the product very much",
-      "sentiment": "positive",
-      "aspect": "product",
-      "opinion": "love"
-    }, {"sentence analyze": "my wife do not like it","sentiment": "negative","aspect": "product", "opinion": "not like"},
-    { "sentence analyze": "It is beautiful",  "sentiment": "positive","aspect": "product","opinion": "beautiful" },{"sentence analyze": "I regret to this","sentiment": "negative", "aspect": "product", "opinion": "regret"},]}
-    Không trả về những thông tin không có trong câu
+I have many note: sentiment only are  Positive, Negative, Neutral. The important that There only are in results: [ ]. Keeping origin language from input. For example architecture for json: { "results": [{ "sentence analyze": "this product is low battery","sentiment":"Negative","aspect": "battery","opinion": "low"},{ "sentence analyze": "I love the product very much",
+      "Sentiment": "Positive",
+      "Aspect": "product",
+      "Opinion": "love"
+    }, {"sentence analyze": "my wife do not like it","sentiment": "Negative","aspect": "product", "opinion": "not like"},
+    { "sentence analyze": "It is beautiful",  "sentiment": "Positive","aspect": "product","opinion": "beautiful" },{"sentence analyze": "I regret to this","sentiment": "Negative", "aspect": "product", "opinion": "regret"},]}
 """
     prompt += sentence
     response = client.chat.completions.create(
@@ -133,10 +139,31 @@ def test_sentiment_basedaspect_level(request):
         data = json.loads(request.body.decode("utf-8"))
         text = data["text"]
         detail_sentiment = sentiment_basedaspect_a_sentence(text)
-    
-        # Chuyển lại chuỗi JSON thành đối tượng Python
-        detail_sentiment_dict = json.loads(detail_sentiment)
-        return JsonResponse({"message": detail_sentiment_dict}, status=200)
+        processed_results = []
+        try:
+            sentiment_data = json.loads(detail_sentiment)
+            results = sentiment_data.get("results", [])
+            print(results)
+            # Process each result
+
+            for result in results:
+                sentence_analyze = result.get("sentence analyze", "")
+                sentiment = result.get("sentiment", "")
+                aspect = result.get("aspect", "")
+                opinion = result.get("opinion", "")
+
+                processed_results.append(
+                    {
+                        "sentence analyze": sentence_analyze,
+                        "sentiment": sentiment,
+                        "aspect": aspect,
+                        "opinion": opinion,
+                    }
+                )
+        except:
+            JsonResponse({"error": "Can not decode json file"}, status=500)
+
+        return JsonResponse({"message": processed_results}, status=200)
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
