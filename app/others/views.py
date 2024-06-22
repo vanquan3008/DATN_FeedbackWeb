@@ -21,6 +21,7 @@ from models.views import (
     score_sentiment_a_sentence,
     mapping_sentiment,
     mapping_detail_sentiment,
+    count_exactly_sentiment,
 )
 
 
@@ -137,18 +138,18 @@ def comments_shopee_count_sentiments(request):
 
         emotion_sentiment = count_unique_emotions_sentences(comments)
         attitude_sentiment = count_unique_attitudes_sentences(comments)
-        data_response = count_pos_neg_neu_sentences(comments)
-        pos_count = data_response["positive"]
-        neg_count = data_response["negative"]
-        neu_count = data_response["neutral"]
+        # data_response = count_pos_neg_neu_sentences(comments)
+        # pos_count = data_response["positive"]
+        # neg_count = data_response["negative"]
+        # neu_count = data_response["neutral"]
+
+        count_detail_sentiments = count_exactly_sentiment(comments)
 
         return JsonResponse(
             {
                 "emotion_sentiment": emotion_sentiment,
                 "attitude_sentiment": attitude_sentiment,
-                "positive_count": pos_count,
-                "negative_count": neg_count,
-                "neutral_count": neu_count,
+                "detail_sentiment": count_detail_sentiments,
             },
             status=200,
         )
@@ -174,8 +175,9 @@ def comments_shopee_analysis(request):
             score = score_sentiment_a_sentence(comment)
             float_score = float(score)
             sentiment = mapping_detail_sentiment(float_score)
-            # print(sentiment)
-            sentiment_comments.append((comment, sentiment))
+            # Create a dictionary with the desired structure
+            sentiment_comment = {"text": comment, "sentiment": sentiment}
+            sentiment_comments.append(sentiment_comment)
 
         return JsonResponse(
             {
@@ -372,18 +374,17 @@ def comments_tiki_count_sentiments(request):
 
         emotion_sentiment = count_unique_emotions_sentences(comments)
         attitude_sentiment = count_unique_attitudes_sentences(comments)
-        data_response = count_pos_neg_neu_sentences(comments)
-        pos_count = data_response["positive"]
-        neg_count = data_response["negative"]
-        neu_count = data_response["neutral"]
+        # data_response = count_pos_neg_neu_sentences(comments)
+        # pos_count = data_response["positive"]
+        # neg_count = data_response["negative"]
+        # neu_count = data_response["neutral"]
+        count_detail_sentiments = count_exactly_sentiment(comments)
 
         return JsonResponse(
             {
                 "emotion_sentiment": emotion_sentiment,
                 "attitude_sentiment": attitude_sentiment,
-                "positive_count": pos_count,
-                "negative_count": neg_count,
-                "neutral_count": neu_count,
+                "detail_sentiment": count_detail_sentiments,
             },
             status=200,
         )
@@ -408,8 +409,9 @@ def comments_tiki_analysis(request):
             score = score_sentiment_a_sentence(comment)
             float_score = float(score)
             sentiment = mapping_detail_sentiment(float_score)
-            # print(sentiment)
-            sentiment_comments.append((comment, sentiment))
+            # Create a dictionary with the desired structure
+            sentiment_comment = {"text": comment, "sentiment": sentiment}
+            sentiment_comments.append(sentiment_comment)
 
         return JsonResponse(
             {

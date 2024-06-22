@@ -41,11 +41,11 @@ def mapping_detail_sentiment(score):
     elif round(score, 3) > -0.5 and round(score, 3) <= -0.3:
         return "Light negative"
     elif round(score, 3) > -0.3 and round(score, 3) <= -0.15:
-        return "Neural negative"
+        return "Neutral negative"
     elif round(score, 3) >= -0.15 and round(score, 3) <= 0.15:
         return "Neutral"
     elif round(score, 3) > 0.15 and round(score, 3) <= 0.3:
-        return "Neural positive"
+        return "Neutral positive"
     elif round(score, 3) > 0.3 and round(score, 3) <= 0.5:
         return "Light positive"
     elif round(score, 3) > 0.5 and round(score, 3) <= 0.8:
@@ -88,7 +88,6 @@ def sentiment_a_sentence(sentence):
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",  # Use a powerful model for sentiment analysis
         messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt},
         ],
         temperature=1,
@@ -106,7 +105,7 @@ def sentiment_a_sentence(sentence):
 def sentiment_basedaspect_a_sentence(sentence):
     prompt = """You are trained to analyze and extract sentiment based-aspect opinion pairs from the given text. I want result has performance: this is json format only include
 \"sentence analyze\":\"part of sentence that you analyze aspect and sentiment\",\"sentiment\": \"sentiment\",\"aspect\": \"aspect\",\"opinion\":\"opinion\"
-I have many note: sentiment only are  Positive, Negative, Neutral. The important that There only are in results: [ ]. Keeping origin language from input. For example architecture for json: { "results": [{ "sentence analyze": "this product is low battery","sentiment":"Negative","aspect": "battery","opinion": "low"},{ "sentence analyze": "I love the product very much",
+I have many note: sentiment only are  Positive, Negative, Neutral. The important that There only are in results: [ ]. For example architecture for json: { "results": [{ "sentence analyze": "this product is low battery","sentiment":"Negative","aspect": "battery","opinion": "low"},{ "sentence analyze": "I love the product very much",
       "Sentiment": "Positive",
       "Aspect": "product",
       "Opinion": "love"
@@ -171,16 +170,62 @@ def count_pos_neg_neu_sentences(sentences):
     num_neutral = 0
     for sentence in sentences:
         sentiment = sentiment_a_sentence(sentence)
-        if sentiment == "positive":
+        if sentiment == "positive" or sentiment == "Positive":
             num_positive += 1
-        elif sentiment == "negative":
+        elif sentiment == "negative" or sentiment == "Negative":
             num_negative += 1
-        else:
+        elif sentiment == "neutral" or sentiment == "Neutral":
             num_neutral += 1
     data_response = {
         "positive": num_positive,
         "negative": num_negative,
         "neutral": num_neutral,
+    }
+    return data_response
+
+
+def count_exactly_sentiment(sentences):
+    num_strong_neg = 0
+    num_neg = 0
+    num_light_neg = 0
+    num_neu_neg = 0
+    num_neu = 0
+    num_neu_pos = 0
+    num_light_pos = 0
+    num_pos = 0
+    num_strong_neg = 0
+    for sentence in sentences:
+        score = score_sentiment_a_sentence(sentence)
+        float_score = float(score)
+        sentiment = mapping_detail_sentiment(float_score)
+        if sentiment == "Strong negative":
+            num_strong_neg += 1
+        elif sentiment == "Negative":
+            num_neg += 1
+        elif sentiment == "Light negative":
+            num_light_neg += 1
+        elif sentiment == "Neutral negative":
+            num_neu_neg += 1
+        elif sentiment == "Neutral":
+            num_neu += 1
+        elif sentiment == "Neutral positive":
+            num_neu_pos += 1
+        elif sentiment == "Light positive":
+            num_light_pos += 1
+        elif sentiment == "Positive":
+            num_pos += 1
+        elif sentiment == "Strong positive":
+            num_strong_neg += 1
+    data_response = {
+        "strong_negative": num_strong_neg,
+        "negative": num_neg,
+        "light_negative": num_light_neg,
+        "neutral_negative": num_neu_neg,
+        "neutral": num_neu,
+        "neutral_positive": num_neu_pos,
+        "light_positive": num_light_pos,
+        "positive": num_pos,
+        "strong_positive": num_strong_neg,
     }
     return data_response
 
