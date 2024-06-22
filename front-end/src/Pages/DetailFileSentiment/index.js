@@ -26,6 +26,7 @@ function DetailFilesSentiment(
 
 
 
+
     useEffect(() => {
         if (state?.type === "Url") {
             const data = {
@@ -62,11 +63,79 @@ function DetailFilesSentiment(
         }
     }, []);
     
+
+
+    // useEffect(()=>{
+    //     if (state?.type === "Url") {
+    //         const data = {
+    //             "url": state?.url, 
+    //             "email": infoUser?.email
+    //         };
+    //         const fetchData = async () => {
+    //             try{
+    //                 setloadingDetail(true);
+    //                 let getData;
+    //                 if (state?.option === "Tiki") { // Assuming the other type is Tiki
+    //                     getData = await axios.post("http://127.0.0.1:8000/others/comments_tiki_count_sentiments", data, {
+    //                         withCredentials: true,
+    //                         headers: { token: `Bearer ${userLogin?.jwt}` }
+    //                     });
+    //                 } else if (state?.option === "Shopee") {
+    //                     getData = await axios.post("http://127.0.0.1:8000/others/comments_shopee_count_sentiments", data, {
+    //                         withCredentials: true,
+    //                         headers: { token: `Bearer ${userLogin?.jwt}` }
+    //                     });
+    //             }}
+    //             catch (err) {
+
+    //             }
+    //         }}});
         
     const data =[
         { name: 'Positive',value: dataSentiment?.positive_count},
         { name: 'Negative',value:dataSentiment?.negative_count},
         { name: 'Neutral', value: dataSentiment?.neutral_count},
+    ]
+
+    const dataDetailSentiment = [ 
+        {
+            "name": "S_Pos",
+            "S-Pos": dataSentiment?.detail_sentiment['strong_positive'] ?? 0,
+          },
+        {
+            "name": "Positive",
+            "Pos": dataSentiment?.detail_sentiment['positive'] ?? 0,
+          }
+          ,{
+            "name": "L-Pos",
+            "L-Pos": dataSentiment?.detail_sentiment['light_positive'] ?? 0,
+          }, 
+          {
+            "name": "N-Pos",
+            "N-Pos": dataSentiment?.detail_sentiment['neutral_positive'] ?? 0,
+          },
+         
+          {
+            "name": "Neutral",
+            "Neu": dataSentiment?.detail_sentiment['neutral'] ??0,
+          },
+           {
+            "name": "Negative",
+            "Neg": dataSentiment?.detail_sentiment['negative'] ?? 0,
+          },
+          {
+            "name": "L-Neg",
+            "L-Neg": dataSentiment?.detail_sentiment['light_negative'] ?? 0,
+          },
+          {
+            "name": "N-Neg",
+            "N-Neg": dataSentiment?.detail_sentiment['neutral_negative'] ?? 0,
+          },
+          {
+            "name": "S-Neg",
+            "S-Neg": dataSentiment?.detail_sentiment['strong_negative'] ??0,
+          },
+         
     ]
 
 
@@ -130,7 +199,6 @@ function DetailFilesSentiment(
         }
       ]
 
-      console.log(data_attiture)
     
     return (  
         <div className="p-8 w-full flex flex-col h-auto justify-center items-center  bg-color-background-main">
@@ -171,7 +239,7 @@ function DetailFilesSentiment(
 
                                 {/* Loading  */}
 
-                            <div class={`flex items-center flex-col  justify-center h-full ${loadingDetail=== true ? "" :"hidden"}`}>
+                            <div class={`flex items-center flex-col  justify-center h-[350px] ${loadingDetail=== true ? "" :"hidden"}`}>
                                                 <div class="relative pb-4">
                                                     <div class="h-16 w-16 rounded-full border-t-8 border-b-8 border-gray-200"></div>
                                                     <div class="absolute top-0 left-0 h-16 w-16 rounded-full border-t-8 border-b-8 border-blue-400 animate-spin">
@@ -205,18 +273,33 @@ function DetailFilesSentiment(
                             </div>
                         
                             <div className="flex flex-col bg-white rounded-2xl justify-center items-center  w-1/2  drop-shadow border ">
-                                <div className="text-xl font-medium">
-                                    <div>Emotion and Attitude Sentiment Count</div>
+                                <div class={`flex items-center flex-col h-[350px]  justify-center  ${loadingDetail=== true ? "" :"hidden"}`}>
+                                    <div class="relative pb-4">
+                                        <div class="h-16 w-16 rounded-full border-t-8 border-b-8 border-gray-200"></div>
+                                            <div class="absolute top-0 left-0 h-16 w-16 rounded-full border-t-8 border-b-8 border-blue-400 animate-spin">
+                                            </div>
+                                        </div>
+                                    <div className="text-xl text-sky-500">Processing data, please wait a few minutes.</div>
                                 </div>
-                                <div>                         
-                                    <BarChart width={820} height={350} data={data_emotion}>
+                                <div className={`text-xl font-medium ${loadingDetail !== true ? "" :"hidden"}`}>
+                                    <div>Sentiment Count</div>
+                                </div>
+                                <div className={`text-xl font-medium ${loadingDetail !== true ? "" :"hidden"}`}>                         
+                                    <BarChart width={820} height={350} data={dataDetailSentiment}>
                                     <CartesianGrid strokeDasharray="3 3" />
                                     <XAxis dataKey="name" />
                                     <YAxis />
                                     <Tooltip />
-                                    <Legend />
-                                        <Bar dataKey="Attitude" fill="#8884d8" />
-                                        <Bar dataKey="emotion" fill="#82ca9d" />
+                                    <Legend /> 
+                                        <Bar dataKey="S-Neg" fill="#FF0000" stackId="a" />
+                                        <Bar dataKey="Neg" fill="#f8321e" stackId="a" />
+                                        <Bar dataKey="L-Neg" fill="#f56e60" stackId="a" />
+                                        <Bar dataKey="N-Neg" fill="#f56e60" stackId="a" />
+                                        <Bar dataKey="Neu" fill="#808080" stackId="a" />
+                                        <Bar dataKey="L-Pos" fill="#67f951" stackId="a" />
+                                        <Bar dataKey="N-Pos" fill="#82ca9d" stackId="a" />
+                                        <Bar dataKey="Pos" fill="#3af81e" stackId="a" />
+                                        <Bar dataKey="S-Pos" fill="#00FF00" stackId="a" />
                                     </BarChart>
                                 </div>
                             </div>
@@ -239,7 +322,7 @@ function DetailFilesSentiment(
                                                 <div className="text-xl text-sky-500">Processing data, please wait a few minutes.</div>
                                             </div>
 
-                                    <div className={`flex flex-col p-6 justify-center items-center ${loadingDetail === true ?"hidden":""}`}>
+                                    <div className={`flex flex-col p-6  justify-center items-center ${loadingDetail === true ?"hidden":""}`}>
                                         <div className="text-xl font-medium pb-2">
                                             <div>Attitude Sentiment Count</div>
                                         </div>

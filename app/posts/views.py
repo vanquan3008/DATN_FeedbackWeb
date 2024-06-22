@@ -32,6 +32,7 @@ from models.views import (
     attitude_a_sentence,
     score_sentiment_a_sentence,
     mapping_detail_sentiment,
+    count_exactly_sentiment,
 )
 
 
@@ -149,12 +150,13 @@ def analyze_txt_detail_sentiment_file(request):
         sentences = [sentence for sentence in txt_data if len(sentence) > 0]
 
         sentiment_sentences = []
-        for sentence in sentences:
-            score = score_sentiment_a_sentence(sentence)
+        for text in sentences:
+            score = score_sentiment_a_sentence(text)
             float_score = float(score)
             sentiment = mapping_detail_sentiment(float_score)
-            # print(sentiment)
-            sentiment_sentences.append((sentence, sentiment))
+            # Create a dictionary with the desired structure
+            sentiment_sentence = {"text": text, "sentiment": sentiment}
+            sentiment_sentences.append(sentiment_sentence)
 
         return JsonResponse({"message": sentiment_sentences}, status=200)
     else:
@@ -197,7 +199,16 @@ def analyze_txt_file(request):
             )
             result_file.save()
 
-        return JsonResponse({"message": data_response}, status=200)
+        data_response_show = count_exactly_sentiment(sentences)
+
+        return JsonResponse(
+            {
+                "count_sentiment": data_response_show,
+                "attitude_sentiment": attitude_sentiment,
+                "emotion_sentiment": emotion_sentiment,
+            },
+            status=200,
+        )
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
@@ -266,7 +277,16 @@ def analyze_csv_file(request):
             else:
                 print("Required login user")
 
-            return JsonResponse({"message": data_response}, status=200)
+            data_response_show = count_exactly_sentiment(texts)
+
+            return JsonResponse(
+                {
+                    "count_sentiment": data_response_show,
+                    "attitude_sentiment": attitude_sentiment,
+                    "emotion_sentiment": emotion_sentiment,
+                },
+                status=200,
+            )
         except Exception as e:
             return JsonResponse({"error message": e}, status=400)
     else:
@@ -289,12 +309,13 @@ def analyze_csv_detail_sentiment_file(request):
             texts = df[key_word].tolist()
 
             sentiment_sentences = []
-            for sentence in texts:
-                score = score_sentiment_a_sentence(sentence)
+            for text in texts:
+                score = score_sentiment_a_sentence(text)
                 float_score = float(score)
                 sentiment = mapping_detail_sentiment(float_score)
-                # print(sentiment)
-                sentiment_sentences.append((sentence, sentiment))
+                # Create a dictionary with the desired structure
+                sentiment_sentence = {"text": text, "sentiment": sentiment}
+                sentiment_sentences.append(sentiment_sentence)
 
             return JsonResponse({"message": sentiment_sentences}, status=200)
         except Exception as e:
@@ -368,7 +389,16 @@ def analyze_json_file(request):
             )
             result_file.save()
 
-        return JsonResponse({"message": data_response}, status=200)
+        data_response_show = count_exactly_sentiment(texts)
+
+        return JsonResponse(
+            {
+                "count_sentiment": data_response_show,
+                "attitude_sentiment": attitude_sentiment,
+                "emotion_sentiment": emotion_sentiment,
+            },
+            status=200,
+        )
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
@@ -389,12 +419,13 @@ def analyze_json_detail_sentiment_file(request):
         texts = [json_data[i][key_word] for i in range(len(json_data))]
 
         sentiment_sentences = []
-        for sentence in texts:
-            score = score_sentiment_a_sentence(sentence)
+        for text in texts:
+            score = score_sentiment_a_sentence(text)
             float_score = float(score)
             sentiment = mapping_detail_sentiment(float_score)
-            # print(sentiment)
-            sentiment_sentences.append((sentence, sentiment))
+            # Create a dictionary with the desired structure
+            sentiment_sentence = {"text": text, "sentiment": sentiment}
+            sentiment_sentences.append(sentiment_sentence)
 
         return JsonResponse({"message": sentiment_sentences}, status=200)
     else:
