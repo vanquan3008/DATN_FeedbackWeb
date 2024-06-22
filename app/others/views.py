@@ -22,6 +22,8 @@ from models.views import (
     mapping_sentiment,
     mapping_detail_sentiment,
     count_exactly_sentiment,
+    check_legal_emotion,
+    check_legal_attitude,
 )
 
 
@@ -113,15 +115,17 @@ def count_unique_emotions_sentences(sentences):
     emotions = defaultdict(int)
     for sentence in sentences:
         emotion = emotion_a_sentence(sentence)
-        emotions[emotion] += 1
+        if check_legal_emotion(emotion):
+            emotions[emotion] += 1
     return emotions
 
 
 def count_unique_attitudes_sentences(sentences):
     attitudes = defaultdict(int)
     for sentence in sentences:
-        emotion = attitude_a_sentence(sentence)
-        attitudes[emotion] += 1
+        attitude = attitude_a_sentence(sentence)
+        if check_legal_attitude(attitude):
+            attitudes[attitude] += 1
     return attitudes
 
 

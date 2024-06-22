@@ -24,6 +24,38 @@ openai.api_key = API_SECRET_KEY
 client = OpenAI(api_key=openai.api_key)
 
 
+def check_legal_emotion(word):
+    word_lower = word.lower()
+    legal_words = [
+        "angry",
+        "joyful",
+        "sad",
+        "fearful",
+        "ashame",
+        "pround",
+        "elated",
+        "not sure",
+    ]
+    if word_lower in legal_words:
+        return True
+    return False
+
+
+def check_legal_attitude(word):
+    word_lower = word.lower()
+    legal_words = [
+        "liking",
+        "loving",
+        "hating",
+        "valuing",
+        "desiring",
+        "not sure",
+    ]
+    if word_lower in legal_words:
+        return True
+    return False
+
+
 def mapping_sentiment(score):
     if round(score, 3) > 0.333:
         return "Positive"
