@@ -15,10 +15,8 @@ import CustomTag from "../../Components/CustomTagSentiment";
 
 const COLORS = [ '#00FF00','#FF0000','#808080'];
 function DetailFilesSentiment(
-    
 
 ) {
-
     const {state} = useLocation();
     const navigate = useNavigate();
     const [dataSentiment , setDataSentiment] = useState(null);
@@ -64,8 +62,6 @@ function DetailFilesSentiment(
         }
     }, []);
     
-
-    console.log(loadingDetail);
         
     const data =[
         { name: 'Positive',value: dataSentiment?.positive_count},

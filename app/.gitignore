@@ -1,2 +1,3 @@
 .env
 app/certifications/certificate_firebase.json
+db.sqlite3

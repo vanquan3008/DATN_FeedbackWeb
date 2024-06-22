@@ -87,6 +87,8 @@ function DetailSentiment() {
             </div>
         )
     })
+
+
     return (
         <div className="p-8 w-full flex flex-col h-full  bg-color-background-main">
             <NavbarDefaultLayout type="Detail Sentiment"></NavbarDefaultLayout>
@@ -123,7 +125,7 @@ function DetailSentiment() {
                                     <div className="text-xl font-medium flex py-2 pr-2 border-b" >
                                         Base aspects
                                     </div>
-                                    <div className="scroll-smooth overflow-auto">
+                                    <div className="scroll-smooth overflow-auto w-full h-full">
                                         {/* <div className="py-2 border-b">
                                             <div className="pl-4">
                                                 <CustomTag nameTag={"Sentence"}></CustomTag>
@@ -138,7 +140,8 @@ function DetailSentiment() {
                                                 </div>
                                             </div>
                                         </div> */}
-                                        {renderAsp}
+                                        {detailsSen !== null ?
+                                        renderAsp: <div className="w-full h-full flex justify-center items-center text-blue-400 font-medium tex ">No content aspect sentiment</div>}
                                     </div>
                                </div>
                             </div>

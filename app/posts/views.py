@@ -503,6 +503,8 @@ def get_all_post_by_userid(request):
                             "content": post.content_post,
                             "date_post": post.date_post,
                             "image_content_url": post.image_content_url,
+                            "title": post.title_post,
+                            
                         }
                         for post in user_posts
                     ]

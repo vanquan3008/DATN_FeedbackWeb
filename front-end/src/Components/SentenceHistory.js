@@ -6,6 +6,7 @@ import Moment from 'react-moment';
 import * as React from 'react';
 import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
+import { useNavigate } from "react-router-dom";
 
 
 function capitalizeFirstLetter(str) {
@@ -22,8 +23,9 @@ function SentenceHistory( {
     const [pageCurrent ,setPageCurrent] = useState(1);
     const [page ,setPage ] = useState(null);
     const [listHistory , setlistHistory] = useState([]);
-    //const [loading ,setLoading] = useState(null);
+    const [textDetail , setTextDetail] = useState(null);
     const user = useSelector((state)=> state.auth?.login.currentUser)
+    const navigator = useNavigate();
     
     useEffect(() => {
         const renderHistory = async ()=>{
@@ -39,7 +41,6 @@ function SentenceHistory( {
         }
         renderHistory()
     },[pageCurrent])
-
     // Render history
 
     const renderHistory =  listHistory.map((his , index)=>{
@@ -52,19 +53,26 @@ function SentenceHistory( {
                 </div> 
                </div>
                 <div className="text-color-basic font-normal text-base  w-1/2  justify-between text-center flex flex-row">
-                    <div className={`p-4 w-1/4 ${his?.sentiment === "neutral" ? "text-color-basic" : his.sentiment === "positive" ? "text-green-500"  : "text-red-500" } font-semibold`}>
+                    <div className={`p-4 w-1/4 ${his?.sentiment === "neutral" ? "text-color-basic" : his?.sentiment === "positive" ? "text-green-500"  : "text-red-500" } font-semibold`}>
                         {capitalizeFirstLetter(his?.sentiment)}
                     </div>
                     <div className="p-4 w-1/4">
                         <Moment format="LL" className="text-base text-color-basic">{his?.date_save}</Moment>
                     </div>
                     <div className=" w-1/4 flex items-center justify-center  ">
-                        <button className="text-white font-semibold text-xs rounded-xl w-16 h-9 bg-sky-500">DETAIL</button>
+                        <button className="text-white font-semibold text-xs rounded-xl w-16 h-9 bg-sky-500" 
+                            onClick={()=>{
+                                navigator("/Details" , 
+                                    {
+                                       state : {text : his?.text_content}
+                                    }
+                                )
+                            } }>DETAIL</button>
                     </div>
                         <div className=" w-1/4 flex items-center justify-center  ">
                             <button className="text-white font-semibold text-xs rounded-xl  w-16 h-9 bg-red-500" 
                                 onClick={()=>{
-                                    setpostCurrent(his.id_text);
+                                    setpostCurrent(his?.id_text);
                                     setDelete(true);
                                 }}
                             >DELETE</button>

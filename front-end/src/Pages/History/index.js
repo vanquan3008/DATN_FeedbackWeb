@@ -21,6 +21,8 @@ function History() {
     // if(postCurrent !== null){
     //     setFileOrTextDelete("historyFile")
     // }
+
+    console.log(postCurrent);
     
 
     return (
