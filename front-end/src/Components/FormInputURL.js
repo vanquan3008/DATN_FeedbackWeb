@@ -7,7 +7,7 @@ function FormInputUrl(
     {
         close,
         setCloseForm,
-        option="File"
+        option="Tiki"
     }
 ) {
     const  [url , setUrl]  =useState("");

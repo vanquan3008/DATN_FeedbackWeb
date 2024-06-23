@@ -12,6 +12,8 @@ import openai
 from openai import OpenAI
 from collections import defaultdict
 
+from django.core.paginator import Paginator
+
 from models.views import (
     sentiment_a_sentence,
     count_pos_neg_neu_sentences,
@@ -170,33 +172,64 @@ def comments_shopee_count_sentiments(request):
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
 
-
+##################
 @csrf_exempt
 def comments_shopee_analysis(request):
     if request.method == "POST":
         data = json.loads(request.body)
         url = data.get("url")
-        if not url:
-            return JsonResponse({"error": "url is required"}, status=400)
+        # Authentications
+        token = request.headers.get("token")
+        r_email = data.get("email")
+        if verify_token(token, email=r_email):
+            if not url:
+                return JsonResponse({"error": "url is required"}, status=400)
 
-        comments = crawl_shopee_comments(url)
-        comments = clean_text_comment_shopee(comments)
+            comments = crawl_shopee_comments(url)
+            comments = clean_text_comment_shopee(comments)
 
-        sentiment_comments = []
-        for comment in comments:
-            score = score_sentiment_a_sentence(comment)
-            float_score = float(score)
-            sentiment = mapping_detail_sentiment(float_score)
-            # Create a dictionary with the desired structure
-            sentiment_comment = {"text": comment, "sentiment": sentiment}
-            sentiment_comments.append(sentiment_comment)
+            sentiment_comments = []
+            for comment in comments:
+                score = score_sentiment_a_sentence(comment)
+                float_score = float(score)
+                sentiment = mapping_detail_sentiment(float_score)
+                # Create a dictionary with the desired structure
+                sentiment_comment = {"text": comment, "sentiment": sentiment}
+                sentiment_comments.append(sentiment_comment)
+                
+            
+            page_size = 5
+            
+            if len(sentiment_comments) > 0:
+                paginator = Paginator(sentiment_comments, page_size)
+                page = request.GET.get("page", 1)
+                page_obj = paginator.get_page(page)
+                number_page = int((len(sentiment_comments) - 1) / 5) + 1
+                data_loads = [
+                    {
+                        "sentiment": comment['sentiment'],
+                        "text" : comment['text'],
+                    }
+                    for comment in page_obj
+                ]
+            else:
+                data_loads = []
+                number_page = 0
 
-        return JsonResponse(
-            {
-                "sentiment_detail_comments": sentiment_comments,
-            },
-            status=200,
-        )
+            return JsonResponse(
+                {
+                    "sentiment_detail_comments": data_loads,
+                    "page" : number_page
+                },
+                status=200,
+            )
+        else : 
+            return JsonResponse(
+                {
+                    "errors": "UnAuthorized"
+                },
+                status=200,
+            )
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
@@ -416,26 +449,56 @@ def comments_tiki_analysis(request):
     if request.method == "POST":
         data = json.loads(request.body)
         url = data.get("url")
-        if not url:
-            return JsonResponse({"error": "url is required"}, status=400)
+        
+        token = request.headers.get("token")
+        r_email = data.get("email")
+        if verify_token(token, email=r_email):
+            if not url:
+                return JsonResponse({"error": "url is required"}, status=400)
 
-        comments = crawl_tiki_comments(url)
+            comments = crawl_tiki_comments(url)
+            sentiment_comments = []
+            for comment in comments:
+                score = score_sentiment_a_sentence(comment)
+                float_score = float(score)
+                sentiment = mapping_detail_sentiment(float_score)
+                # Create a dictionary with the desired structure
+                sentiment_comment = {"text": comment, "sentiment": sentiment}
+                sentiment_comments.append(sentiment_comment)
+                
+            page_size = 5
+            
+            if len(sentiment_comments) > 0:
+                paginator = Paginator(sentiment_comments, page_size)
+                page = request.GET.get("page", 1)
+                page_obj = paginator.get_page(page)
+                number_page = int((len(sentiment_comments) - 1) / 5) + 1
+                data_loads = [
+                    {
+                            "sentiment": comment['sentiment'],
+                            "text" : comment['text'],
+                        }
+                        for comment in page_obj
+                ]
+            else:
+                data_loads = []
+                number_page = 0
 
-        sentiment_comments = []
-        for comment in comments:
-            score = score_sentiment_a_sentence(comment)
-            float_score = float(score)
-            sentiment = mapping_detail_sentiment(float_score)
-            # Create a dictionary with the desired structure
-            sentiment_comment = {"text": comment, "sentiment": sentiment}
-            sentiment_comments.append(sentiment_comment)
-
-        return JsonResponse(
-            {
-                "sentiment_detail_comments": sentiment_comments,
-            },
-            status=200,
-        )
+            return JsonResponse(
+                    {
+                        "sentiment_detail_comments": data_loads,
+                        "page":number_page
+                    },
+                    status=200,
+                )
+        else:
+             return JsonResponse(
+                    {
+                        "Error": "UnAuthenticated",
+                    },
+                    status=400,
+                )
+            
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500

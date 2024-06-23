@@ -18,5 +18,5 @@ export const icons ={
     iconSignUpPage: require('./iconSignUpPage.svg').default,
 
     iconFacebook : require('./iconFacebookColor.svg').default,
-    iconApple : require('./iconAppleColor.svg').default,
+    iconApple : require('./iconAppleColor.svg').default
 }

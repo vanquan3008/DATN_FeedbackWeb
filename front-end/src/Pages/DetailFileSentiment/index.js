@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import CustomTag from "../../Components/CustomTagSentiment";
+import { Pagination, Stack } from "@mui/material";
 
 
 
@@ -24,9 +25,16 @@ function DetailFilesSentiment(
     const infoUser = userLogin?.userLogin;
     const [loadingDetail ,setloadingDetail] = useState(false);
 
+    const [pageCurrent , setPageCurrent] = useState(1);
+    const [page ,setPage] = useState(null);
+    const [comment ,setComment] = useState([]);
+    const [loadingComment ,setLoadingComment] = useState(false);
+    const [sentimentFile ,setSentimentFile] = useState([]);
 
 
 
+    console.log(state);
+    // Sentimet
     useEffect(() => {
         if (state?.type === "Url") {
             const data = {
@@ -61,35 +69,117 @@ function DetailFilesSentiment(
             };
             fetchData();
         }
+        else{
+            const file = state.file;
+            const sentimentFile = async()=>{ 
+                const filename = file['0'].name;
+                const extension = filename.split('.').pop();
+                const data = new FormData();
+                data.append("user_id",infoUser.user_id);
+                try{
+                   setloadingDetail(true);
+                    if(extension === 'txt'){
+                        data.append("file",file);
+                        const generation_stm = await axios.post('http://localhost:8000/posts/txt_analysis',data ,{headers: { "Content-Type": "multipart/form-data" }});
+                        setDataSentiment(generation_stm.data)
+                    }
+                    else if(extension === 'json'){
+                        data.append("file[]",file[0]);
+                        const generation_stm = await axios.post('http://localhost:8000/posts/json_analysis',data,{
+                            'Accept': 'application/json',
+                            'Content-Type': 'multipart/form-data',
+                        });
+                        setDataSentiment(generation_stm.data)
+                    }
+                    else if(extension === 'csv'){
+                        data.append("file[]",file[0]);
+                        const generation_stm = await axios.post('http://localhost:8000/posts/csv_analysis',data ,
+                            {headers: {
+                                 "Content-Type": "multipart/form-data"
+                         }
+                        });
+                        setDataSentiment(generation_stm.data)
+                    }
+                    setloadingDetail(false);
+                
+                }
+                catch(err){
+                   console.log(err);
+                   setloadingDetail(false);
+                }
+            }
+            sentimentFile();
+        }
     }, []);
     
 
 
-    // useEffect(()=>{
-    //     if (state?.type === "Url") {
-    //         const data = {
-    //             "url": state?.url, 
-    //             "email": infoUser?.email
-    //         };
-    //         const fetchData = async () => {
-    //             try{
-    //                 setloadingDetail(true);
-    //                 let getData;
-    //                 if (state?.option === "Tiki") { // Assuming the other type is Tiki
-    //                     getData = await axios.post("http://127.0.0.1:8000/others/comments_tiki_count_sentiments", data, {
-    //                         withCredentials: true,
-    //                         headers: { token: `Bearer ${userLogin?.jwt}` }
-    //                     });
-    //                 } else if (state?.option === "Shopee") {
-    //                     getData = await axios.post("http://127.0.0.1:8000/others/comments_shopee_count_sentiments", data, {
-    //                         withCredentials: true,
-    //                         headers: { token: `Bearer ${userLogin?.jwt}` }
-    //                     });
-    //             }}
-    //             catch (err) {
+    useEffect(()=>{
+        if (state?.type === "Url") {
+            const data = {
+                "url": state?.url, 
+                "email": infoUser?.email
+            };
+            const fetchData = async () => {
+                try{
+                    setLoadingComment(true);
+                    let getData;
+                    if (state?.option === "Tiki") { // Assuming the other type is Tiki
+                        getData = await axios.post(`http://127.0.0.1:8000/others/comments_shopee_analysis?page=${pageCurrent}`, data, {
+                            withCredentials: true,
+                            headers: { token: `Bearer ${userLogin?.jwt}` }
+                        });
+                    } else if (state?.option === "Shopee") {
+                        getData = await axios.post(`http://127.0.0.1:8000/others/comments_shopee_analysis?page=${pageCurrent}`, data, {
+                            withCredentials: true,
+                            headers: { token: `Bearer ${userLogin?.jwt}` }
+                    });
+                    setComment(getData.data['sentiment_detail_comments'])
+                    setPage(getData.data['page']);
+                    setLoadingComment(false);
+                }}
+                catch (err) {
+                    console.log(err);
+                    setLoadingComment(false)
+                }
+            }
+            fetchData();
+        }
+    },[pageCurrent]);
+    const handleChange = (event, value) => {
+        setPageCurrent(value);
+    };
 
-    //             }
-    //         }}});
+    const colorTagComment = {
+        
+            'Strong negative' :'bg-red-600',
+            'Negative': 'bg-red-500',
+            'Light negative':'bg-red-400',
+            'Neutral negative' :'bg-red-300',
+            'Neutral' : 'bg-gray-500',
+            'Neutral positive' :' bg-green-300',
+            'Light positive' :'bg-green-400',
+            'Positive' : 'bg-green-500',
+            'Strong positive' :'bg-green-600'
+        
+    }
+
+    const renderComment = comment.map((value ,index)=>{
+        return(
+            <div className={`flex flex-row px-10 w-full `}>
+            
+
+                <div className={`my-1 w-full flex flex-row drop-shadow rounded-sm  border-spacing-y-0.5 justify-between ${loadingComment === true ? "hidden" :""}`}>
+                    <div className="w-10/12 pr-4"> 
+                        <CustomTag border={true}  text={value?.text} nameTag={"Text"} ></CustomTag>
+                            </div>
+                        <div className="w-2/12"> 
+                        <CustomTag border={true} text={""} nameTag={value?.sentiment} colorTag={colorTagComment[value?.sentiment]}></CustomTag>
+                    </div>
+                </div>
+            </div>
+        );
+    })
         
     const data =[
         { name: 'Positive',value: dataSentiment?.positive_count},
@@ -226,8 +316,10 @@ function DetailFilesSentiment(
                                 <div>
                                     <div className="text-base font-medium pl-6 pr-8 b h-6 w-full text-color-basic justify-between flex flex-row">
                                         <div className="w-3/5 h-6 flex flex-row pr-12">
-                                            <div className="w-48">{state?.type} information :</div> <div className="pl-4 h-6 w-full text-base text-black truncate ">
-                                               <a href={state?.url} className="text-blue-400 italic" target="_blank"> {state?.url}</a>
+                                            <div className="w-48">{state?.type} information :</div>
+                                             <div className="pl-4 h-6 w-full text-base text-black truncate ">
+                                                {state.type ==="File"? <div className="text-blue-400 italic">{state?.file[0].name}</div>:
+                                               <a href={state?.url} className="text-blue-400 italic" target="_blank"> {state?.url}</a>}
                                             </div>
                                         </div>
                                         <div className="w-2/5 flex flex-row">
@@ -363,16 +455,17 @@ function DetailFilesSentiment(
                         Detail Sentence Sentiment
                     </div>
                     <div className="h-full w-full">
-                        <div className="flex flex-row px-10 w-full">
-                            <div className="my-1 w-full flex flex-row justify-between">
-                                <div className="w-10/12 pr-4"> 
-                                    <CustomTag border={true} text={"Biến đổi khí hậu đã trở thành  và giao thông vận tải đã tăng cường lượng khí nhà kính trong bầu khí quyển, làm gia tăng hiệu ứng nhà kính và dẫn đến sự ấm lên toàn cầu. Hiệu ứng nhà kính xảy ra khi các khí như carbon dioxide (CO2), methane (CH4), và nitrous oxide (N2O) hấp thụ và phát lại bức xạ nhiệt từ mặt trời, giữ nhiệt trong bầu khí quyển và làm tăng nhiệt độ của Trái Đất."} nameTag={"Implicit"} colorTag={"bg-orange-500"}></CustomTag>
-                                </div>
-                                <div className="w-1/6"> 
-                                    <CustomTag border={true} text={"123"} nameTag={"Implicit"} colorTag={"bg-orange-500"}></CustomTag>
-                                </div>
-                            </div>
-                        </div>  
+                        <div className="h-full w-full flex flex-col items-center justify-center">
+                            <div class={`border-gray-300 h-20 w-20 animate-spin rounded-full border-8 border-t-blue-600 ${loadingComment === true ? "" :"hidden"}`} />
+                        
+                            {/*  */}
+                            {renderComment}
+                        </div>
+                        <div className="w-full text-2xl  flex justify-end items-center py-4 pr-20">
+                        <Stack spacing={pageCurrent}>
+                            <Pagination count={page}  color="primary" onChange={handleChange}/>
+                        </Stack>
+                    </div>
                     </div>
                 </div>
             </div>

@@ -82,7 +82,7 @@ function Home() {
             if(extension === 'txt'){
                 data.append("file",file);
                 const generation_stm = await axios.post('http://localhost:8000/posts/txt_analysis',data ,{headers: { "Content-Type": "multipart/form-data" }});
-                setSentimentF(generation_stm.data.message)
+                setSentimentF(generation_stm.data)
             }
             else if(extension === 'json'){
                 data.append("file[]",file[0]);
@@ -90,7 +90,7 @@ function Home() {
                     'Accept': 'application/json',
                     'Content-Type': 'multipart/form-data',
             });
-                setSentimentF(generation_stm.data.message)
+                setSentimentF(generation_stm.data)
             }
             else if(extension === 'csv'){
                 data.append("file[]",file[0]);
@@ -99,7 +99,7 @@ function Home() {
                          "Content-Type": "multipart/form-data"
                  }
                 });
-                setSentimentF(generation_stm.data.message)
+                setSentimentF(generation_stm.data)
             }
             setSentimentSuccess(true);
             setLoading(false);
@@ -110,11 +110,10 @@ function Home() {
         }
     }
 
-
     const data =[
-        { name: 'Positive', value:sentimentF?.positive},
-        { name: 'Negative', value: sentimentF?.negative },
-        { name: 'Neutral', value: sentimentF?.neutral },
+        { name: 'Positive', value:sentimentF?.positive_count},
+        { name: 'Negative', value: sentimentF?.negative_count },
+        { name: 'Neutral', value: sentimentF?.neutral_count },
     ]
     return ( 
        <DefaultLayout type={"Dashboard"}>
@@ -259,7 +258,13 @@ function Home() {
                                         )
                                     }  
                                     else{
-                                        navigator("/DetailsFiles")
+                                        navigator("/DetailsFiles",{
+                                            state:{
+                                                file ,
+                                                type : "File",
+                                                option : "File"
+                                            }
+                                        })
                                     }
                                 }}
                             >

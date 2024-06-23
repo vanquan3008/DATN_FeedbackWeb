@@ -203,9 +203,12 @@ def analyze_txt_file(request):
 
         return JsonResponse(
             {
-                "count_sentiment": data_response_show,
+                "detail_sentiment": data_response_show,
                 "attitude_sentiment": attitude_sentiment,
                 "emotion_sentiment": emotion_sentiment,
+                "positive_count": pos_count,
+                "negative_count": neg_count,
+                "neutral_count": neu_count,
             },
             status=200,
         )
@@ -281,9 +284,13 @@ def analyze_csv_file(request):
 
             return JsonResponse(
                 {
-                    "count_sentiment": data_response_show,
+                    "detail_sentiment": data_response_show,
                     "attitude_sentiment": attitude_sentiment,
                     "emotion_sentiment": emotion_sentiment,
+                    "positive_count": pos_count,
+                    "negative_count": neg_count,
+                    "neutral_count": neu_count,
+                    
                 },
                 status=200,
             )
@@ -393,9 +400,12 @@ def analyze_json_file(request):
 
         return JsonResponse(
             {
-                "count_sentiment": data_response_show,
+                "detail_sentiment": data_response_show,
                 "attitude_sentiment": attitude_sentiment,
                 "emotion_sentiment": emotion_sentiment,
+                "positive_count": pos_count,
+                "negative_count": neg_count,
+                "neutral_count": neu_count,
             },
             status=200,
         )

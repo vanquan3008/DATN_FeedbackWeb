@@ -2,6 +2,7 @@ import { faBell, faGear } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { icons } from "../../Assets/icons";
 import { useSelector } from 'react-redux'
+import { useNavigate } from "react-router-dom";
 
 function NavbarDefaultLayout(
     {
@@ -13,6 +14,7 @@ function NavbarDefaultLayout(
 
     const userLogin = useSelector((state)=> state.auth.login.currentUser)
     const infoUser = userLogin?.userLogin;
+    const navigate = useNavigate();
     return ( 
 
         
@@ -31,7 +33,7 @@ function NavbarDefaultLayout(
                 </div> */}
                 {
                 userLogin? 
-                <div className="flex flex-row pl-4 pr-4" >
+                <div className="flex flex-row pl-4 pr-4" onClick={()=> navigate("/Profile")} >
                     {
                     infoUser?.url_image ?<img alt="" className={`w-6 h-6 mr-2  `} src={infoUser?.url_image}></img>:
                         <img alt="" className={`w-6 h-6 mr-2  `} src={tTitleColor ==="text-black" ? icons.iconProfileLogin : icons.iconProfileSignUp}></img>

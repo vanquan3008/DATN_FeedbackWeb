@@ -24,24 +24,34 @@ function DetailSentiment() {
     const {state} = useLocation();
     const [detailsSen , setDetail] = useState(null);
 
+    const [loading , setLoading] = useState(false);
+
 
     useEffect(() =>{
-        const Sentiment = async() =>{
-            const data = {
-                "text" : state
+        try{
+            setLoading(true);
+            const Sentiment = async() =>{
+                const data = {
+                    "text" : state
+                }
+                const Implicit = await axios.post("http://127.0.0.1:8000/models/implicit_sentiment" , data);
+                const Hate = await axios.post("http://127.0.0.1:8000/models/hate_detection" , data);
+                const odetec = await axios.post("http://127.0.0.1:8000/models/offensive_detection" , data);
+                const idetec = await axios.post("http://127.0.0.1:8000/models/irony_detection" , data);
+                const emo = await axios.post("http://127.0.0.1:8000/models/emotion_recognition" , data);
+                setImplicit(Object(Implicit.data).message)
+                setHate(Object(Hate.data).message)
+                setODetection(Object(odetec.data).message)
+                setIDetection(Object(idetec.data).message)
+                setEmotion(Object(emo.data).message)
             }
-            const Implicit = await axios.post("http://127.0.0.1:8000/models/implicit_sentiment" , data);
-            const Hate = await axios.post("http://127.0.0.1:8000/models/hate_detection" , data);
-            const odetec = await axios.post("http://127.0.0.1:8000/models/offensive_detection" , data);
-            const idetec = await axios.post("http://127.0.0.1:8000/models/irony_detection" , data);
-            const emo = await axios.post("http://127.0.0.1:8000/models/emotion_recognition" , data);
-            setImplicit(Object(Implicit.data).message)
-            setHate(Object(Hate.data).message)
-            setODetection(Object(odetec.data).message)
-            setIDetection(Object(idetec.data).message)
-            setEmotion(Object(emo.data).message)
+            Sentiment();
+            setLoading(false);
         }
-        Sentiment();
+        catch(e){
+            console.log(e);
+            setLoading(false);
+        }
     },[state]);
 
 
@@ -149,12 +159,22 @@ function DetailSentiment() {
                     </div>
                     <div className="h-20 text-2xl font-bold p-4 ml-6 ">Sentimet emotional</div>
                    <div className="flex flex-col w-full px-10 h-full overflow-y-auto"> 
-                        <div className="my-1"><CustomTag border={true} text={implicit} nameTag={"Implicit"} colorTag={"bg-orange-500"}></CustomTag></div>
-                        <div className="my-1"><CustomTag border={true} text={hate} nameTag={"Hate Detection"} colorTag={"bg-red-500"}></CustomTag></div>
-                        <div className="my-1"><CustomTag border={true} text={odetection} nameTag={"Offensive Detection"} colorTag={"bg-blue-500"}></CustomTag></div>
-                        <div className="my-1"><CustomTag border={true} text={idetection} nameTag={"Irony Detection"} colorTag={"bg-cyan-500"}></CustomTag></div>
-                        <div className="my-1"><CustomTag border={true} text={emotion} nameTag={"Emotion Recognition"} colorTag={"bg-green-500"}></CustomTag></div>
+                    <div className="my-1">
+                         <CustomTag border={true} text={implicit} nameTag={"Implicit"} colorTag={"bg-orange-500"}></CustomTag>
 
+                        </div>
+                        <div className="my-1">
+                            <CustomTag border={true} text={hate} nameTag={"Hate Detection"} colorTag={"bg-red-500"}></CustomTag>
+                        </div>
+                        <div className="my-1">
+                            <CustomTag border={true} text={odetection} nameTag={"Offensive Detection"} colorTag={"bg-blue-500"}></CustomTag>
+                        </div>
+                        <div className="my-1">
+                            <CustomTag border={true} text={idetection} nameTag={"Irony Detection"} colorTag={"bg-cyan-500"}></CustomTag>
+                        </div>
+                        <div className="my-1">
+                            <CustomTag border={true} text={emotion} nameTag={"Emotion Recognition"} colorTag={"bg-green-500"}></CustomTag>
+                        </div>
                     </div>
                 </div>
             </div> 
