@@ -151,6 +151,7 @@ def analyze_txt_detail_sentiment_file(request):
         user_id = request.POST.get("user_id")
         txt_data = extract_txt_string(data).split("\r\n")
         filename = extract_filename(data)
+        
         sentences = [sentence for sentence in txt_data if len(sentence) > 0]
         page_size = 5 
         sentiment_sentences = []
@@ -197,6 +198,7 @@ def analyze_txt_file(request):
         filename = extract_filename(data)
         sentences = [sentence for sentence in txt_data if len(sentence) > 0]
 
+        print(sentences);
         # based_aspect_sentiment = sentiment_basedaspect_a_sentence(sentences)
         # emotion_sentiment = extract_detail_emotion_a_sentence(sentences)
         # attitude_sentiment = extract_detail_attitude_a_sentence(sentences)
@@ -606,7 +608,8 @@ def get_all_post_by_userid(request):
             user_posts = Post.objects.filter(user=r_user_id)
 
             if not user_posts.exists():
-                return JsonResponse({"error": "Do not have user id"}, status=404)
+                res = JsonResponse({"message": []}, status=200)
+                return res
             else:
                 if verify_token(authorization_header, user.email):
                     posts_data = [

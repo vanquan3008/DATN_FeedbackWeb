@@ -51,6 +51,10 @@ function DetailSentiment() {
         catch(e){
             console.log(e);
             setLoading(false);
+            navigate("/Error" ,{
+                state:{
+                    error : "Can not sentiment sentence"
+                }});
         }
     },[state]);
 

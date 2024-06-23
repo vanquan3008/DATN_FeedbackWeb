@@ -29,7 +29,8 @@ function DetailFilesSentiment(
     const [page ,setPage] = useState(null);
     const [comment ,setComment] = useState([]);
     const [loadingComment ,setLoadingComment] = useState(false);
-    const [sentimentFile ,setSentimentFile] = useState([]);
+
+    console.log(state)
     // Sentimet
     useEffect(() => {
         if (state?.type === "Url") {
@@ -46,7 +47,8 @@ function DetailFilesSentiment(
                             withCredentials: true,
                             headers: { token: `Bearer ${userLogin?.jwt}` }
                         });
-                    } else if (state?.option === "Shopee") {
+                    }
+                    else if (state?.option === "Shopee") {
                         getData = await axios.post("http://127.0.0.1:8000/others/comments_shopee_count_sentiments", data, {
                             withCredentials: true,
                             headers: { token: `Bearer ${userLogin?.jwt}` }
@@ -60,6 +62,11 @@ function DetailFilesSentiment(
                 }
                 catch (e) {
                     setloadingDetail(false)
+                    navigate("/Error" ,{
+                        state:{
+                            error : "Wrong error url or url import not found"
+                        }
+                    })
                 }
                 
             };
@@ -68,14 +75,14 @@ function DetailFilesSentiment(
         else{
             const file = state.file;
             const sentimentFile = async()=>{ 
-                const filename = file['0'].name;
+                const filename = file['0']?.name;
                 const extension = filename.split('.').pop();
                 const data = new FormData();
                 data.append("user_id",infoUser.user_id);
                 try{
                    setloadingDetail(true);
                     if(extension === 'txt'){
-                        data.append("file",file);
+                        data.append("file[]",file[0]);
                         const generation_stm = await axios.post('http://localhost:8000/posts/txt_analysis',data ,{headers: { "Content-Type": "multipart/form-data" }});
                         setDataSentiment(generation_stm.data);
                         
@@ -102,8 +109,11 @@ function DetailFilesSentiment(
                 
                 }
                 catch(err){
-                   console.log(err);
-                   setloadingDetail(false);
+                    navigate("/Error" ,{
+                        state:{
+                            error : "Wrong error file or file port not found"
+                        }
+                    })
                 }
             }
             sentimentFile();
@@ -111,7 +121,7 @@ function DetailFilesSentiment(
     }, []);
     
 
-    console.log(dataSentiment);
+
 
     useEffect(()=>{
         if (state?.type === "Url") {
@@ -124,22 +134,28 @@ function DetailFilesSentiment(
                     setLoadingComment(true);
                     let getData;
                     if (state?.option === "Tiki") { // Assuming the other type is Tiki
-                        getData = await axios.post(`http://127.0.0.1:8000/others/comments_shopee_analysis?page=${pageCurrent}`, data, {
+                        getData = await axios.post(`http://127.0.0.1:8000/others/comments_tiki_analysis?page=${pageCurrent}`, data, {
                             withCredentials: true,
                             headers: { token: `Bearer ${userLogin?.jwt}` }
                         });
-                    } else if (state?.option === "Shopee") {
+                    }
+                    else if (state?.option === "Shopee") {
                         getData = await axios.post(`http://127.0.0.1:8000/others/comments_shopee_analysis?page=${pageCurrent}`, data, {
                             withCredentials: true,
                             headers: { token: `Bearer ${userLogin?.jwt}` }
                     });
+                }
                     setComment(getData.data['sentiment_detail_comments'])
                     setPage(getData.data['page']);
                     setLoadingComment(false);
-                }}
+                }
                 catch (err) {
-                    console.log(err);
                     setLoadingComment(false)
+                    navigate("/Error" ,{
+                        state:{
+                            error : "Wrong error url or url import not found"
+                        }
+                    })
                 }
             }
             fetchData();
@@ -154,7 +170,7 @@ function DetailFilesSentiment(
                 try{
                    setLoadingComment(true);
                     if(extension === 'txt'){
-                        data.append("file",file);
+                        data.append("file[]",file[0]);
                         const commentFile = await axios.post('http://localhost:8000/posts/txt_detail_analysis',data ,{headers: { "Content-Type": "multipart/form-data" }});
                         setComment(commentFile.data['sentiment_detail_comments'])
                         setPage(commentFile.data['page']);
@@ -182,6 +198,10 @@ function DetailFilesSentiment(
                 }
                 catch(err){
                    setLoadingComment(false);
+                   navigate("/Error" ,{
+                    state:{
+                        error : "Wrong error file or file port not found"
+                    }})
                 }
             }
 
@@ -193,7 +213,7 @@ function DetailFilesSentiment(
     };
 
 
-    console.log(comment);
+
     const colorTagComment = {
         
             'Strong negative' :'bg-red-600',
@@ -253,27 +273,27 @@ function DetailFilesSentiment(
           {
             "name": "Neutral",
             "Neu": dataSentiment?.detail_sentiment['neutral'] ??0,
-          },
-           {
-            "name": "Negative",
-            "Neg": dataSentiment?.detail_sentiment['negative'] ?? 0,
-          },
-          {
-            "name": "L-Neg",
-            "L-Neg": dataSentiment?.detail_sentiment['light_negative'] ?? 0,
-          },
+          }, 
           {
             "name": "N-Neg",
             "N-Neg": dataSentiment?.detail_sentiment['neutral_negative'] ?? 0,
           },
+         {
+            "name": "L-Neg",
+            "L-Neg": dataSentiment?.detail_sentiment['light_negative'] ?? 0,
+          },
+          
+           {
+            "name": "Negative",
+            "Neg": dataSentiment?.detail_sentiment['negative'] ?? 0,
+          },
+
           {
             "name": "S-Neg",
             "S-Neg": dataSentiment?.detail_sentiment['strong_negative'] ??0,
           },
          
     ]
-
-    console.log(dataSentiment);
 
     const data_attiture = [
         {

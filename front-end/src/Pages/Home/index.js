@@ -80,7 +80,7 @@ function Home() {
         try{
            
             if(extension === 'txt'){
-                data.append("file",file);
+                data.append("file[]",file[0]);
                 const generation_stm = await axios.post('http://localhost:8000/posts/txt_analysis',data ,{headers: { "Content-Type": "multipart/form-data" }});
                 setSentimentF(generation_stm.data)
             }
@@ -245,7 +245,7 @@ function Home() {
                                 </div>
                             
                             </div>
-                            <button className="bg-sky-500 hover:opacity-60 text-lg text-white font-medium p-1 m-10 float-right rounded-lg" 
+                            <button className={`bg-sky-500 hover:opacity-60 text-lg text-white font-medium p-1 m-10 float-right rounded-lg  ${userLogin ? "" :"hidden"}`} 
                                 disabled={textLength === 0 && file === null ? true : false}
                                 onClick={()=>{
                                     if(options === "textarea"){

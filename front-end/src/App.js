@@ -10,6 +10,7 @@ import History from './Pages/History/index.js';
 import DetailSentiment from './Pages/DetailSentiment/index.js';
 import InputURL from './Pages/InputURL/index.js';
 import DetailFilesSentiment from './Pages/DetailFileSentiment/index.js';
+import ErrorPage from './Pages/Error/index.js';
 
 function App() {
   const user = store.getState().auth.login.currentUser;
@@ -26,6 +27,7 @@ function App() {
             <Route path="/Details" element={user?<DetailSentiment/>:<Home/>}/>
             <Route path="/DetailsFiles" element={user?<DetailFilesSentiment/>:<Home/>}/>
             <Route path="/InputURL" element={user?<InputURL/>:<Home/>}/>
+            <Route path='/Error' element={<ErrorPage/>}/>
           </Routes>
       </div>
    </BrowserRouter>
