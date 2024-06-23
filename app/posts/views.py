@@ -34,6 +34,10 @@ from models.views import (
     mapping_detail_sentiment,
     count_exactly_sentiment,
 )
+from others.views import (
+    count_unique_emotions_sentences,
+    count_unique_attitudes_sentences,
+)
 
 
 
@@ -148,7 +152,7 @@ def analyze_txt_detail_sentiment_file(request):
         txt_data = extract_txt_string(data).split("\r\n")
         filename = extract_filename(data)
         sentences = [sentence for sentence in txt_data if len(sentence) > 0]
-
+        page_size = 5 
         sentiment_sentences = []
         for text in sentences:
             score = score_sentiment_a_sentence(text)
@@ -158,7 +162,26 @@ def analyze_txt_detail_sentiment_file(request):
             sentiment_sentence = {"text": text, "sentiment": sentiment}
             sentiment_sentences.append(sentiment_sentence)
 
-        return JsonResponse({"message": sentiment_sentences}, status=200)
+            
+        if len(sentiment_sentences) > 0:
+            paginator = Paginator(sentiment_sentences, page_size)
+            page = request.GET.get("page", 1)
+            page_obj = paginator.get_page(page)
+            number_page = int((len(sentiment_sentences) - 1) / 5) + 1
+            data_loads = [
+                {
+                    "sentiment": comment['sentiment'],
+                    "text" : comment['text'],
+                }
+            for comment in page_obj
+            ]
+        else:
+            data_loads = []
+            number_page = 0
+
+        return JsonResponse(
+            {"sentiment_detail_comments": data_loads , "page":number_page}, status=200
+        )
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
@@ -175,8 +198,10 @@ def analyze_txt_file(request):
         sentences = [sentence for sentence in txt_data if len(sentence) > 0]
 
         # based_aspect_sentiment = sentiment_basedaspect_a_sentence(sentences)
-        emotion_sentiment = extract_detail_emotion_a_sentence(sentences)
-        attitude_sentiment = extract_detail_attitude_a_sentence(sentences)
+        # emotion_sentiment = extract_detail_emotion_a_sentence(sentences)
+        # attitude_sentiment = extract_detail_attitude_a_sentence(sentences)
+        emotion_sentiment = count_unique_emotions_sentences(sentences)
+        attitude_sentiment = count_unique_attitudes_sentences(sentences)
         data_response = count_pos_neg_neu_sentences(sentences)
         pos_count = data_response["positive"]
         neg_count = data_response["negative"]
@@ -250,12 +275,16 @@ def analyze_csv_file(request):
             filename = extract_filename(data)
             csv_string = extract_string_csv(data)
             df = pd.read_csv(io.StringIO(csv_string))
-            texts = df['product_description'].tolist()
-            
-            emotion_sentiment = extract_detail_emotion_a_sentence(texts)
-            attitude_sentiment = extract_detail_attitude_a_sentence(texts)
+
+
+            key_word = "product_description"
+            texts = df[key_word].tolist()
+
+            # emotion_sentiment = extract_detail_emotion_a_sentence(texts)
+            # attitude_sentiment = extract_detail_attitude_a_sentence(texts)
+            emotion_sentiment = count_unique_emotions_sentences(texts)
+            attitude_sentiment = count_unique_attitudes_sentences(texts)
             data_response = count_pos_neg_neu_sentences(texts)
-            
             pos_count = data_response["positive"]
             neg_count = data_response["negative"]
             neu_count = data_response["neutral"]
@@ -290,7 +319,6 @@ def analyze_csv_file(request):
                     "positive_count": pos_count,
                     "negative_count": neg_count,
                     "neutral_count": neu_count,
-                    
                 },
                 status=200,
             )
@@ -323,8 +351,29 @@ def analyze_csv_detail_sentiment_file(request):
                 # Create a dictionary with the desired structure
                 sentiment_sentence = {"text": text, "sentiment": sentiment}
                 sentiment_sentences.append(sentiment_sentence)
+                
+                
+            page_size = 5
+            
+            if len(sentiment_sentences) > 0:
+                paginator = Paginator(sentiment_sentences, page_size)
+                page = request.GET.get("page", 1)
+                page_obj = paginator.get_page(page)
+                number_page = int((len(sentiment_sentences) - 1) / 5) + 1
+                data_loads = [
+                    {
+                        "sentiment": comment['sentiment'],
+                        "text" : comment['text'],
+                    }
+                    for comment in page_obj
+                ]
+            else:
+                data_loads = []
+                number_page = 0
 
-            return JsonResponse({"message": sentiment_sentences}, status=200)
+            return JsonResponse(
+                {"sentiment_detail_comments": data_loads , "page":number_page}, status=200
+            )
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
     else:
@@ -370,8 +419,10 @@ def analyze_json_file(request):
         key_word = "review"
         texts = [json_data[i][key_word] for i in range(len(json_data))]
 
-        emotion_sentiment = extract_detail_emotion_a_sentence(texts)
-        attitude_sentiment = extract_detail_attitude_a_sentence(texts)
+        # emotion_sentiment = extract_detail_emotion_a_sentence(texts)
+        # attitude_sentiment = extract_detail_attitude_a_sentence(texts)
+        emotion_sentiment = count_unique_emotions_sentences(texts)
+        attitude_sentiment = count_unique_attitudes_sentences(texts)
         data_response = count_pos_neg_neu_sentences(texts)
         pos_count = data_response["positive"]
         neg_count = data_response["negative"]
@@ -436,8 +487,28 @@ def analyze_json_detail_sentiment_file(request):
             # Create a dictionary with the desired structure
             sentiment_sentence = {"text": text, "sentiment": sentiment}
             sentiment_sentences.append(sentiment_sentence)
+            
+        page_size = 5
+            
+        if len(sentiment_sentences) > 0:
+            paginator = Paginator(sentiment_sentences, page_size)
+            page = request.GET.get("page", 1)
+            page_obj = paginator.get_page(page)
+            number_page = int((len(sentiment_sentences) - 1) / 5) + 1
+            data_loads = [
+                {
+                    "sentiment": comment['sentiment'],
+                    "text" : comment['text'],
+                }
+            for comment in page_obj
+            ]
+        else:
+            data_loads = []
+            number_page = 0
 
-        return JsonResponse({"message": sentiment_sentences}, status=200)
+        return JsonResponse(
+            {"sentiment_detail_comments": data_loads , "page":number_page}, status=200
+        )
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
