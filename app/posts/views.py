@@ -182,7 +182,6 @@ def analyze_txt_file(request):
         txt_data = extract_txt_string(data).split("\r\n")
         filename = extract_filename(data)
         sentences = [sentence for sentence in txt_data if len(sentence) > 0]
-
         # based_aspect_sentiment = sentiment_basedaspect_a_sentence(sentences)
         # emotion_sentiment = extract_detail_emotion_a_sentence(sentences)
         # attitude_sentiment = extract_detail_attitude_a_sentence(sentences)
@@ -210,6 +209,7 @@ def analyze_txt_file(request):
                 number_neu=neu_count,
             )
             result_file.save()
+        print(data_response)
 
         data_response_show = count_exactly_sentiment(sentences)
 
@@ -289,7 +289,7 @@ def analyze_csv_file(request):
                     number_neu=neu_count,
                 )
                 result_file.save()
-
+            print(data_response)
             data_response_show = count_exactly_sentiment(texts)
 
             return JsonResponse(
@@ -386,6 +386,8 @@ def analyze_json_file(request):
         pos_count = data_response["positive"]
         neg_count = data_response["negative"]
         neu_count = data_response["neutral"]
+
+        print(data_response)
 
         if user_id:
             try:
