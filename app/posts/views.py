@@ -34,6 +34,10 @@ from models.views import (
     mapping_detail_sentiment,
     count_exactly_sentiment,
 )
+from others.views import (
+    count_unique_emotions_sentences,
+    count_unique_attitudes_sentences,
+)
 
 # from certifications.certification import (
 #     upload_file
@@ -161,7 +165,9 @@ def analyze_txt_detail_sentiment_file(request):
             sentiment_sentence = {"text": text, "sentiment": sentiment}
             sentiment_sentences.append(sentiment_sentence)
 
-        return JsonResponse({"message": sentiment_sentences}, status=200)
+        return JsonResponse(
+            {"sentiment_detail_comments": sentiment_sentences}, status=200
+        )
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
@@ -178,8 +184,10 @@ def analyze_txt_file(request):
         sentences = [sentence for sentence in txt_data if len(sentence) > 0]
 
         # based_aspect_sentiment = sentiment_basedaspect_a_sentence(sentences)
-        emotion_sentiment = extract_detail_emotion_a_sentence(sentences)
-        attitude_sentiment = extract_detail_attitude_a_sentence(sentences)
+        # emotion_sentiment = extract_detail_emotion_a_sentence(sentences)
+        # attitude_sentiment = extract_detail_attitude_a_sentence(sentences)
+        emotion_sentiment = count_unique_emotions_sentences(sentences)
+        attitude_sentiment = count_unique_attitudes_sentences(sentences)
         data_response = count_pos_neg_neu_sentences(sentences)
         pos_count = data_response["positive"]
         neg_count = data_response["negative"]
@@ -207,9 +215,9 @@ def analyze_txt_file(request):
 
         return JsonResponse(
             {
-                "count_sentiment": data_response_show,
-                "attitude_sentiment": attitude_sentiment,
                 "emotion_sentiment": emotion_sentiment,
+                "attitude_sentiment": attitude_sentiment,
+                "detail_sentiment": data_response_show,
             },
             status=200,
         )
@@ -254,8 +262,10 @@ def analyze_csv_file(request):
             key_word = "product_description"
             texts = df[key_word].tolist()
 
-            emotion_sentiment = extract_detail_emotion_a_sentence(texts)
-            attitude_sentiment = extract_detail_attitude_a_sentence(texts)
+            # emotion_sentiment = extract_detail_emotion_a_sentence(texts)
+            # attitude_sentiment = extract_detail_attitude_a_sentence(texts)
+            emotion_sentiment = count_unique_emotions_sentences(texts)
+            attitude_sentiment = count_unique_attitudes_sentences(texts)
             data_response = count_pos_neg_neu_sentences(texts)
             pos_count = data_response["positive"]
             neg_count = data_response["negative"]
@@ -284,9 +294,9 @@ def analyze_csv_file(request):
 
             return JsonResponse(
                 {
-                    "count_sentiment": data_response_show,
-                    "attitude_sentiment": attitude_sentiment,
                     "emotion_sentiment": emotion_sentiment,
+                    "attitude_sentiment": attitude_sentiment,
+                    "detail_sentiment": data_response_show,
                 },
                 status=200,
             )
@@ -320,7 +330,9 @@ def analyze_csv_detail_sentiment_file(request):
                 sentiment_sentence = {"text": text, "sentiment": sentiment}
                 sentiment_sentences.append(sentiment_sentence)
 
-            return JsonResponse({"message": sentiment_sentences}, status=200)
+            return JsonResponse(
+                {"sentiment_detail_comments": sentiment_sentences}, status=200
+            )
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
     else:
@@ -366,8 +378,10 @@ def analyze_json_file(request):
         key_word = "review"
         texts = [json_data[i][key_word] for i in range(len(json_data))]
 
-        emotion_sentiment = extract_detail_emotion_a_sentence(texts)
-        attitude_sentiment = extract_detail_attitude_a_sentence(texts)
+        # emotion_sentiment = extract_detail_emotion_a_sentence(texts)
+        # attitude_sentiment = extract_detail_attitude_a_sentence(texts)
+        emotion_sentiment = count_unique_emotions_sentences(texts)
+        attitude_sentiment = count_unique_attitudes_sentences(texts)
         data_response = count_pos_neg_neu_sentences(texts)
         pos_count = data_response["positive"]
         neg_count = data_response["negative"]
@@ -396,9 +410,9 @@ def analyze_json_file(request):
 
         return JsonResponse(
             {
-                "count_sentiment": data_response_show,
-                "attitude_sentiment": attitude_sentiment,
                 "emotion_sentiment": emotion_sentiment,
+                "attitude_sentiment": attitude_sentiment,
+                "detail_sentiment": data_response_show,
             },
             status=200,
         )
@@ -430,7 +444,9 @@ def analyze_json_detail_sentiment_file(request):
             sentiment_sentence = {"text": text, "sentiment": sentiment}
             sentiment_sentences.append(sentiment_sentence)
 
-        return JsonResponse({"message": sentiment_sentences}, status=200)
+        return JsonResponse(
+            {"sentiment_detail_comments": sentiment_sentences}, status=200
+        )
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
