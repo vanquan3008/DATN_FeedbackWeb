@@ -26,7 +26,7 @@ def crawl_comments_by_ollama(url):
 
     smart_scraper_graph = SmartScraperGraph(
         prompt="Hãy lấy tất cả comment trong trang web này và giữ nguyên ngôn ngữ gốc",
-        source="http://localhost:1000/page/page1",
+        source="http://localhost:4000/page/page1",
         config=graph_config,
     )
 
