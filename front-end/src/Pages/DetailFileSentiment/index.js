@@ -54,6 +54,12 @@ function DetailFilesSentiment(
                             headers: { token: `Bearer ${userLogin?.jwt}` }
                         });
                     }
+                    else if( state?.option === "Other"){
+                        getData = await axios.post("http://127.0.0.1:8000/ollama_models/comments_count_sentiment_ollama", data, {
+                            withCredentials: true,
+                            headers: { token: `Bearer ${userLogin?.jwt}` }
+                        });
+                    }
                     
                     if (getData) {
                         setDataSentiment(getData.data);   
@@ -144,7 +150,13 @@ function DetailFilesSentiment(
                             withCredentials: true,
                             headers: { token: `Bearer ${userLogin?.jwt}` }
                     });
-                }
+                    }
+                    else if(state?.option === "Other"){
+                        getData = await axios.post(`http://127.0.0.1:8000/ollama_models/comments_detail_sentiment_ollama?page=${pageCurrent}`, data, {
+                            withCredentials: true,
+                            headers: { token: `Bearer ${userLogin?.jwt}` }
+                    });
+                    }
                     setComment(getData.data['sentiment_detail_comments'])
                     setPage(getData.data['page']);
                     setLoadingComment(false);

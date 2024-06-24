@@ -225,6 +225,7 @@ def analyze_txt_file(request):
                 number_neu=neu_count,
             )
             result_file.save()
+        print(data_response)
 
         data_response_show = count_exactly_sentiment(sentences)
 
@@ -429,7 +430,6 @@ def analyze_json_file(request):
         pos_count = data_response["positive"]
         neg_count = data_response["negative"]
         neu_count = data_response["neutral"]
-
         if user_id:
             try:
                 user_instance = User.objects.get(pk=user_id)

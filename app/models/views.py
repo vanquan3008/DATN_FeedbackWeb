@@ -119,7 +119,7 @@ def score_sentiment_a_sentence(sentence):
 
 
 def sentiment_a_sentence(sentence):
-    prompt = f"""You are trained to analyze and detect the sentiment of the given text.\n    If you are unsure of an answer, you can say \"not sure\" and recommend the user review manually.\n\n    i want output sentiment only are one word: Positive, Negative,Neutral.\n\n
+    prompt = f"""You are trained to analyze and detect the sentiment of the given text.\n\n    i want output sentiment only are one word: Positive, Negative,Neutral.\n\n
     {sentence}"""
 
     # Call the OpenAI API to generate a response
@@ -235,6 +235,7 @@ def count_exactly_sentiment(sentences):
         score = score_sentiment_a_sentence(sentence)
         float_score = float(score)
         sentiment = mapping_detail_sentiment(float_score)
+        # print(sentence, score, sentiment)
         if sentiment == "Strong negative":
             num_strong_neg += 1
         elif sentiment == "Negative":
