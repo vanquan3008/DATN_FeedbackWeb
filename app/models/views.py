@@ -14,13 +14,11 @@ import openai
 from openai import OpenAI
 
 from models.helper import (
-    emotion_a_sentence ,
-    attitude_a_sentence ,
+    emotion_a_sentence,
+    attitude_a_sentence,
     score_sentiment_a_sentence,
-    mapping_detail_sentiment
+    mapping_detail_sentiment,
 )
-
-
 
 
 load_dotenv()
@@ -143,12 +141,9 @@ def sentiment_a_sentence(sentence):
 def sentiment_basedaspect_a_sentence(sentence):
     prompt = """You are trained to analyze and extract sentiment based-aspect opinion pairs from the given text. I want result has performance: this is json format only include
 \"sentence analyze\":\"part of sentence that you analyze aspect and sentiment\",\"sentiment\": \"sentiment\",\"aspect\": \"aspect\",\"opinion\":\"opinion\"
-I have many note: sentiment only are  Positive, Negative, Neutral. The important that There only are in results: [ ]. For example architecture for json: { "results": [{ "sentence analyze": "this product is low battery","sentiment":"Negative","aspect": "battery","opinion": "low"},{ "sentence analyze": "I love the product very much",
-      "Sentiment": "Positive",
-      "Aspect": "product",
-      "Opinion": "love"
-    }, {"sentence analyze": "my wife do not like it","sentiment": "Negative","aspect": "product", "opinion": "not like"},
-    { "sentence analyze": "It is beautiful",  "sentiment": "Positive","aspect": "product","opinion": "beautiful" },{"sentence analyze": "I regret to this","sentiment": "Negative", "aspect": "product", "opinion": "regret"},]}
+I have many note: sentiment only are  Positive, Negative, Neutral. The important that There only are in results: [ ]. 
+For example architecture for json: { "results": [{ "sentence analyze": "this product is low battery","sentiment":"Negative","aspect": "battery","opinion": "low"},
+{ "sentence analyze": "I love the product very much", "Sentiment": "Positive", "Aspect": "product","Opinion": "love"}, 
 """
     prompt += sentence
     response = client.chat.completions.create(
@@ -354,19 +349,25 @@ def test_score_sentiment(request):
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
+
+
 # Model Details
 
-# Sentimet details 
+
+# Sentimet details
 @csrf_exempt
 def sentiment_text_details(request):
     if request.method == "POST":
         data = json.loads(request.body.decode("utf-8"))
         text = data["text"]
-        score_details =float(score_sentiment_a_sentence(text))        
+        score_details = float(score_sentiment_a_sentence(text))
         detail_sentiment = mapping_detail_sentiment(score_details)
-     
+
         sentiment_basedaspect = sentiment_basedaspect_a_sentence(text)
-        return JsonResponse({"message": detail_sentiment,"base_aspect" : sentiment_basedaspect }, status=200)
+        return JsonResponse(
+            {"message": detail_sentiment, "base_aspect": sentiment_basedaspect},
+            status=200,
+        )
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
