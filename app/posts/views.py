@@ -149,6 +149,7 @@ def analyze_txt_detail_sentiment_file(request):
     if request.method == "POST":
         data = request.body.decode("utf-8")
         user_id = request.POST.get("user_id")
+
         txt_data = extract_txt_string(data).split("\r\n")
         filename = extract_filename(data)
         
@@ -197,8 +198,6 @@ def analyze_txt_file(request):
         txt_data = extract_txt_string(data).split("\r\n")
         filename = extract_filename(data)
         sentences = [sentence for sentence in txt_data if len(sentence) > 0]
-
-        print(sentences);
         # based_aspect_sentiment = sentiment_basedaspect_a_sentence(sentences)
         # emotion_sentiment = extract_detail_emotion_a_sentence(sentences)
         # attitude_sentiment = extract_detail_attitude_a_sentence(sentences)

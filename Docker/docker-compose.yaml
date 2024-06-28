@@ -1,0 +1,20 @@
+services:
+  backend:
+    build:
+      context: ../app
+      dockerfile: Dockerfile
+    volumes:
+      - ./app/db.sqlite3:/path/to/db.sqlite3
+    ports:
+      - "8000:8000"
+  frontend:
+    build:
+      context: ../front-end
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+
+  olama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"

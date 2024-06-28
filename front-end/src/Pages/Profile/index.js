@@ -35,6 +35,7 @@ function Profile() {
         )
     });
 
+    console.log(listPost.length)
     return ( 
        <DefaultLayout type={"Profile"}>
             <div className=" h-full flex flex-col justify-center items-center">
@@ -95,9 +96,10 @@ function Profile() {
                         <div className="flex flex-row justify-between p-4 border-b ">
                             <div className="text-xl font-medium text-color-basic"> Information Posts</div>
                         </div>
+                        {listPost.length !== 0? 
                         <div className="scroll-smooth overflow-auto w-full h-full">
                             {renderPost}
-                        </div>
+                        </div>:<div className="flex items-center justify-center h-full w-full text-xl font-medium text-sky-500">Can not post to user</div>}
                     </div>
                     
                 </div>

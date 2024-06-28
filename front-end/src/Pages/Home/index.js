@@ -76,7 +76,9 @@ function Home() {
         const filename = file['0'].name;
         const extension = filename.split('.').pop();
         const data = new FormData();
-        data.append("user_id",infoUser.user_id);
+        if(infoUser?.user_id!=null){
+            data.append("user_id",infoUser?.user_id);
+        }
         try{
            
             if(extension === 'txt'){
@@ -162,7 +164,7 @@ function Home() {
                                     <div className="w-full pt-4 pb-4 pl-12">
                                        <label className="border-b-2 font-semibold text-sky-500"> Overview</label>
                                     </div>
-                                    <div className="h-full">{
+                                    <div className="h-full w-full">{
                                         options === "textarea" ?
                                         <div>
                                             {textSentiment ?
@@ -202,11 +204,29 @@ function Home() {
                                                 </div>
                                             </>
                                             :
-                                                <div className="flex justify-center font-bold text-center text-2xl text-sky-500">No Content</div>
+                                            <>
+                                                <div className={`flex flex-col pt-20 justify-center text-sky-500 ${loading === true ? "hidden":""} `} >
+                                                    <div className="font-bold text-center text-3xl">No Content</div>
+                                                    <div className="font-medium text-center text-xl">Please provide the sentence for sentiment analysis.</div>
+                                                </div>
+                                                 <div class={`flex items-center flex-col pt-40 justify-center h-full ${loading=== true ? "" :"hidden"}`}>
+                                                 <div class="relative pb-4">
+                                                     <div class="h-16 w-16 rounded-full border-t-8 border-b-8 border-gray-200"></div>
+                                                     <div class="absolute top-0 left-0 h-16 w-16 rounded-full border-t-8 border-b-8 border-blue-400 animate-spin">
+                                                     </div>
+                                                </div>
+                                                     <div className="text-xl text-sky-500">Processing data, please wait a few minutes.</div>
+                                                </div>
+                                             </>
                                             }
                                         </div> :
                                         <div className="h-full">
-                                            <div className={`${(file && sentimentSuccess) || loading===true?'hidden':"flex flex-col"} justify-center font-bold text-center text-2xl text-sky-500`}>No Content</div>
+                                            <div className={`${(file && sentimentSuccess) || loading===true?'hidden':"flex flex-col"} justify-center font-bold text-center text-2xl text-sky-500`}>
+                                                <div className="flex flex-col pt-20 justify-center text-sky-500">
+                                                        <div className="font-bold text-center text-3xl">No Content</div>
+                                                        <div className="font-medium text-center text-xl">Please upload the file containing the text you want to analyze for sentiment.</div>
+                                                    </div>
+                                            </div>
                                             <div class={`flex items-center flex-col pt-40 justify-center h-full ${loading=== true ? "" :"hidden"}`}>
                                                 <div class="relative pb-4">
                                                     <div class="h-16 w-16 rounded-full border-t-8 border-b-8 border-gray-200"></div>

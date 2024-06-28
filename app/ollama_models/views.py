@@ -21,7 +21,9 @@ from others.views import (
     count_unique_emotions_sentences,
     count_unique_attitudes_sentences,
 )
+import nest_asyncio
 
+nest_asyncio.apply()
 
 def crawl_comments_by_ollama(url):
     graph_config = {

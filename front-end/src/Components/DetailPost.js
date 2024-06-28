@@ -104,9 +104,9 @@ function DetailPost(
                                         </div>
                                     </div>:<div>
                                         <div className="w-full h-14 border-b flex flex-row text-color-basic pl-6">
-                                                <div className="p-2 cursor-pointer hover:opacity-60">
+                                                {/* <div className="p-2 cursor-pointer hover:opacity-60">
                                                     Info User
-                                                </div>
+                                                </div> */}
                                                 <div className="p-2 cursor-pointer hover:opacity-60 " >
                                                     Detail Post
                                                 </div>

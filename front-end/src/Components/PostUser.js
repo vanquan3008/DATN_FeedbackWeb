@@ -6,7 +6,6 @@ function PostUser(
     data
 ) {
 
-    console.log(data.data.title);
     return ( 
         <div className="flex flex-row w-full border h-20 border-l-8 border-r-8">
             <div className="flex flex-col w-4/5 py-2 pl-6 justify-center">

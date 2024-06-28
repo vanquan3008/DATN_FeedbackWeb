@@ -33,19 +33,19 @@ function NavbarDefaultLayout(
                 </div> */}
                 {
                 userLogin? 
-                <div className="flex flex-row pl-4 pr-4" onClick={()=> navigate("/Profile")} >
+                <div className="flex flex-row pl-4 pr-4 cursor-pointer rounded-xl p-2 hover:bg-sky-300 group" onClick={()=> navigate("/Profile")}  >
                     {
                     infoUser?.url_image ?<img alt="" className={`w-6 h-6 mr-2  `} src={infoUser?.url_image}></img>:
-                        <img alt="" className={`w-6 h-6 mr-2  `} src={tTitleColor ==="text-black" ? icons.iconProfileLogin : icons.iconProfileSignUp}></img>
+                        <img alt="" className={`w-6 h-6 mr-2`} src={tTitleColor ==="text-black" ? icons.iconProfileLogin : icons.iconProfileSignUp}></img>
                         
                     }
-                    <span className={`${tTitleColor} text-base font-normal `}>{infoUser?.fullname}</span>
+                    <span className={`${tTitleColor} text-base font-medium group-hover:text-white`}>{infoUser?.fullname}</span>
                 </div>:
-                <div className="flex flex-row pl-4 pr-4" >
-                    <img alt="" className={`w-6 h-6 mr-2  `} src={tTitleColor ==="text-black" ? icons.iconProfileLogin : icons.iconProfileSignUp}></img>
-                    <span className={`${tTitleColor} text-base font-normal `}>Sign in</span>
+                <a alt="login" href="/" className="flex flex-row pl-4 pr-4 hover:bg-sky-300  rounded-xl group" >
+                    {/* <img alt="" className={`w-6 h-6 mr-2  `} src={tTitleColor ==="text-black" ? icons.iconProfileLogin : icons.iconProfileSignUp}></img> */}
+                    <span className={`text-sky-300 p-2   text-base font-medium cursor-pointer group-hover:text-white `}>Sign in</span>
                     
-                </div>}
+                </a>}
                 <div className="p-2">
                     <FontAwesomeIcon className={`${tTitleColor}`} icon={faGear}></FontAwesomeIcon>
                 </div>
