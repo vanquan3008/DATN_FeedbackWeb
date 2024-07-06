@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 import json
 from django.core.paginator import Paginator
+
 # Create your views here.
 from scrapegraphai.graphs import SmartScraperGraph
 from models.views import (
@@ -24,6 +25,7 @@ from others.views import (
 import nest_asyncio
 
 nest_asyncio.apply()
+
 
 def crawl_comments_by_ollama(url):
     graph_config = {
@@ -47,6 +49,7 @@ def crawl_comments_by_ollama(url):
     )
 
     result = smart_scraper_graph.run()
+    return result
 
 
 @csrf_exempt
@@ -54,14 +57,14 @@ def comments_detail_sentiment_ollama(request):
     if request.method == "POST":
         data = json.loads(request.body)
         url = data.get("url")
-        #texts = crawl_comments_by_ollama(url)
-        texts = [
-            "Sản phẩm này thật sự tuyệt vời, tôi chưa từng thấy gì tốt hơn.",
-            "Chất lượng của sản phẩm quá kém, tôi rất thất vọng.",
-            "Tôi nghĩ sản phẩm này ổn, nhưng vẫn cần cải thiện thêm một số tính năng.",
-            "Thiết kế của sản phẩm rất đẹp mắt và sang trọng.",
-            "Giá cả hợp lý, nhưng dịch vụ hỗ trợ khách hàng cần cải thiện.",
-        ]
+        texts = crawl_comments_by_ollama(url)
+        # texts = [
+        #     "Sản phẩm này thật sự tuyệt vời, tôi chưa từng thấy gì tốt hơn.",
+        #     "Chất lượng của sản phẩm quá kém, tôi rất thất vọng.",
+        #     "Tôi nghĩ sản phẩm này ổn, nhưng vẫn cần cải thiện thêm một số tính năng.",
+        #     "Thiết kế của sản phẩm rất đẹp mắt và sang trọng.",
+        #     "Giá cả hợp lý, nhưng dịch vụ hỗ trợ khách hàng cần cải thiện.",
+        # ]
         sentiment_sentences = []
         for text in texts:
             score = score_sentiment_a_sentence(text)
@@ -71,9 +74,8 @@ def comments_detail_sentiment_ollama(request):
             sentiment_sentence = {"text": text, "sentiment": sentiment}
             sentiment_sentences.append(sentiment_sentence)
 
-
         page_size = 5
-            
+
         if len(sentiment_sentences) > 0:
             paginator = Paginator(sentiment_sentences, page_size)
             page = request.GET.get("page", 1)
@@ -81,16 +83,16 @@ def comments_detail_sentiment_ollama(request):
             number_page = int((len(sentiment_sentences) - 1) / 5) + 1
             data_loads = [
                 {
-                        "sentiment": comment['sentiment'],
-                        "text" : comment['text'],
-                    }
-                    for comment in page_obj
-                ]
+                    "sentiment": comment["sentiment"],
+                    "text": comment["text"],
+                }
+                for comment in page_obj
+            ]
         else:
             data_loads = []
             number_page = 0
         return JsonResponse(
-            {"sentiment_detail_comments": data_loads , "page": number_page}, status=200
+            {"sentiment_detail_comments": data_loads, "page": number_page}, status=200
         )
     else:
         return JsonResponse(
@@ -103,15 +105,15 @@ def comments_count_sentiment_ollama(request):
     if request.method == "POST":
         data = json.loads(request.body)
         url = data.get("url")
-        # texts= crawl_comments_by_ollama(url)
+        texts = crawl_comments_by_ollama(url)
 
-        texts = [
-            "Sản phẩm này thật sự tuyệt vời, tôi chưa từng thấy gì tốt hơn.",
-            "Chất lượng của sản phẩm quá kém, tôi rất thất vọng.",
-            "Tôi nghĩ sản phẩm này ổn, nhưng vẫn cần cải thiện thêm một số tính năng.",
-            "Thiết kế của sản phẩm rất đẹp mắt và sang trọng.",
-            "Giá cả hợp lý, nhưng dịch vụ hỗ trợ khách hàng cần, cải thiện.",
-        ]
+        # texts = [
+        #     "Sản phẩm này thật sự tuyệt vời, tôi chưa từng thấy gì tốt hơn.",
+        #     "Chất lượng của sản phẩm quá kém, tôi rất thất vọng.",
+        #     "Tôi nghĩ sản phẩm này ổn, nhưng vẫn cần cải thiện thêm một số tính năng.",
+        #     "Thiết kế của sản phẩm rất đẹp mắt và sang trọng.",
+        #     "Giá cả hợp lý, nhưng dịch vụ hỗ trợ khách hàng cần, cải thiện.",
+        # ]
 
         emotion_sentiment = count_unique_emotions_sentences(texts)
         attitude_sentiment = count_unique_attitudes_sentences(texts)
@@ -120,8 +122,7 @@ def comments_count_sentiment_ollama(request):
         pos_count = data_response["positive"]
         neg_count = data_response["negative"]
         neu_count = data_response["neutral"]
-        
-        
+
         return JsonResponse(
             {
                 "emotion_sentiment": emotion_sentiment,
