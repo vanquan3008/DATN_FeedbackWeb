@@ -1,12 +1,4 @@
 services:
-  backend:
-    build:
-      context: ../app
-      dockerfile: Dockerfile
-    volumes:
-      - ./app/db.sqlite3:/path/to/db.sqlite3
-    ports:
-      - "8000:8000"
   frontend:
     build:
       context: ../front-end
@@ -15,6 +7,18 @@ services:
       - "3000:3000"
 
   olama:
-    image: ollama/ollama:latest
+    build: 
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "11434:11434"
+  
+  backend:
+    build:
+      context: ../app
+      dockerfile: Dockerfile
+    volumes:
+      - ./app/db.sqlite3:/path/to/db.sqlite3
+    ports:
+      - "8000:8000"
+    

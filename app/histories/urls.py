@@ -2,9 +2,9 @@ from . import views
 from django.urls import path
 
 urlpatterns = [
-    path("get_list_history_sentiment/", views.get_list_history_sentiment, name="page"),
+    path("get_list_history_sentiment", views.get_list_history_sentiment, name="page"),
     path(
-        "get_list_file_history_sentiment/",
+        "get_list_file_history_sentiment",
         views.get_list_file_history_sentiment,
         name="page",
     ),

@@ -11,7 +11,7 @@ function FileHistory(
         setfileCurrent
     }
 ) {
-    const [page ,setPage] = useState(0);
+    const [page ,setPage] = useState(null);
     const [listHistory ,setlistHistory] = useState([]);
     //const [length,setLength] = useState(0);
     const [pageCurrent,setPageCurrent] = useState(1);
@@ -19,7 +19,7 @@ function FileHistory(
 
     useEffect(() => {
         const renderHistory = async ()=>{
-            const listPost = await axios.post(`http://127.0.0.1:8000/history/get_list_file_history_sentiment/?page=${pageCurrent}` ,{"user_id":user.userLogin?.user_id});
+            const listPost = await axios.post(`http://127.0.0.1:8000/history/get_list_file_history_sentiment?page=${pageCurrent}` ,{"user_id":user.userLogin?.user_id});
             
                 setPage(listPost.data.numberPage)
                 setlistHistory(listPost.data.history)

@@ -142,6 +142,24 @@ def get_all_user(request):
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
 
+@csrf_exempt
+def get_user_by_id(request):
+    if request.method == "GET":
+        try:
+            user_id = request.GET.get("id")
+            user = UserSerializer.get_user_id(user_id)
+            if not user.exists():
+                return JsonResponse({"error": "Do not have user"}, status=404)
+            else:
+                return JsonResponse(
+                    {"message": "Get all post successfully" , "user" : user}, status=200
+                )
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
 
 @csrf_exempt
 def refresh_token(request):
