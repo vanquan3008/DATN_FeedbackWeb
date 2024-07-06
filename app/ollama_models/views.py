@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 import json
+from dotenv import load_dotenv
+import os
 from django.core.paginator import Paginator
 # Create your views here.
 from scrapegraphai.graphs import SmartScraperGraph
@@ -23,30 +25,56 @@ from others.views import (
 )
 import nest_asyncio
 
+load_dotenv()
+API_SECRET_KEY = os.getenv("api_gpt_key")
+
 nest_asyncio.apply()
+
 
 def crawl_comments_by_ollama(url):
     graph_config = {
+        # "llm": {
+        #     "model": "groq/gemma-7b-it",
+        #     "api_key": "GROQ_API_KEY",
+        #     "temperature": 0
+        # },
+        # "embeddings": {
+        #     "model": "ollama/nomic-embed-text",  # Kiểm tra tên và phiên bản mô hình
+        #     "base_url": "http://localhost:11434",
+        # },
+        # "verbose": True,}
         "llm": {
-            "model": "ollama/mistral",  # Kiểm tra tên và phiên bản mô hình
-            "temperature": 0,
-            "format": "json",
-            "base_url": "http://localhost:11434",
+            "api_key": API_SECRET_KEY,
+            "model": "gpt-3.5-turbo",
         },
         "embeddings": {
-            "model": "ollama/nomic-embed-text",  # Kiểm tra tên và phiên bản mô hình
-            "base_url": "http://localhost:11434",
+            "model": "ollama/nomic-embed-text",
+            "base_url": "http://localhost:11434",  # set ollama URL arbitrarily
         },
-        "verbose": True,
     }
 
     smart_scraper_graph = SmartScraperGraph(
-        prompt="Hãy lấy tất cả comment trong trang web này và giữ nguyên ngôn ngữ gốc",
+        prompt="""Phân tích trang web này và thu thập tất cả các ý kiến cá nhân của người dùng liên quan đến bài viết.
+            1. Lấy tất cả ý kiến độc giả, bình luận của người dùng ở dưới nội dung chính của bài viết.
+            2. Trả về một danh sách các ý kiến với thông tin:
+                - Nội dung ý kiến, bình luận
+            3. Loại bỏ tất cả các phần không liên quan đến ý kiến hoặc bình luận.
+            4. Đảm bảo rằng tất cả ý kiến và bình luận là thật, không tự tạo ra.
+            5. Trả về kết quả dưới dạng  Object với cấu trúc như sau:{
+                'user_opinions' = [
+                    {
+                        "comment": "Nội dung ý kiến hoặc bình luận"
+                    },
+                    ...
+                ]
+                }
+            6. Đảm bảo rằng tất cả ý kiến và bình luận được lấy đầy đủ.""",
         source=f"{url}",
         config=graph_config,
     )
 
     result = smart_scraper_graph.run()
+    return result
 
 
 @csrf_exempt
@@ -54,14 +82,29 @@ def comments_detail_sentiment_ollama(request):
     if request.method == "POST":
         data = json.loads(request.body)
         url = data.get("url")
-        #texts = crawl_comments_by_ollama(url)
-        texts = [
-            "Sản phẩm này thật sự tuyệt vời, tôi chưa từng thấy gì tốt hơn.",
-            "Chất lượng của sản phẩm quá kém, tôi rất thất vọng.",
-            "Tôi nghĩ sản phẩm này ổn, nhưng vẫn cần cải thiện thêm một số tính năng.",
-            "Thiết kế của sản phẩm rất đẹp mắt và sang trọng.",
-            "Giá cả hợp lý, nhưng dịch vụ hỗ trợ khách hàng cần cải thiện.",
-        ]
+        data_crawing = crawl_comments_by_ollama(url)
+        # data_crawing= {
+        #     'user_opinions':
+        #         [
+        #             {'comment': 'Chọn việc dễ làm (chứ không phải việc có lợi) + không quản được thì cấm.'}, 
+        #             {'comment': "Các giáo sư, phó giáo sư thường được coi là những người thông minh nhất sao không 'Hội thảo' để bàn cần hay không cần điện mặt trời? EVN thì liên tục kêu gọi 'tiết kiệm điện' rồi giá bán điện thì theo bậc thang trong khi người ta góp điện vào lưới điện thì lại không trả tiền kêu thế này thế khác. Hỏi, tại sao phải tiết kiệm điện? mà người ta góp thêm điện vào thì lại coi là thừa?"},
+        #             {'comment': 'Tôi đã phản ánh rằng đã là mua bán thì ít nhất phải là 1 đồng chứ không thể là 0 đồng, bài viết rất chính xác về mặt thực hiện điều tiết điện đến vấn đề kinh tế năng lượng.'},
+        #             {'comment': 'Cái chính là ở Australia không có độc quyền ngành điện. Người dân có thể lựa chọn bán điện mặt trời dư thừa cho các đơn vị vận hành khác theo giá thị trường. Còn ở VN thì độc quyền ngành điện. Điện sinh hoạt càng sử dụng nhiều giá càng tăng theo lũy tiến. Đúng là chỉ có độc quyền mới làm được điều đó. Trong khi thế giới sử dụng càng nhiều càng có nhiều đãi ngộ, giảm giá...'},
+        #             {'comment': 'Giá nên để linh động, ví dụ mùa này nóng nhiều gia đình bật máy lạnh thì mua lại với giá ổn, lúc dư thừa quá tải thì 0 đồng, hợp lý hơn là để 0 đồng toàn thời gian.'}
+        #         ]
+        # }
+        comments = data_crawing['user_opinions']
+        texts =[]
+        
+        for comment in comments: 
+            texts.append(comment['comment'])
+        # texts = [
+        #     "Sản phẩm này thật sự tuyệt vời, tôi chưa từng thấy gì tốt hơn.",
+        #     "Chất lượng của sản phẩm quá kém, tôi rất thất vọng.",
+        #     "Tôi nghĩ sản phẩm này ổn, nhưng vẫn cần cải thiện thêm một số tính năng.",
+        #     "Thiết kế của sản phẩm rất đẹp mắt và sang trọng.",
+        #     "Giá cả hợp lý, nhưng dịch vụ hỗ trợ khách hàng cần cải thiện.",
+        # ]
         sentiment_sentences = []
         for text in texts:
             score = score_sentiment_a_sentence(text)
@@ -103,15 +146,19 @@ def comments_count_sentiment_ollama(request):
     if request.method == "POST":
         data = json.loads(request.body)
         url = data.get("url")
-        # texts= crawl_comments_by_ollama(url)
-
-        texts = [
-            "Sản phẩm này thật sự tuyệt vời, tôi chưa từng thấy gì tốt hơn.",
-            "Chất lượng của sản phẩm quá kém, tôi rất thất vọng.",
-            "Tôi nghĩ sản phẩm này ổn, nhưng vẫn cần cải thiện thêm một số tính năng.",
-            "Thiết kế của sản phẩm rất đẹp mắt và sang trọng.",
-            "Giá cả hợp lý, nhưng dịch vụ hỗ trợ khách hàng cần, cải thiện.",
-        ]
+        data_crawing= crawl_comments_by_ollama(url)
+        comments = data_crawing['user_opinions']
+        texts =[]
+        
+        for comment in comments: 
+            texts.append(comment['comment'])
+        # texts = [
+        #     "Sản phẩm này thật sự tuyệt vời, tôi chưa từng thấy gì tốt hơn.",
+        #     "Chất lượng của sản phẩm quá kém, tôi rất thất vọng.",
+        #     "Tôi nghĩ sản phẩm này ổn, nhưng vẫn cần cải thiện thêm một số tính năng.",
+        #     "Thiết kế của sản phẩm rất đẹp mắt và sang trọng.",
+        #     "Giá cả hợp lý, nhưng dịch vụ hỗ trợ khách hàng cần, cải thiện.",
+        # ]
 
         emotion_sentiment = count_unique_emotions_sentences(texts)
         attitude_sentiment = count_unique_attitudes_sentences(texts)

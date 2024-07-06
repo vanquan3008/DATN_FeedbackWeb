@@ -19,10 +19,11 @@ from .models import Detail_post
 from posts.models import Post
 from users.models import User
 
+
 # Selilazer
 from users.serializers import UserSerializer
-
 from models.views import count_pos_neg_neu_sentences
+from users.permissions import verify_token
 
 
 # Create your views here.
@@ -53,6 +54,26 @@ def create_comment_post(request):
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
 
+@csrf_exempt
+def delete_comment_post(request ,  comment_id):
+    if request.method == "DELETE":
+        token = request.headers.get("token")
+        r_email = data.get("email")
+        if verify_token(token , email = r_email): 
+            comment = Detail_post.objects.get(comment_id=comment_id)
+            print(comment)
+            return JsonResponse(
+                {"error": "Only POST requests are allowed for this endpoint"}, status=500
+            )
+        else:
+            return JsonResponse(
+                {"error": "Only POST requests are allowed for this endpoint"}, status=500
+            )
+    else:
+        return JsonResponse(
+            {"error": "Only DELETE requests are allowed for this endpoint"}, status=500
+        )
+        
 
 @csrf_exempt
 def get_all_comments_on_post(request):

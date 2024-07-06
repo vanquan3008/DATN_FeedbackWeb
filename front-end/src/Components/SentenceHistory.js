@@ -32,7 +32,7 @@ function SentenceHistory( {
             const data = {
                 "user_id":user.userLogin?.user_id 
             }
-            const listPost = await axios.post(`http://127.0.0.1:8000/history/get_list_history_sentiment/?page=${pageCurrent}` ,data);
+            const listPost = await axios.post(`http://127.0.0.1:8000/history/get_list_history_sentiment?page=${pageCurrent}` ,data);
             setPage(listPost.data.numberPage)
             setlistHistory(listPost.data.history)
             if(listPost.data.history.length === 0 ){
