@@ -14,13 +14,11 @@ import openai
 from openai import OpenAI
 
 from models.helper import (
-    emotion_a_sentence ,
-    attitude_a_sentence ,
+    emotion_a_sentence,
+    attitude_a_sentence,
     score_sentiment_a_sentence,
-    mapping_detail_sentiment
+    mapping_detail_sentiment,
 )
-
-
 
 
 load_dotenv()
@@ -354,19 +352,25 @@ def test_score_sentiment(request):
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
+
+
 # Model Details
 
-# Sentimet details 
+
+# Sentimet details
 @csrf_exempt
 def sentiment_text_details(request):
     if request.method == "POST":
         data = json.loads(request.body.decode("utf-8"))
         text = data["text"]
-        score_details =float(score_sentiment_a_sentence(text))        
+        score_details = float(score_sentiment_a_sentence(text))
         detail_sentiment = mapping_detail_sentiment(score_details)
-     
+
         sentiment_basedaspect = sentiment_basedaspect_a_sentence(text)
-        return JsonResponse({"message": detail_sentiment,"base_aspect" : sentiment_basedaspect }, status=200)
+        return JsonResponse(
+            {"message": detail_sentiment, "base_aspect": sentiment_basedaspect},
+            status=200,
+        )
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
@@ -553,6 +557,52 @@ def test_emotion_recognition_model(request):
         data = json.loads(request.body.decode("utf-8"))
         text = data["text"]
         detail_sentiment = emotion_recognition(text)
+        print(detail_sentiment)
+        return JsonResponse({"message": detail_sentiment}, status=200)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+
+def analyze_summary_to_report(text):
+    prompt = (
+        f'"Chỉ xuất ra báo cáo về số nhiều các comments theo cấu trúc sau: \n\\n\n\\n\n\\n\n- Product: ( n_pos positive, n_neg negative, n_neu neutral)\n+the positive generality about product, you summarize from comments.\n+ the neutral generality about product, you summarize from comments.\n+ the negative generality about product ,you summarize from comments\n- Service: ( n_pos positive, n_neg negative, n_neu neutral)\n+ the positive generality about service, you summarize from comments.\n+ the neutral generality about service, you summarize from comments.\n+ the negative generality about service, you summarize from comments\n\\n\n\\n\n\\n\n"Lưu ý , ngôn ngữ tiếng việt"\n"\n\{text}'
+        ""
+    )
+
+    # Gửi yêu cầu tới OpenAI API
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": prompt,
+                    }
+                ],
+            }
+        ],
+        temperature=1,
+        max_tokens=1024,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0,
+    )
+
+    # Lấy kết quả từ API
+    result = response.choices[0].message.content.strip().lower()
+    return result
+
+
+@csrf_exempt
+def test_analyze_summary_to_report(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        text = data["text"]
+        detail_sentiment = analyze_summary_to_report(text)
         print(detail_sentiment)
         return JsonResponse({"message": detail_sentiment}, status=200)
     else:

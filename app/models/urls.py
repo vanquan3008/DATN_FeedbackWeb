@@ -12,4 +12,5 @@ urlpatterns = [
     path("offensive_detection", views.test_offensive_detection_model),
     path("irony_detection", views.test_detect_irony_model),
     path("emotion_recognition", views.test_emotion_recognition_model),
+    path("analyze_summary_to_report", views.test_analyze_summary_to_report),
 ]

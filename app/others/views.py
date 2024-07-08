@@ -26,6 +26,7 @@ from models.views import (
     count_exactly_sentiment,
     check_legal_emotion,
     check_legal_attitude,
+    analyze_summary_to_report,
 )
 
 
@@ -159,18 +160,20 @@ def comments_shopee_count_sentiments(request):
                     "emotion_sentiment": emotion_sentiment,
                     "attitude_sentiment": attitude_sentiment,
                     "detail_sentiment": count_detail_sentiments,
-                    "positive_count" :pos_count ,
-                    "negative_count" :neg_count,
-                    "neutral_count":neu_count
+                    "positive_count": pos_count,
+                    "negative_count": neg_count,
+                    "neutral_count": neu_count,
                 },
-                status=200,)
-        
+                status=200,
+            )
+
         else:
-            return JsonResponse({"Un Authenticated"} , status=401)
+            return JsonResponse({"Un Authenticated"}, status=401)
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
+
 
 ##################
 @csrf_exempt
@@ -196,10 +199,9 @@ def comments_shopee_analysis(request):
                 # Create a dictionary with the desired structure
                 sentiment_comment = {"text": comment, "sentiment": sentiment}
                 sentiment_comments.append(sentiment_comment)
-                
-            
+
             page_size = 5
-            
+
             if len(sentiment_comments) > 0:
                 paginator = Paginator(sentiment_comments, page_size)
                 page = request.GET.get("page", 1)
@@ -207,8 +209,8 @@ def comments_shopee_analysis(request):
                 number_page = int((len(sentiment_comments) - 1) / 5) + 1
                 data_loads = [
                     {
-                        "sentiment": comment['sentiment'],
-                        "text" : comment['text'],
+                        "sentiment": comment["sentiment"],
+                        "text": comment["text"],
                     }
                     for comment in page_obj
                 ]
@@ -217,19 +219,42 @@ def comments_shopee_analysis(request):
                 number_page = 0
 
             return JsonResponse(
-                {
-                    "sentiment_detail_comments": data_loads,
-                    "page" : number_page
-                },
+                {"sentiment_detail_comments": data_loads, "page": number_page},
                 status=200,
             )
-        else : 
+        else:
             return JsonResponse(
-                {
-                    "errors": "UnAuthorized"
-                },
+                {"errors": "UnAuthorized"},
                 status=200,
             )
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+
+@csrf_exempt
+def report_shopee(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        url = data.get("url")
+        # Authentications
+        # token = request.headers.get("token")
+        # r_email = data.get("email")
+        # if verify_token(token, email=r_email):
+        #     if not url:
+        #         return JsonResponse({"error": "url is required"}, status=400)
+        comments = crawl_shopee_comments(url)
+        comments = clean_text_comment_shopee(comments)
+
+        text_comments = ""
+        for comment in comments:
+            text_comments += comment + "\n"
+
+        report = analyze_summary_to_report(text_comments)
+        print(report)
+
+        return JsonResponse(report, safe=False, status=200)
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
@@ -432,9 +457,9 @@ def comments_tiki_count_sentiments(request):
                 "emotion_sentiment": emotion_sentiment,
                 "attitude_sentiment": attitude_sentiment,
                 "detail_sentiment": count_detail_sentiments,
-                "positive_count" :pos_count ,
-                "negative_count" :neg_count,
-                "neutral_count":neu_count
+                "positive_count": pos_count,
+                "negative_count": neg_count,
+                "neutral_count": neu_count,
             },
             status=200,
         )
@@ -449,7 +474,7 @@ def comments_tiki_analysis(request):
     if request.method == "POST":
         data = json.loads(request.body)
         url = data.get("url")
-        
+
         token = request.headers.get("token")
         r_email = data.get("email")
         if verify_token(token, email=r_email):
@@ -465,9 +490,9 @@ def comments_tiki_analysis(request):
                 # Create a dictionary with the desired structure
                 sentiment_comment = {"text": comment, "sentiment": sentiment}
                 sentiment_comments.append(sentiment_comment)
-                
+
             page_size = 5
-            
+
             if len(sentiment_comments) > 0:
                 paginator = Paginator(sentiment_comments, page_size)
                 page = request.GET.get("page", 1)
@@ -475,30 +500,27 @@ def comments_tiki_analysis(request):
                 number_page = int((len(sentiment_comments) - 1) / 5) + 1
                 data_loads = [
                     {
-                            "sentiment": comment['sentiment'],
-                            "text" : comment['text'],
-                        }
-                        for comment in page_obj
+                        "sentiment": comment["sentiment"],
+                        "text": comment["text"],
+                    }
+                    for comment in page_obj
                 ]
             else:
                 data_loads = []
                 number_page = 0
 
             return JsonResponse(
-                    {
-                        "sentiment_detail_comments": data_loads,
-                        "page":number_page
-                    },
-                    status=200,
-                )
+                {"sentiment_detail_comments": data_loads, "page": number_page},
+                status=200,
+            )
         else:
-             return JsonResponse(
-                    {
-                        "Error": "UnAuthenticated",
-                    },
-                    status=400,
-                )
-            
+            return JsonResponse(
+                {
+                    "Error": "UnAuthenticated",
+                },
+                status=400,
+            )
+
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
