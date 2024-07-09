@@ -525,3 +525,29 @@ def comments_tiki_analysis(request):
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
+
+
+@csrf_exempt
+def report_tiki(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        url = data.get("url")
+        # Authentications
+        # token = request.headers.get("token")
+        # r_email = data.get("email")
+        # if verify_token(token, email=r_email):
+        #     if not url:
+        #         return JsonResponse({"error": "url is required"}, status=400)
+        comments = crawl_tiki_comments(url)
+        text_comments = ""
+        for comment in comments:
+            text_comments += comment + "\n"
+
+        report = analyze_summary_to_report(text_comments)
+        print(report)
+
+        return JsonResponse(report, safe=False, status=200)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )

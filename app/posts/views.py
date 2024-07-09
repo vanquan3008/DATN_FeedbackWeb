@@ -33,13 +33,12 @@ from models.views import (
     score_sentiment_a_sentence,
     mapping_detail_sentiment,
     count_exactly_sentiment,
+    analyze_summary_to_report,
 )
 from others.views import (
     count_unique_emotions_sentences,
     count_unique_attitudes_sentences,
 )
-
-
 
 
 def extract_detail_basedaspect_from_response(json_data):
@@ -152,9 +151,9 @@ def analyze_txt_detail_sentiment_file(request):
 
         txt_data = extract_txt_string(data).split("\r\n")
         filename = extract_filename(data)
-        
+
         sentences = [sentence for sentence in txt_data if len(sentence) > 0]
-        page_size = 5 
+        page_size = 5
         sentiment_sentences = []
         for text in sentences:
             score = score_sentiment_a_sentence(text)
@@ -164,7 +163,6 @@ def analyze_txt_detail_sentiment_file(request):
             sentiment_sentence = {"text": text, "sentiment": sentiment}
             sentiment_sentences.append(sentiment_sentence)
 
-            
         if len(sentiment_sentences) > 0:
             paginator = Paginator(sentiment_sentences, page_size)
             page = request.GET.get("page", 1)
@@ -172,17 +170,17 @@ def analyze_txt_detail_sentiment_file(request):
             number_page = int((len(sentiment_sentences) - 1) / 5) + 1
             data_loads = [
                 {
-                    "sentiment": comment['sentiment'],
-                    "text" : comment['text'],
+                    "sentiment": comment["sentiment"],
+                    "text": comment["text"],
                 }
-            for comment in page_obj
+                for comment in page_obj
             ]
         else:
             data_loads = []
             number_page = 0
 
         return JsonResponse(
-            {"sentiment_detail_comments": data_loads , "page":number_page}, status=200
+            {"sentiment_detail_comments": data_loads, "page": number_page}, status=200
         )
     else:
         return JsonResponse(
@@ -245,6 +243,29 @@ def analyze_txt_file(request):
         )
 
 
+@csrf_exempt
+def report_txt(request):
+    if request.method == "POST":
+        data = request.body.decode("utf-8")
+        user_id = request.POST.get("user_id")
+        txt_data = extract_txt_string(data).split("\r\n")
+        filename = extract_filename(data)
+        sentences = [sentence for sentence in txt_data if len(sentence) > 0]
+
+        text_comments = ""
+        for comment in sentences:
+            text_comments += comment + "\n"
+
+        report = analyze_summary_to_report(text_comments)
+        print(report)
+
+        return JsonResponse(report, safe=False, status=200)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+
 ############### CSV file Analysis ###############
 
 
@@ -273,11 +294,10 @@ def analyze_csv_file(request):
         try:
             data = request.body.decode("utf-8")
             user_id = request.POST.get("user_id")
-            
+
             filename = extract_filename(data)
             csv_string = extract_string_csv(data)
             df = pd.read_csv(io.StringIO(csv_string))
-
 
             key_word = "product_description"
             texts = df[key_word].tolist()
@@ -353,10 +373,9 @@ def analyze_csv_detail_sentiment_file(request):
                 # Create a dictionary with the desired structure
                 sentiment_sentence = {"text": text, "sentiment": sentiment}
                 sentiment_sentences.append(sentiment_sentence)
-                
-                
+
             page_size = 5
-            
+
             if len(sentiment_sentences) > 0:
                 paginator = Paginator(sentiment_sentences, page_size)
                 page = request.GET.get("page", 1)
@@ -364,8 +383,8 @@ def analyze_csv_detail_sentiment_file(request):
                 number_page = int((len(sentiment_sentences) - 1) / 5) + 1
                 data_loads = [
                     {
-                        "sentiment": comment['sentiment'],
-                        "text" : comment['text'],
+                        "sentiment": comment["sentiment"],
+                        "text": comment["text"],
                     }
                     for comment in page_obj
                 ]
@@ -374,10 +393,38 @@ def analyze_csv_detail_sentiment_file(request):
                 number_page = 0
 
             return JsonResponse(
-                {"sentiment_detail_comments": data_loads , "page":number_page}, status=200
+                {"sentiment_detail_comments": data_loads, "page": number_page},
+                status=200,
             )
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+
+@csrf_exempt
+def report_csv(request):
+    if request.method == "POST":
+
+        data = request.body.decode("utf-8")
+        user_id = request.POST.get("user_id")
+        filename = extract_filename(data)
+        csv_string = extract_string_csv(data)
+        df = pd.read_csv(io.StringIO(csv_string))
+
+        key_word = "product_description"
+        texts = df[key_word].tolist()
+
+        text_comments = ""
+        for comment in texts:
+            text_comments += comment + "\n"
+
+        report = analyze_summary_to_report(text_comments)
+        print(report)
+
+        return JsonResponse(report, safe=False, status=200)
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
@@ -488,9 +535,9 @@ def analyze_json_detail_sentiment_file(request):
             # Create a dictionary with the desired structure
             sentiment_sentence = {"text": text, "sentiment": sentiment}
             sentiment_sentences.append(sentiment_sentence)
-            
+
         page_size = 5
-            
+
         if len(sentiment_sentences) > 0:
             paginator = Paginator(sentiment_sentences, page_size)
             page = request.GET.get("page", 1)
@@ -498,18 +545,46 @@ def analyze_json_detail_sentiment_file(request):
             number_page = int((len(sentiment_sentences) - 1) / 5) + 1
             data_loads = [
                 {
-                    "sentiment": comment['sentiment'],
-                    "text" : comment['text'],
+                    "sentiment": comment["sentiment"],
+                    "text": comment["text"],
                 }
-            for comment in page_obj
+                for comment in page_obj
             ]
         else:
             data_loads = []
             number_page = 0
 
         return JsonResponse(
-            {"sentiment_detail_comments": data_loads , "page":number_page}, status=200
+            {"sentiment_detail_comments": data_loads, "page": number_page}, status=200
         )
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+
+@csrf_exempt
+def report_json(request):
+    if request.method == "POST":
+
+        data = request.body.decode("utf-8")
+        user_id = request.POST.get("user_id")
+        filename = extract_filename(data)
+        json_string = extract_json_string(data)
+
+        json_data = json.loads(json_string)
+
+        key_word = "review"
+        texts = [json_data[i][key_word] for i in range(len(json_data))]
+
+        text_comments = ""
+        for comment in texts:
+            text_comments += comment + "\n"
+
+        report = analyze_summary_to_report(text_comments)
+        print(report)
+
+        return JsonResponse(report, safe=False, status=200)
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
@@ -618,7 +693,6 @@ def get_all_post_by_userid(request):
                             "date_post": post.date_post,
                             "image_content_url": post.image_content_url,
                             "title": post.title_post,
-                            
                         }
                         for post in user_posts
                     ]

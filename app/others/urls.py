@@ -8,4 +8,5 @@ urlpatterns = [
     path("comments_lazada_analysis", views.comments_lazada_analysis),
     path("comments_tiki_analysis", views.comments_tiki_analysis, name="page"),
     path("comments_tiki_count_sentiments", views.comments_tiki_count_sentiments),
+    path("comments_tiki_to_report", views.report_tiki),
 ]
