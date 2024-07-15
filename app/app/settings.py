@@ -15,7 +15,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
-
+import sqlite3
 app = Flask(__name__)
 CORS(app)
 
@@ -130,6 +130,13 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+try:
+    # Kết nối tới database SQLite3 (nếu không tồn tại, nó sẽ được tạo mới)
+    connection = sqlite3.connect('example.db')
+    print("Kết nối thành công!")
+except sqlite3.Error as e:
+    print(f"Đã xảy ra lỗi khi kết nối tới cơ sở dữ liệu: {e}")
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

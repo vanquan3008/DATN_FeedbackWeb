@@ -8,5 +8,5 @@ urlpatterns = [
     path("page2", views.get_page2),
     path("page3", views.get_page3),
     path("page4", views.get_page4),
-    path("page5", views.get_page1),
+    path("page5", views.get_page5),
 ]

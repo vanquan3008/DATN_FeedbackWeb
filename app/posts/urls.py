@@ -17,6 +17,7 @@ urlpatterns = [
     path("get_all_post_by_userid", views.get_all_post_by_userid),
     path("get_all_post", views.get_all_post),
     path("delete_post", views.delete_post),
+    path("update_post", views.update_post, name="post_id"),
     # Comment
     path("get_sentiment_comments_on_post", views.static_all_comments_on_post),
     # Based-aspect level

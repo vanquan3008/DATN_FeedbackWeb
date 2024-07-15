@@ -2,25 +2,37 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { images } from "../Assets/images";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import InfoPost from "./InfoPost";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSelector } from 'react-redux'
 import axios from "axios";
 
 
 function CreatePost(
     {
+        data,
         stateCreatePost,
         setCreatePost,
         
     }
 ) {
     const [createPostSuccess,setCreatePostSuccess] = useState(null);
+    const [dataPost , setDataPost] = useState(null);
+    const [title,setTitle] = useState(null)
+    const [content ,setContent] = useState(null)
     const userLogin = useSelector((state)=> state.auth.login.currentUser)
     const infoUser = userLogin?.userLogin;
     const wrapRef = useRef();
     const titleRef = useRef();
     const contentRef = useRef();
+    useEffect(()=>{
+        setDataPost(data);
+        setTitle(data?.title);
+        setContent(data?.content);
+    },[data])
+    
 
+    console.log(dataPost)
+    
     // Create post
     const handleCreatePost = async ()=>{
         const createPost ={
@@ -42,6 +54,25 @@ function CreatePost(
         } 
     }
 
+    const handleUpdatePost = async ()=>{
+        const  updatePost={
+            "content_post":content, 
+            "user_id":infoUser.user_id,
+            "title_post":title
+        }
+        try{
+            await axios.put(`http://127.0.0.1:8000/posts/update_post?post_id=${data?.post_id}`,updatePost  ,{
+                withCredentials : true, 
+                headers : {token : `Bearer ${userLogin?.jwt}`}
+            });
+            setCreatePost(false);
+            setCreatePostSuccess(true);
+            window.location.reload();
+        }
+        catch(e){
+            setCreatePostSuccess(false);
+        } 
+    }
 
     return ( 
         <div
@@ -76,7 +107,16 @@ function CreatePost(
                             <div className="text-start py-3 font-medium text-base">
                                 TITLE
                             </div>
-                            <input ref={titleRef} type="text" placeholder="Short, descriptive title" className="border-solid border-2 rounded-xl outline-none p-4">
+                            <input 
+                                ref={titleRef} 
+                                type="text" 
+                                value={title} 
+                                placeholder="Short, descriptive title" 
+                                className="border-solid border-2 rounded-xl outline-none p-4"
+                                onChange={(e)=>{
+                                    setTitle(e.target.value);
+                                }}
+                            >
 
                             </input>
                         </div>
@@ -84,7 +124,15 @@ function CreatePost(
                             <div className="text-start py-3 font-medium text-base">
                                 CONTENT
                             </div>
-                            <textarea ref={contentRef} placeholder="Any additional details..." className="border-solid border-2 rounded-xl outline-none p-4 h-40">
+                            <textarea 
+                                ref={contentRef} 
+                                value={content}
+                                placeholder="Any additional details..." 
+                                className="border-solid border-2 rounded-xl outline-none p-4 h-40"
+                                onChange={(e)=>{
+                                    setContent(e.target.value);
+                                }}    
+                            >
                             </textarea>
                         </div>
                     </div>
@@ -105,7 +153,9 @@ function CreatePost(
                     </div>
                 </div>
                 <div className="flex justify-end items-center w-full h-20 border border-t">
-                    <button className=" rounded-xl bg-sky-400 p-4 mr-10 text-white font-bold hover:opacity-40" onClick={handleCreatePost}>CREATE POST</button>
+                    <button className=" rounded-xl bg-sky-400 p-4 mr-10 text-white font-bold hover:opacity-40" onClick={
+                        data ==null?handleCreatePost : handleUpdatePost}>
+                        {data ==null ? "CREATE POST" :"UPDATE POST"}</button>
                 </div>
             </div>
         </div>

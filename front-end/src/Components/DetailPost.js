@@ -8,6 +8,7 @@ import axios from "axios";
 // Time
 import Moment from 'react-moment';
 import FormAccess from "./FormAccess";
+import CreatePost from "./CreatePost";
 
 function DetailPost(
         data,
@@ -18,6 +19,8 @@ function DetailPost(
     const [deletePost , setDeletePost] = useState(false);
     const userLogin = useSelector((state)=> state.auth.login.currentUser)
     const infoUser = userLogin?.userLogin;
+    const [updatePost , setUpdatePost] = useState(false);
+    const [dataUpdate ,setDataUpdate] = useState(data);
 
 
     const createComment = async (e)=>{
@@ -58,6 +61,7 @@ function DetailPost(
         )
     })
 
+    console.log(dataUpdate)
     return (
         <>{
          data.data  ? 
@@ -93,10 +97,19 @@ function DetailPost(
                                     userLogin?.userLogin.user_id === data.data?.user_post.id?
                                     <div>
                                         <div className="w-full h-14 border-b flex flex-row text-color-basic pl-6">
-                                            <div className="p-2 cursor-pointer hover:opacity-60">
+                                            <div className="p-2 cursor-pointer hover:opacity-60 underline" onClick={()=>{
+                                                const dataUp = {
+                                                    "title":data.data?.title,
+                                                    "content":data.data?.content,
+                                                    "post_id":data.data?.id_post
+                                                }
+                                                setDataUpdate(dataUp);
+                                                setUpdatePost(true);
+                                                
+                                            }}>
                                                 Edit Post
                                             </div>
-                                            <div className="p-2 cursor-pointer hover:opacity-60 " onClick={()=>{
+                                            <div className="p-2 cursor-pointer hover:opacity-60 underline" onClick={()=>{
                                                 setDeletePost(true);
                                             }} >
                                                 Delete Post
@@ -166,6 +179,8 @@ function DetailPost(
                 setDelete={setDeletePost}
                 formtype={"post"}
             ></FormAccess>
+
+            <CreatePost stateCreatePost={updatePost} data={dataUpdate} setCreatePost={setUpdatePost}></CreatePost>
         </>
      );
 }

@@ -222,7 +222,7 @@ def analyze_txt_file(request):
                 number_neu=neu_count,
             )
             result_file.save()
-        print(data_response)
+
 
         data_response_show = count_exactly_sentiment(sentences)
 
@@ -750,7 +750,48 @@ def delete_post(request):
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
 
+@csrf_exempt
+def update_post(request):
+    if request.method == "PUT":
+        data = json.loads(request.body)
+        r_user_id = data.get("user_id")
+        post_id = request.GET.get("post_id")
+        try:
+            user_update = User.objects.get(user_id=r_user_id)
+            authorization_header = request.headers.get("token")
 
+            if post_id is None:
+                raise ValueError("id_post are required")
+            # Check exist post
+            if not Post.objects.filter(id_post=post_id).exists():
+                return JsonResponse({"error": "Post not found"}, status=404)
+
+            if verify_token(authorization_header, user_update.email): 
+                #Update data
+                post_update = Post.objects.get(id_post=post_id)
+                post_update.content_post = data.get("content_post")
+                post_update.title_post = data.get("title_post")
+                
+                post_update.save()
+                
+                res = JsonResponse(
+                    {"message": "Update  post successfully"},
+                    status=200,
+                )
+            else:
+                res = JsonResponse(
+                    {"message": "Can not authentication user to delete post"},
+                    status=403,
+                )
+            return res
+
+        except Exception as e:
+            return JsonResponse({"Error": str(e)}, status=400)
+
+    else:
+        return JsonResponse(
+            {"error": "Only PUT requests are allowed for this endpoint"}, status=500
+        )
 @csrf_exempt
 def static_all_comments_on_post(request):
     if request.method == "POST":
