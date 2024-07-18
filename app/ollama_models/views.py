@@ -34,16 +34,6 @@ nest_asyncio.apply()
 
 def crawl_comments_by_ollama(url):
     graph_config = {
-        # "llm": {
-        #     "model": "groq/gemma-7b-it",
-        #     "api_key": "GROQ_API_KEY",
-        #     "temperature": 0
-        # },
-        # "embeddings": {
-        #     "model": "ollama/nomic-embed-text",  # Kiểm tra tên và phiên bản mô hình
-        #     "base_url": "http://localhost:11434",
-        # },
-        # "verbose": True,}
         "llm": {
             "api_key": API_SECRET_KEY,
             "model": "gpt-3.5-turbo",
@@ -84,28 +74,11 @@ def comments_detail_sentiment_ollama(request):
         data = json.loads(request.body)
         url = data.get("url")
         data_crawing = crawl_comments_by_ollama(url)
-        # data_crawing= {
-        #     'user_opinions':
-        #         [
-        #             {'comment': 'Chọn việc dễ làm (chứ không phải việc có lợi) + không quản được thì cấm.'},
-        #             {'comment': "Các giáo sư, phó giáo sư thường được coi là những người thông minh nhất sao không 'Hội thảo' để bàn cần hay không cần điện mặt trời? EVN thì liên tục kêu gọi 'tiết kiệm điện' rồi giá bán điện thì theo bậc thang trong khi người ta góp điện vào lưới điện thì lại không trả tiền kêu thế này thế khác. Hỏi, tại sao phải tiết kiệm điện? mà người ta góp thêm điện vào thì lại coi là thừa?"},
-        #             {'comment': 'Tôi đã phản ánh rằng đã là mua bán thì ít nhất phải là 1 đồng chứ không thể là 0 đồng, bài viết rất chính xác về mặt thực hiện điều tiết điện đến vấn đề kinh tế năng lượng.'},
-        #             {'comment': 'Cái chính là ở Australia không có độc quyền ngành điện. Người dân có thể lựa chọn bán điện mặt trời dư thừa cho các đơn vị vận hành khác theo giá thị trường. Còn ở VN thì độc quyền ngành điện. Điện sinh hoạt càng sử dụng nhiều giá càng tăng theo lũy tiến. Đúng là chỉ có độc quyền mới làm được điều đó. Trong khi thế giới sử dụng càng nhiều càng có nhiều đãi ngộ, giảm giá...'},
-        #             {'comment': 'Giá nên để linh động, ví dụ mùa này nóng nhiều gia đình bật máy lạnh thì mua lại với giá ổn, lúc dư thừa quá tải thì 0 đồng, hợp lý hơn là để 0 đồng toàn thời gian.'}
-        #         ]
-        # }
         comments = data_crawing["user_opinions"]
         texts = []
 
         for comment in comments:
             texts.append(comment["comment"])
-        # texts = [
-        #     "Sản phẩm này thật sự tuyệt vời, tôi chưa từng thấy gì tốt hơn.",
-        #     "Chất lượng của sản phẩm quá kém, tôi rất thất vọng.",
-        #     "Tôi nghĩ sản phẩm này ổn, nhưng vẫn cần cải thiện thêm một số tính năng.",
-        #     "Thiết kế của sản phẩm rất đẹp mắt và sang trọng.",
-        #     "Giá cả hợp lý, nhưng dịch vụ hỗ trợ khách hàng cần cải thiện.",
-        # ]
         sentiment_sentences = []
         for text in texts:
             score = score_sentiment_a_sentence(text)

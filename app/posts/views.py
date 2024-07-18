@@ -247,19 +247,27 @@ def analyze_txt_file(request):
 def report_txt(request):
     if request.method == "POST":
         data = request.body.decode("utf-8")
-        user_id = request.POST.get("user_id")
-        txt_data = extract_txt_string(data).split("\r\n")
-        filename = extract_filename(data)
-        sentences = [sentence for sentence in txt_data if len(sentence) > 0]
+        # Authentications
+        token = request.headers.get("token")
+        r_email = request.POST.get("email")
+        if verify_token(token, email=r_email):
+            try:
+                txt_data = extract_txt_string(data).split("\r\n")
+                filename = extract_filename(data)
+                sentences = [sentence for sentence in txt_data if len(sentence) > 0]
 
-        text_comments = ""
-        for comment in sentences:
-            text_comments += comment + "\n"
+                text_comments = ""
+                for comment in sentences:
+                    text_comments += comment + "\n"
 
-        report = analyze_summary_to_report(text_comments)
-        print(report)
-
-        return JsonResponse(report, safe=False, status=200)
+                report = analyze_summary_to_report(text_comments)
+                return JsonResponse(report, safe=False, status=200)
+            except Exception as e:
+                return JsonResponse({"error":e }, safe=False, status=400)
+        else:
+            return JsonResponse(
+                {"error": "Can't authentication"}, status=401
+            )
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
@@ -409,22 +417,28 @@ def report_csv(request):
     if request.method == "POST":
 
         data = request.body.decode("utf-8")
-        user_id = request.POST.get("user_id")
-        filename = extract_filename(data)
-        csv_string = extract_string_csv(data)
-        df = pd.read_csv(io.StringIO(csv_string))
+        # Authentications
+        token = request.headers.get("token")
+        r_email = request.POST.get("email")
+        if verify_token(token, email=r_email):
+            filename = extract_filename(data)
+            csv_string = extract_string_csv(data)
+            df = pd.read_csv(io.StringIO(csv_string))
 
-        key_word = "product_description"
-        texts = df[key_word].tolist()
+            key_word = "product_description"
+            texts = df[key_word].tolist()
 
-        text_comments = ""
-        for comment in texts:
-            text_comments += comment + "\n"
+            text_comments = ""
+            for comment in texts:
+                text_comments += comment + "\n"
 
-        report = analyze_summary_to_report(text_comments)
-        print(report)
+            report = analyze_summary_to_report(text_comments)
 
-        return JsonResponse(report, safe=False, status=200)
+            return JsonResponse(report, safe=False, status=200)
+        else:
+            return JsonResponse(
+                {"error": "Can't authentication"}, status=401
+            )
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
@@ -569,22 +583,28 @@ def report_json(request):
 
         data = request.body.decode("utf-8")
         user_id = request.POST.get("user_id")
-        filename = extract_filename(data)
-        json_string = extract_json_string(data)
+        data = request.body.decode("utf-8")
+        # Authentications
+        token = request.headers.get("token")
+        r_email = request.POST.get("email")
+        if verify_token(token, email=r_email):
+            filename = extract_filename(data)
+            json_string = extract_json_string(data)
 
-        json_data = json.loads(json_string)
+            json_data = json.loads(json_string)
 
-        key_word = "review"
-        texts = [json_data[i][key_word] for i in range(len(json_data))]
+            key_word = "review"
+            texts = [json_data[i][key_word] for i in range(len(json_data))]
 
-        text_comments = ""
-        for comment in texts:
-            text_comments += comment + "\n"
+            text_comments = ""
+            for comment in texts:
+                text_comments += comment + "\n"
 
-        report = analyze_summary_to_report(text_comments)
-        print(report)
+            report = analyze_summary_to_report(text_comments)
 
-        return JsonResponse(report, safe=False, status=200)
+            return JsonResponse(report, safe=False, status=200)
+        else :
+            return JsonResponse({"error" :"Can't authenticate"})
     else:
         return JsonResponse(
             {"error": "Only POST requests are allowed for this endpoint"}, status=500

@@ -10,6 +10,8 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import CustomTag from "../../Components/CustomTagSentiment";
 import { Pagination, Stack } from "@mui/material";
+import Overall from "../../Components/Overall";
+import { images } from "../../Assets/images";
 
 
 
@@ -29,8 +31,101 @@ function DetailFilesSentiment(
     const [page ,setPage] = useState(null);
     const [comment ,setComment] = useState([]);
     const [loadingComment ,setLoadingComment] = useState(false);
+    const [reportProduct,setReportProduct] = useState({});
+    const [reportService,setReportService] = useState({});
 
-    console.log(state)
+
+
+    useEffect(()=>{
+        if (state?.type === "Url") {
+            const data = {
+                "url": state?.url
+            }
+            try{
+                let dataReport ;
+                const getDataReport = async ()=>{
+                    if(state?.option === "Tiki"){
+                        dataReport = await axios.post(`http://127.0.0.1:8000/others/comments_tiki_to_report`,data);
+                    }
+                    else if (state?.option === "Shopee") {
+                        dataReport = await axios.post(`http://127.0.0.1:8000/others/comments_shopee_to_report`,data)
+                    }
+                    setReportProduct(dataReport?.data["Product"]);
+                    setReportService(dataReport?.data["Service"]);
+                }
+                getDataReport()
+            }
+            catch(err){
+                navigate("/Error" ,{
+                    state:{
+                        error : "Can't get report sentiment from data.",
+                    }
+                })
+            }
+        }
+        else{
+            const file = state.file;
+            const reportData = async()=>{ 
+                const filename = file['0']?.name;
+                const extension = filename.split('.').pop();
+                const data = new FormData();
+                data.append("email",infoUser?.email);
+                try{
+                    let dataReport;
+                    if(extension === 'txt'){
+                        data.append("file[]",file[0]);
+                        dataReport = await axios.post('http://localhost:8000/posts/txt_report',data ,{
+                            headers: {
+                                "Content-Type": "multipart/form-data",
+                                "withCredentials": true,
+                                "token": `Bearer ${userLogin?.jwt}`
+                            }
+                        });
+                    }
+                    else if(extension === 'json'){
+                        data.append("file[]",file[0]);
+                        dataReport = await axios.post('http://localhost:8000/posts/json_report',data,{
+                            headers: {
+                                "Content-Type": "multipart/form-data",
+                                'Accept': 'application/json',
+                                "withCredentials": true,
+                                "token": `Bearer ${userLogin?.jwt}`
+                            }
+                        });
+                        
+                    }
+                    else if(extension === 'csv'){
+                        data.append("file[]",file[0]);
+                        dataReport = await axios.post('http://localhost:8000/posts/csv_report',data ,
+                            {
+                                headers: {
+                                    "Content-Type": "multipart/form-data",
+                                    "withCredentials": true,
+                                    "token": `Bearer ${userLogin?.jwt}`
+                                }        
+                            }
+                        );
+                    }
+                    setReportProduct(dataReport?.data["Product"]);
+                    setReportService(dataReport?.data["Service"]);
+                
+                
+                }
+                catch(err){
+                    navigate("/Error" ,{
+                        state:{
+                            error : "Can't get report sentiment from data."
+                        }
+                    })
+                }
+            }
+            reportData()
+
+        }
+    },[state]);
+
+
+
     // Sentimet
     useEffect(() => {
         if (state?.type === "Url") {
@@ -139,7 +234,7 @@ function DetailFilesSentiment(
                 try{
                     setLoadingComment(true);
                     let getData;
-                    if (state?.option === "Tiki") { // Assuming the other type is Tiki
+                    if (state?.option === "Tiki") { 
                         getData = await axios.post(`http://127.0.0.1:8000/others/comments_tiki_analysis?page=${pageCurrent}`, data, {
                             withCredentials: true,
                             headers: { token: `Bearer ${userLogin?.jwt}` }
@@ -240,12 +335,10 @@ function DetailFilesSentiment(
         
     }
 
-    console.log(comment);
+    
     const renderComment = comment.map((value ,index)=>{
         return(
             <div className={`flex flex-row px-10 w-full `}>
-            
-
                 <div className={`my-1 w-full flex flex-row drop-shadow rounded-sm  border-spacing-y-0.5 justify-between ${loadingComment === true ? "hidden" :""}`}>
                     <div className="w-10/12 pr-4"> 
                         <CustomTag border={true}  text={value?.text} nameTag={"Text"} ></CustomTag>
@@ -473,8 +566,29 @@ function DetailFilesSentiment(
                                     </BarChart>
                                 </div>
                             </div>
+
                         </div>
                     </div>
+                    {/* Overall */}
+                    <div className="w-full h-full px-10 py-4">
+
+                        <div className="flex flex-col px-6 6 bg-white  drop-shadow border p-4 mb-4 rounded-2xl">
+                            <div className="flex flex-row font-normal text-base items-center pb-2">
+                                <div className="underline text-base  items-center font-medium text-blue-500 flex flex-row px-2">
+                                    <img alt="" src={images.iconAI} className="w-8 bg-white"></img >
+                                    Trợ lý AI 
+                                </div>
+                                <span className="italic">Đánh giá tổng quan bình luận người dùng</span>
+                            </div>
+                            <div className="flex flex-row">
+                                <Overall report={reportProduct} >
+                                </Overall>
+                                <Overall report={reportService} >
+                                </Overall>
+                            </div>
+                        </div>
+                    </div>
+                    
                     {/* Detail  */}
                     <div className="h-20 text-2xl font-bold p-4 ml-6">
                         Base Emotion

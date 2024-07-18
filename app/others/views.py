@@ -26,7 +26,7 @@ from models.views import (
     count_exactly_sentiment,
     check_legal_emotion,
     check_legal_attitude,
-    analyze_summary_to_report,
+    analyze_summary_to_report
 )
 
 
@@ -544,8 +544,6 @@ def report_tiki(request):
             text_comments += comment + "\n"
 
         report = analyze_summary_to_report(text_comments)
-        print(report)
-
         return JsonResponse(report, safe=False, status=200)
     else:
         return JsonResponse(

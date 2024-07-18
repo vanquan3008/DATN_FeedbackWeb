@@ -308,7 +308,7 @@ def attitude_a_sentence(sentence):
         frequency_penalty=0,
         presence_penalty=0,
     )
-    attitude = response.choices[0].message.content.strip().lower()
+    attitude = response.choices[0].message.content.strip()
     return attitude
 
 
@@ -400,7 +400,7 @@ def implicit_sentiment_analysis(text):
     )
 
     # Get the result from the API
-    sentiment = response.choices[0].message.content.strip().lower()
+    sentiment = response.choices[0].message.content.strip()
     return sentiment
 
 
@@ -437,7 +437,7 @@ def detect_hate_speech(text):
     )
 
     # Get the result from the API
-    result = response.choices[0].message.content.strip().lower()
+    result = response.choices[0].message.content.strip()
     return result
 
 
@@ -474,7 +474,7 @@ def detect_offensive_language(text):
     )
 
     # Get the result from the API
-    result = response.choices[0].message.content.strip().lower()
+    result = response.choices[0].message.content.strip()
     return result
 
 
@@ -511,7 +511,7 @@ def detect_irony(text):
     )
 
     # Lấy kết quả từ API
-    result = response.choices[0].message.content.strip().lower()
+    result = response.choices[0].message.content.strip()
     return result
 
 
@@ -547,7 +547,7 @@ def emotion_recognition(text):
     )
 
     # Lấy kết quả từ API
-    result = response.choices[0].message.content.strip().lower()
+    result = response.choices[0].message.content.strip()
     return result
 
 
@@ -564,11 +564,39 @@ def test_emotion_recognition_model(request):
             {"error": "Only POST requests are allowed for this endpoint"}, status=500
         )
 
+# def analyze_main_summary_to_report(text):
+#     prompt = (
+#         f'"Phân tích nội dung của bình luận sau đây và cho biết nó nói về vấn đề gì? Xuất ra 1 dòng chứa thông tin tổng quan của bình luận {text}"'
+#     )
+
+#     # Gửi yêu cầu tới OpenAI API
+#     response = client.chat.completions.create(
+#         model="gpt-3.5-turbo",
+#         messages=[
+#             {
+#                 "role": "user",
+#                 "content": [
+#                     {
+#                         "type": "text",
+#                         "text": prompt,
+#                     }
+#                 ],
+#             }
+#         ],
+#         temperature=1,
+#         max_tokens=1024,
+#         top_p=1,
+#         frequency_penalty=0,
+#         presence_penalty=0,
+#     )
+
+#     # Lấy kết quả từ API
+#     result = json.loads(response.choices[0].message.content.strip())
+#     return result
 
 def analyze_summary_to_report(text):
     prompt = (
-        f'"Chỉ xuất ra báo cáo về số nhiều các comments theo cấu trúc sau: \n\\n\n\\n\n\\n\n- Product: ( n_pos positive, n_neg negative, n_neu neutral)\n+the positive generality about product, you summarize from comments.\n+ the neutral generality about product, you summarize from comments.\n+ the negative generality about product ,you summarize from comments\n- Service: ( n_pos positive, n_neg negative, n_neu neutral)\n+ the positive generality about service, you summarize from comments.\n+ the neutral generality about service, you summarize from comments.\n+ the negative generality about service, you summarize from comments\n\\n\n\\n\n\\n\n"Lưu ý , ngôn ngữ tiếng việt ,trả về kiểu mảng Json"\n"\n\{text}'
-        ""
+        f'"Chỉ xuất ra báo cáo về số nhiều các comments theo cấu trúc sau: \n\\n\n\\n\n\\n\n- Product: ( n_pos positive, n_neg negative, n_neu neutral)\n+the positive generality about product, you summarize from comments.\n+ the neutral generality about product, you summarize from comments.\n+ the negative generality about product ,you summarize from comments\n- Service: ( n_pos positive, n_neg negative, n_neu neutral)\n+ the positive generality about service, you summarize from comments.\n+ the neutral generality about service, you summarize from comments.\n+ the negative generality about service, you summarize from comments\n\\n\n\\n\n\\n\n"Lưu ý , ngôn ngữ tiếng việt ,trả về kiểu Json"\n"\n\{text}'""
     )
 
     # Gửi yêu cầu tới OpenAI API
@@ -593,7 +621,7 @@ def analyze_summary_to_report(text):
     )
 
     # Lấy kết quả từ API
-    result = response.choices[0].message.content.strip().lower()
+    result = json.loads(response.choices[0].message.content.strip())
     return result
 
 
@@ -603,7 +631,7 @@ def test_analyze_summary_to_report(request):
         data = json.loads(request.body.decode("utf-8"))
         text = data["text"]
         detail_sentiment = analyze_summary_to_report(text)
-        print(detail_sentiment)
+        console.log(detail_stm)
         return JsonResponse({"message": detail_sentiment}, status=200)
     else:
         return JsonResponse(

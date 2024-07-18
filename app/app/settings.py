@@ -91,6 +91,7 @@ CORS_ALLOW_HEADERS = [
     "Content-Type",
     "Authorization",
     # Add other headers as needed
+    "withCredentials"
 ]
 
 ROOT_URLCONF = "app.urls"
