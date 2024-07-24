@@ -8,7 +8,7 @@ function Comment({
 
     
     return ( 
-        <div className="w-full h-40 py-2">
+        <div className="w-full h-auto py-">
             <div className="flex flex-row justify-between p-4  ml-4 items-center">
                 <div className="flex flex-row items-center">
                     <div className="flex justify-center items-center border w-12 h-12 rounded-full">
@@ -25,8 +25,8 @@ function Comment({
             </div>
             <div className="flex flex-row p-2 ml-6">
                 <div className="text-base text-color-basic p-1">•<span className="pl-2">January 1,2024</span></div> 
-                <div className="text-base text-color-basic p-1">•<span className="pl-2 underline ">Edit Comment</span></div>
-                <div className="text-base h-auto text-color-basic p-1">•<span className="pl-2 underline ">Delete Comment</span></div>
+                <div className="text-base text-color-basic p-1">•<span className="pl-2 underline cursor-pointer">Edit Comment</span></div>
+                <div className="text-base h-auto text-color-basic p-1">•<span className="pl-2 underline cursor-pointer ">Delete Comment</span></div>
             </div>
         </div>
      );

@@ -410,7 +410,7 @@ def test_implicit_sentiment_model(request):
         data = json.loads(request.body.decode("utf-8"))
         text = data["text"]
         detail_sentiment = implicit_sentiment_analysis(text)
-        print(detail_sentiment)
+        
         return JsonResponse({"message": detail_sentiment}, status=200)
     else:
         return JsonResponse(
@@ -596,7 +596,7 @@ def test_emotion_recognition_model(request):
 
 def analyze_summary_to_report(text):
     prompt = (
-        f'"Chỉ xuất ra báo cáo về số nhiều các comments theo cấu trúc sau: \n\\n\n\\n\n\\n\n- Product: ( n_pos positive, n_neg negative, n_neu neutral)\n+the positive generality about product, you summarize from comments.\n+ the neutral generality about product, you summarize from comments.\n+ the negative generality about product ,you summarize from comments\n- Service: ( n_pos positive, n_neg negative, n_neu neutral)\n+ the positive generality about service, you summarize from comments.\n+ the neutral generality about service, you summarize from comments.\n+ the negative generality about service, you summarize from comments\n\\n\n\\n\n\\n\n"Lưu ý , ngôn ngữ tiếng việt ,trả về kiểu Json"\n"\n\{text}'""
+        f'"Chỉ xuất ra báo cáo về số nhiều các comments theo cấu trúc sau: \n\\n\n\\n\n\\n\n- Product: ( n_pos positive, n_neg negative, n_neu neutral)\n+The positive generality about product, you summarize from comments.\n+ the neutral generality about product, you summarize from comments.\n+ the negative generality about product ,you summarize from comments\n- Service: ( n_pos positive, n_neg negative, n_neu neutral)\n+ the positive generality about service, you summarize from comments.\n+ the neutral generality about service, you summarize from comments.\n+ the negative generality about service, you summarize from comments\n\\n\n\\n\n\\n\n"Lưu ý ,trả về ngôn ngữ tiếng việt ,trả về kiểu Json , không trả về chuỗi rỗng"\n"\n\{text}'""
     )
 
     # Gửi yêu cầu tới OpenAI API

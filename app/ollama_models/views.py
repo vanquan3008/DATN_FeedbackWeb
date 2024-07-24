@@ -67,16 +67,14 @@ def crawl_comments_by_ollama(url):
     result = smart_scraper_graph.run()
     return result
 
-
 @csrf_exempt
-def comments_detail_sentiment_ollama(request):
+def craw_data(request):
     if request.method == "POST":
         data = json.loads(request.body)
         url = data.get("url")
         data_crawing = crawl_comments_by_ollama(url)
         comments = data_crawing["user_opinions"]
         texts = []
-
         for comment in comments:
             texts.append(comment["comment"])
         sentiment_sentences = []
@@ -87,14 +85,44 @@ def comments_detail_sentiment_ollama(request):
             # Create a dictionary with the desired structure
             sentiment_sentence = {"text": text, "sentiment": sentiment}
             sentiment_sentences.append(sentiment_sentence)
+        return JsonResponse(
+            {"sentiment" : sentiment_sentences}, status=200
+        )
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed for this endpoint"}, status=500
+        )
+
+@csrf_exempt
+def comments_detail_sentiment_ollama(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        #url = data.get("url")
+        # data_crawing = crawl_comments_by_ollama(url)
+        # comments = data_crawing["user_opinions"]
+        # texts = []
+
+        # for comment in comments:
+        #     texts.append(comment["comment"])
+        # sentiment_sentences = []
+        # for text in texts:
+        #     score = score_sentiment_a_sentence(text)
+        #     float_score = float(score)
+        #     sentiment = mapping_detail_sentiment(float_score)
+        #     # Create a dictionary with the desired structure
+        #     sentiment_sentence = {"text": text, "sentiment": sentiment}
+        #     sentiment_sentences.append(sentiment_sentence)
+        sentiment_sentences = data.get("sentiment")
 
         page_size = 5
 
         if len(sentiment_sentences) > 0:
             paginator = Paginator(sentiment_sentences, page_size)
             page = request.GET.get("page", 1)
+            
+            print(page)
             page_obj = paginator.get_page(page)
-            number_page = int((len(sentiment_sentences) - 1) / 5) + 1
+            number_page = int((len(sentiment_sentences) - 1) / page_size) + 1
             data_loads = [
                 {
                     "sentiment": comment["sentiment"],
@@ -118,21 +146,16 @@ def comments_detail_sentiment_ollama(request):
 def comments_count_sentiment_ollama(request):
     if request.method == "POST":
         data = json.loads(request.body)
-        url = data.get("url")
-        data_crawing = crawl_comments_by_ollama(url)
-        comments = data_crawing["user_opinions"]
+        # url = data.get("url")
+        # data_crawing = crawl_comments_by_ollama(url)
+        # comments = data_crawing["user_opinions"]
+        comments =  data.get("sentiment")
+        print(comments)
         texts = []
 
         for comment in comments:
-            texts.append(comment["comment"])
-        # texts = [
-        #     "Sản phẩm này thật sự tuyệt vời, tôi chưa từng thấy gì tốt hơn.",
-        #     "Chất lượng của sản phẩm quá kém, tôi rất thất vọng.",
-        #     "Tôi nghĩ sản phẩm này ổn, nhưng vẫn cần cải thiện thêm một số tính năng.",
-        #     "Thiết kế của sản phẩm rất đẹp mắt và sang trọng.",
-        #     "Giá cả hợp lý, nhưng dịch vụ hỗ trợ khách hàng cần, cải thiện.",
-        # ]
-
+            texts.append(comment["text"])
+        
         emotion_sentiment = count_unique_emotions_sentences(texts)
         attitude_sentiment = count_unique_attitudes_sentences(texts)
         data_response_show = count_exactly_sentiment(texts)

@@ -33,29 +33,92 @@ function DetailFilesSentiment(
     const [loadingComment ,setLoadingComment] = useState(false);
     const [reportProduct,setReportProduct] = useState({});
     const [reportService,setReportService] = useState({});
+    const [loadingReport ,setLoadingReport] = useState(false);
+    const [commentSentiment , setCommentSentiment] = useState(null);
+    //const [loadingData , setLoadingData] = useState(false);
 
-
+    const [timeCraw , setTimeCraw] = useState(0);
+    const [timeDetail , setTimeDetail] = useState(0);
+    const [timeComment , setTimeComment] = useState(0)
 
     useEffect(()=>{
-        if (state?.type === "Url") {
+        if(state?.type === "Url"){
+            if(state?.option === "Other"){
+                const data = {
+                    "url": state?.url
+                }
+                const fetchData = async ()=>{
+                    const start = new Date();
+                    const dataComment =  await axios.post(`http://127.0.0.1:8000/ollama_models/craw_data`,data);
+                    setCommentSentiment(dataComment.data)
+                    const end = new Date();
+                    setTimeCraw(end - start);
+
+                    const start_details = new Date();
+                    //Call data
+                    const getData = await axios.post("http://127.0.0.1:8000/ollama_models/comments_count_sentiment_ollama",dataComment.data , {
+                        withCredentials: true,
+                        headers: { token: `Bearer ${userLogin?.jwt}` }
+                    });
+                    setDataSentiment(getData.data);
+                    const end_details = new Date();
+                    setTimeDetail(end_details - start_details);
+                }
+                fetchData()
+               
+
+            }
+        }
+    },[state?.url])
+
+    useEffect(()=>{
+        const start = new Date();
+        if(state?.option  ==="Other" && commentSentiment != null){
+            const fetchData = async ()=>{
+                const getDataComment = await axios.post(`http://127.0.0.1:8000/ollama_models/comments_detail_sentiment_ollama?page=${pageCurrent}`, commentSentiment, {
+                    withCredentials: true,
+                        headers: { token: `Bearer ${userLogin?.jwt}`}
+                    });
+
+                setComment(getDataComment.data['sentiment_detail_comments'])
+                setPage(getDataComment.data['page']);
+            }
+            fetchData();
+        }
+        const end = new Date();
+        setTimeComment(end - start);
+    },[pageCurrent,commentSentiment])
+
+
+    console.log(timeCraw)
+    console.log(timeComment)
+    console.log(timeDetail)
+
+    useEffect(()=>{
+        if (state?.type === "Url" || state?.option !== "Other") {
+            setLoadingReport(true);
             const data = {
                 "url": state?.url
             }
             try{
                 let dataReport ;
                 const getDataReport = async ()=>{
+                    
                     if(state?.option === "Tiki"){
-                        dataReport = await axios.post(`http://127.0.0.1:8000/others/comments_tiki_to_report`,data);
+                        dataReport = await axios.post(`http://127.0.0.1:8000/others/comments_tiki_to_report`,data)
+
                     }
                     else if (state?.option === "Shopee") {
                         dataReport = await axios.post(`http://127.0.0.1:8000/others/comments_shopee_to_report`,data)
                     }
                     setReportProduct(dataReport?.data["Product"]);
                     setReportService(dataReport?.data["Service"]);
+                    setLoadingReport(false);
                 }
                 getDataReport()
             }
             catch(err){
+                setLoadingReport(false);
                 navigate("/Error" ,{
                     state:{
                         error : "Can't get report sentiment from data.",
@@ -64,6 +127,7 @@ function DetailFilesSentiment(
             }
         }
         else{
+            setLoadingReport(true);
             const file = state.file;
             const reportData = async()=>{ 
                 const filename = file['0']?.name;
@@ -108,10 +172,11 @@ function DetailFilesSentiment(
                     }
                     setReportProduct(dataReport?.data["Product"]);
                     setReportService(dataReport?.data["Service"]);
-                
+                    setLoadingReport(false);
                 
                 }
                 catch(err){
+                    setLoadingReport(false);
                     navigate("/Error" ,{
                         state:{
                             error : "Can't get report sentiment from data."
@@ -125,10 +190,9 @@ function DetailFilesSentiment(
     },[state]);
 
 
-
     // Sentimet
     useEffect(() => {
-        if (state?.type === "Url") {
+        if (state?.type === "Url" || state?.option !== "Other") {
             const data = {
                 "url": state?.url, 
                 "email": infoUser?.email
@@ -142,19 +206,23 @@ function DetailFilesSentiment(
                             withCredentials: true,
                             headers: { token: `Bearer ${userLogin?.jwt}` }
                         });
+
+                        setDataSentiment(getData.data); 
                     }
                     else if (state?.option === "Shopee") {
                         getData = await axios.post("http://127.0.0.1:8000/others/comments_shopee_count_sentiments", data, {
                             withCredentials: true,
                             headers: { token: `Bearer ${userLogin?.jwt}` }
                         });
+
+                        setDataSentiment(getData.data); 
                     }
-                    else if( state?.option === "Other"){
-                        getData = await axios.post("http://127.0.0.1:8000/ollama_models/comments_count_sentiment_ollama", data, {
-                            withCredentials: true,
-                            headers: { token: `Bearer ${userLogin?.jwt}` }
-                        });
-                    }
+                    // else if( state?.option === "Other " && commentSentiment !==null){
+                    //     getData = await axios.post("http://127.0.0.1:8000/ollama_models/comments_count_sentiment_ollama",commentSentiment , {
+                    //         withCredentials: true,
+                    //         headers: { token: `Bearer ${userLogin?.jwt}` }
+                    //     });
+                    // }
                     
                     if (getData) {
                         setDataSentiment(getData.data);   
@@ -239,21 +307,23 @@ function DetailFilesSentiment(
                             withCredentials: true,
                             headers: { token: `Bearer ${userLogin?.jwt}` }
                         });
+                        setComment(getData.data['sentiment_detail_comments'])
+                        setPage(getData.data['page']);
                     }
                     else if (state?.option === "Shopee") {
                         getData = await axios.post(`http://127.0.0.1:8000/others/comments_shopee_analysis?page=${pageCurrent}`, data, {
                             withCredentials: true,
                             headers: { token: `Bearer ${userLogin?.jwt}` }
-                    });
+                        });
+                        setComment(getData.data['sentiment_detail_comments'])
+                        setPage(getData.data['page']);
                     }
-                    else if(state?.option === "Other"){
-                        getData = await axios.post(`http://127.0.0.1:8000/ollama_models/comments_detail_sentiment_ollama?page=${pageCurrent}`, data, {
-                            withCredentials: true,
-                            headers: { token: `Bearer ${userLogin?.jwt}` }
-                    });
-                    }
-                    setComment(getData.data['sentiment_detail_comments'])
-                    setPage(getData.data['page']);
+                    // else if(state?.option === "Other" && commentSentiment !==null ){
+                    //     getData = await axios.post(`http://127.0.0.1:8000/ollama_models/comments_detail_sentiment_ollama?page=${pageCurrent}`, commentSentiment, {
+                    //         withCredentials: true,
+                    //         headers: { token: `Bearer ${userLogin?.jwt}` }
+                    // });
+                    
                     setLoadingComment(false);
                 }
                 catch (err) {
@@ -314,11 +384,10 @@ function DetailFilesSentiment(
 
             GenerateComment();
         }
-    },[pageCurrent]);
+    },[pageCurrent,commentSentiment]);
     const handleChange = (event, value) => {
         setPageCurrent(value);
     };
-
 
 
     const colorTagComment = {
@@ -580,12 +649,15 @@ function DetailFilesSentiment(
                                 </div>
                                 <span className="italic">Đánh giá tổng quan bình luận người dùng</span>
                             </div>
-                            <div className="flex flex-row">
-                                <Overall report={reportProduct} >
-                                </Overall>
-                                <Overall report={reportService} >
-                                </Overall>
-                            </div>
+                            {
+                                // state?.option?
+                                //         <div className="flex flex-row">
+                                //             <Overall report={reportProduct} title={"Phản hồi liên quan đến sản phẩm"} >
+                                //             </Overall>
+                                //             <Overall report={reportService} title={"Phản hồi liên quan đến dịch vụ"}>
+                                //             </Overall>
+                                //         </div>:<div></div>
+                            }
                         </div>
                     </div>
                     
@@ -649,10 +721,9 @@ function DetailFilesSentiment(
                     <div className="h-full w-full">
                         <div className="h-full w-full flex flex-col items-center justify-center">
                             <div class={`border-gray-300 h-20 w-20 animate-spin rounded-full border-8 border-t-blue-600 ${loadingComment === true ? "" :"hidden"}`} />
-                        
-                            {/*  */}
-                            {renderComment}
-                        </div>
+                                {/*  */}
+                                {renderComment}
+                            </div>
                         <div className="w-full text-2xl  flex justify-end items-center py-4 pr-20">
                         <Stack spacing={pageCurrent}>
                             <Pagination count={page}  color="primary" onChange={handleChange}/>

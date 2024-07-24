@@ -61,7 +61,6 @@ function DetailPost(
         )
     })
 
-    console.log(dataUpdate)
     return (
         <>{
          data.data  ? 
@@ -138,8 +137,8 @@ function DetailPost(
                                 </div>
                                 <input type="text"
                                     onChange={(e)=>{ setTextComment(e.target.value)}} 
-                                    className="grow outline-none" max={300} placeholder="Comment..."></input>
-                                <div className="text-sm text-color-basic">{textComment.length}/300</div>
+                                    className="grow outline-none" max={600} placeholder="Comment..."></input>
+                                <div className="text-sm text-color-basic">{textComment.length}/600</div>
                                 <button className="bg-sky-300 text-sm w-16 ml-4 rounded-md hover:opacity-60  p-2 font-medium text-white" onClick={createComment}>
                                     Sent
                                 </button>
