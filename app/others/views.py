@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 import openai
 from openai import OpenAI
 from collections import defaultdict
-
+import time
 from django.core.paginator import Paginator
 
 from models.views import (
@@ -142,10 +142,12 @@ def comments_shopee_count_sentiments(request):
             url = data.get("url")
             if not url:
                 return JsonResponse({"error": "url is required"}, status=400)
-
+            start = time.time()
             comments = crawl_shopee_comments(url)
             comments = clean_text_comment_shopee(comments)
-
+            end = time.time()
+            
+            
             emotion_sentiment = count_unique_emotions_sentences(comments)
             attitude_sentiment = count_unique_attitudes_sentences(comments)
             data_response = count_pos_neg_neu_sentences(comments)
@@ -163,6 +165,7 @@ def comments_shopee_count_sentiments(request):
                     "positive_count": pos_count,
                     "negative_count": neg_count,
                     "neutral_count": neu_count,
+                    "time_craw": time_craw,
                 },
                 status=200,
             )
@@ -190,7 +193,7 @@ def comments_shopee_analysis(request):
 
             comments = crawl_shopee_comments(url)
             comments = clean_text_comment_shopee(comments)
-
+            start = time.time()
             sentiment_comments = []
             for comment in comments:
                 score = score_sentiment_a_sentence(comment)
@@ -217,9 +220,13 @@ def comments_shopee_analysis(request):
             else:
                 data_loads = []
                 number_page = 0
-
+            end = time.time()
             return JsonResponse(
-                {"sentiment_detail_comments": data_loads, "page": number_page},
+                {
+                    "sentiment_detail_comments": data_loads,
+                    "page": number_page ,
+                    "time_craw": start - end
+                },
                 status=200,
             )
         else:
@@ -238,12 +245,6 @@ def report_shopee(request):
     if request.method == "POST":
         data = json.loads(request.body)
         url = data.get("url")
-        # Authentications
-        # token = request.headers.get("token")
-        # r_email = data.get("email")
-        # if verify_token(token, email=r_email):
-        #     if not url:
-        #         return JsonResponse({"error": "url is required"}, status=400)
         comments = crawl_shopee_comments(url)
         comments = clean_text_comment_shopee(comments)
 
@@ -441,9 +442,9 @@ def comments_tiki_count_sentiments(request):
             url = data.get("url")
             if not url:
                 return JsonResponse({"error": "url is required"}, status=400)
-
+        start = time.time()
         comments = crawl_tiki_comments(url)
-
+        end = time.time()
         emotion_sentiment = count_unique_emotions_sentences(comments)
         attitude_sentiment = count_unique_attitudes_sentences(comments)
         data_response = count_pos_neg_neu_sentences(comments)
@@ -460,6 +461,7 @@ def comments_tiki_count_sentiments(request):
                 "positive_count": pos_count,
                 "negative_count": neg_count,
                 "neutral_count": neu_count,
+                "time_craw": end - start
             },
             status=200,
         )
@@ -480,8 +482,9 @@ def comments_tiki_analysis(request):
         if verify_token(token, email=r_email):
             if not url:
                 return JsonResponse({"error": "url is required"}, status=400)
-
+            start = time.time()
             comments = crawl_tiki_comments(url)
+            end = time.time()
             sentiment_comments = []
             for comment in comments:
                 score = score_sentiment_a_sentence(comment)
@@ -510,7 +513,7 @@ def comments_tiki_analysis(request):
                 number_page = 0
 
             return JsonResponse(
-                {"sentiment_detail_comments": data_loads, "page": number_page},
+                {"sentiment_detail_comments": data_loads, "page": number_page ,"time_craw" : end - start},
                 status=200,
             )
         else:

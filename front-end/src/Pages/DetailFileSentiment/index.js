@@ -12,7 +12,7 @@ import CustomTag from "../../Components/CustomTagSentiment";
 import { Pagination, Stack } from "@mui/material";
 import Overall from "../../Components/Overall";
 import { images } from "../../Assets/images";
-
+import LoadingPage from "../../Components/LoadingPage";
 
 
 
@@ -35,6 +35,7 @@ function DetailFilesSentiment(
     const [reportService,setReportService] = useState({});
     const [loadingReport ,setLoadingReport] = useState(false);
     const [commentSentiment , setCommentSentiment] = useState(null);
+    const [loadingCraw , setLoadingCraw] = useState(true);
     //const [loadingData , setLoadingData] = useState(false);
 
     const [timeCraw , setTimeCraw] = useState(0);
@@ -44,37 +45,43 @@ function DetailFilesSentiment(
     useEffect(()=>{
         if(state?.type === "Url"){
             if(state?.option === "Other"){
+                
                 const data = {
                     "url": state?.url
                 }
                 const fetchData = async ()=>{
+                    setLoadingCraw(false);
                     const start = new Date();
                     const dataComment =  await axios.post(`http://127.0.0.1:8000/ollama_models/craw_data`,data);
+                    setLoadingCraw(true);
                     setCommentSentiment(dataComment.data)
                     const end = new Date();
-                    setTimeCraw(end - start);
+                    setTimeCraw((end - start)/1000);
 
                     const start_details = new Date();
                     //Call data
+                    setloadingDetail(true);
                     const getData = await axios.post("http://127.0.0.1:8000/ollama_models/comments_count_sentiment_ollama",dataComment.data , {
                         withCredentials: true,
                         headers: { token: `Bearer ${userLogin?.jwt}` }
                     });
+                    setloadingDetail(false);
                     setDataSentiment(getData.data);
+                   
                     const end_details = new Date();
-                    setTimeDetail(end_details - start_details);
+                    setTimeDetail((end_details - start_details)/1000);
                 }
                 fetchData()
-               
-
             }
         }
     },[state?.url])
 
     useEffect(()=>{
         const start = new Date();
-        if(state?.option  ==="Other" && commentSentiment != null){
-            const fetchData = async ()=>{
+        if(state?.option  ==="Other" && commentSentiment != null ){
+           
+            const fetchData = async ()=>{ 
+                setLoadingComment(true);
                 const getDataComment = await axios.post(`http://127.0.0.1:8000/ollama_models/comments_detail_sentiment_ollama?page=${pageCurrent}`, commentSentiment, {
                     withCredentials: true,
                         headers: { token: `Bearer ${userLogin?.jwt}`}
@@ -82,20 +89,18 @@ function DetailFilesSentiment(
 
                 setComment(getDataComment.data['sentiment_detail_comments'])
                 setPage(getDataComment.data['page']);
+                setLoadingComment(false);
             }
             fetchData();
+            
         }
         const end = new Date();
-        setTimeComment(end - start);
+        setTimeComment((end - start)/1000);
     },[pageCurrent,commentSentiment])
 
-
-    console.log(timeCraw)
-    console.log(timeComment)
-    console.log(timeDetail)
-
     useEffect(()=>{
-        if (state?.type === "Url" || state?.option !== "Other") {
+        if (state?.type === "Url" ) {
+            if(state?.option !== "Other"){
             setLoadingReport(true);
             const data = {
                 "url": state?.url
@@ -103,10 +108,8 @@ function DetailFilesSentiment(
             try{
                 let dataReport ;
                 const getDataReport = async ()=>{
-                    
                     if(state?.option === "Tiki"){
                         dataReport = await axios.post(`http://127.0.0.1:8000/others/comments_tiki_to_report`,data)
-
                     }
                     else if (state?.option === "Shopee") {
                         dataReport = await axios.post(`http://127.0.0.1:8000/others/comments_shopee_to_report`,data)
@@ -125,6 +128,7 @@ function DetailFilesSentiment(
                     }
                 })
             }
+        }
         }
         else{
             setLoadingReport(true);
@@ -192,7 +196,8 @@ function DetailFilesSentiment(
 
     // Sentimet
     useEffect(() => {
-        if (state?.type === "Url" || state?.option !== "Other") {
+        if (state?.type === "Url") {
+            if(state?.option !== "Other"){
             const data = {
                 "url": state?.url, 
                 "email": infoUser?.email
@@ -200,8 +205,9 @@ function DetailFilesSentiment(
             const fetchData = async () => {
                 try{
                     setloadingDetail(true);
+                    const start_time = new Date();
                     let getData;
-                    if (state?.option === "Tiki") { // Assuming the other type is Tiki
+                    if (state?.option === "Tiki") { 
                         getData = await axios.post("http://127.0.0.1:8000/others/comments_tiki_count_sentiments", data, {
                             withCredentials: true,
                             headers: { token: `Bearer ${userLogin?.jwt}` }
@@ -215,19 +221,18 @@ function DetailFilesSentiment(
                             headers: { token: `Bearer ${userLogin?.jwt}` }
                         });
 
-                        setDataSentiment(getData.data); 
+                        setDataSentiment(getData?.data); 
                     }
-                    // else if( state?.option === "Other " && commentSentiment !==null){
-                    //     getData = await axios.post("http://127.0.0.1:8000/ollama_models/comments_count_sentiment_ollama",commentSentiment , {
-                    //         withCredentials: true,
-                    //         headers: { token: `Bearer ${userLogin?.jwt}` }
-                    //     });
-                    // }
+                  
                     
                     if (getData) {
-                        setDataSentiment(getData.data);   
+                        setDataSentiment(getData?.data);   
                     }
                     setloadingDetail(false);
+                    const end_time = new Date();
+
+                    setTimeDetail((end_time - start_time)/1000 - getData?.data['time_craw'])
+
                 }
                 catch (e) {
                     setloadingDetail(false)
@@ -241,7 +246,8 @@ function DetailFilesSentiment(
             };
             fetchData();
         }
-        else{
+        }
+        else {
             const file = state.file;
             const sentimentFile = async()=>{ 
                 const filename = file['0']?.name;
@@ -294,14 +300,17 @@ function DetailFilesSentiment(
 
     useEffect(()=>{
         if (state?.type === "Url") {
+            if(state?.option!=="Other"){
             const data = {
                 "url": state?.url, 
                 "email": infoUser?.email
             };
             const fetchData = async () => {
                 try{
+                    
                     setLoadingComment(true);
                     let getData;
+                    const time =new Date();
                     if (state?.option === "Tiki") { 
                         getData = await axios.post(`http://127.0.0.1:8000/others/comments_tiki_analysis?page=${pageCurrent}`, data, {
                             withCredentials: true,
@@ -318,11 +327,9 @@ function DetailFilesSentiment(
                         setComment(getData.data['sentiment_detail_comments'])
                         setPage(getData.data['page']);
                     }
-                    // else if(state?.option === "Other" && commentSentiment !==null ){
-                    //     getData = await axios.post(`http://127.0.0.1:8000/ollama_models/comments_detail_sentiment_ollama?page=${pageCurrent}`, commentSentiment, {
-                    //         withCredentials: true,
-                    //         headers: { token: `Bearer ${userLogin?.jwt}` }
-                    // });
+                    const endtime = new Date();
+                    setTimeCraw(getData.data['time_craw'])
+                    setTimeComment((endtime - time)/1000 - getData.data['time_craw']);
                     
                     setLoadingComment(false);
                 }
@@ -336,6 +343,7 @@ function DetailFilesSentiment(
                 }
             }
             fetchData();
+        }
         }
         else{
             const file = state.file;
@@ -389,6 +397,9 @@ function DetailFilesSentiment(
         setPageCurrent(value);
     };
 
+    console.log(timeComment)
+    console.log(timeCraw)
+    console.log(timeDetail)
 
     const colorTagComment = {
         
@@ -531,6 +542,7 @@ function DetailFilesSentiment(
 
     
     return (  
+        <>
         <div className="p-8 w-full flex flex-col h-auto justify-center items-center  bg-color-background-main">
             <NavbarDefaultLayout type="Detail Files Sentiment"></NavbarDefaultLayout>
             <div className="flex flex-col w-full h-full rounded-md py-4">
@@ -641,14 +653,26 @@ function DetailFilesSentiment(
                     {/* Overall */}
                     <div className="w-full h-full px-10 py-4">
 
-                        <div className="flex flex-col px-6 6 bg-white  drop-shadow border p-4 mb-4 rounded-2xl">
-                            <div className="flex flex-row font-normal text-base items-center pb-2">
+                        <div className="flex flex-row px-6 6 bg-white  drop-shadow border p-4 mb-4 rounded-2xl">
+                            <div className="flex flex-row font-normal text-base items-center pb-2 w-1/4">
                                 <div className="underline text-base  items-center font-medium text-blue-500 flex flex-row px-2">
                                     <img alt="" src={images.iconAI} className="w-8 bg-white"></img >
                                     Trợ lý AI 
                                 </div>
-                                <span className="italic">Đánh giá tổng quan bình luận người dùng</span>
+                                <span className="italic">Đánh giá thời gian</span>
                             </div>
+                            <div className="flex flex-row justify-between w-full h-full items-center">
+                                <div className="text-base h-full">
+                                    <span className="font-medium pt-2">Craw Data : </span>{timeCraw ?? 0}
+                                </div>
+                                <div className="text-base h-full">
+                                   <span className="font-medium pt-2">Sentimet Data : </span>{timeDetail ?? 0}
+                                </div>  
+                                <div className="text-base h-full">
+                                    <span className="font-medium pt-2">Time Sentiment Comment : </span>{timeComment ?? 0}
+                                </div>  
+                            </div>
+
                             {
                                 // state?.option?
                                 //         <div className="flex flex-row">
@@ -734,6 +758,8 @@ function DetailFilesSentiment(
             </div>
             <FooterDefaultLayout></FooterDefaultLayout>
         </div>
+        <LoadingPage hidden={loadingCraw}></LoadingPage>
+        </>
     );
 }
 
